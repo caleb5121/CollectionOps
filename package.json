@@ -1,0 +1,28 @@
+{
+  "name": "rork-cardops-performance-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo root — the Next.js app lives in /web. Scripts delegate there.",
+  "scripts": {
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "start": "npm --prefix web run start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caleb5121/rork-cardops-performance-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/caleb5121/rork-cardops-performance-tracker/issues"
+  },
+  "homepage": "https://github.com/caleb5121/rork-cardops-performance-tracker#readme",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4"
+  }
+}

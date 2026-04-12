@@ -160,7 +160,7 @@ export async function appendOrderImportsFromFiles(
           dateToIso: null,
           status: "unmapped",
           validationStatus: "rejected",
-          validationReasonLine: slot.message,
+          validationReasonLine: "message" in slot ? slot.message : "",
           importCheck: buildImportCheckRejected({ detected, data, target: "order" }),
           contentFingerprint: fp,
           importMapping: {
@@ -439,7 +439,7 @@ export async function appendSummaryImportsFromFiles(
           dateToIso: null,
           status: "unmapped",
           validationStatus: "rejected",
-          validationReasonLine: slot.message,
+          validationReasonLine: "message" in slot ? slot.message : "",
           importCheck: buildImportCheckRejected({ detected, data, target: "summary" }),
           contentFingerprint: fp,
           importMapping: {
