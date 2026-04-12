@@ -6,6 +6,7 @@ import {
   buildAiInsightsSummary,
   buildFallbackInsights,
   canRequestAiInsights,
+  dedupeInsightLines,
   parseInsightsResponseBody,
 } from "../../lib/aiInsightsSummary";
 import { useData } from "../DataProvider";
@@ -26,6 +27,7 @@ export default function AiInsightsModal({ open, onClose }: Props) {
     estimatedNet,
     feeRate,
     shippingEstimatedCost,
+    costsForNetDisplay,
     effectiveOrderImports,
     effectiveSummaryImports,
     orderData,
@@ -70,6 +72,7 @@ export default function AiInsightsModal({ open, onClose }: Props) {
       estimatedNet,
       shippingEstimatedCost,
       feeRate,
+      costsForNetDisplay,
       orderData,
       orderColumnMap,
     });
@@ -100,8 +103,17 @@ export default function AiInsightsModal({ open, onClose }: Props) {
 
         const fromApi = parseInsightsResponseBody(raw);
         if (res.ok && fromApi.length > 0) {
-          list = fromApi.slice(0, 5);
-          useDegraded = false;
+          let merged = fromApi.slice(0, 4);
+          if (merged.length < 2) {
+            merged = dedupeInsightLines([...merged, ...buildFallbackInsights(summary)]).slice(0, 4);
+          }
+          if (merged.length >= 2) {
+            list = merged;
+            useDegraded = false;
+          } else {
+            list = fallback;
+            useDegraded = true;
+          }
         } else {
           if (isDev) {
             console.warn("[AI Insights] Using local fallback", {
@@ -142,6 +154,7 @@ export default function AiInsightsModal({ open, onClose }: Props) {
     estimatedNet,
     feeRate,
     shippingEstimatedCost,
+    costsForNetDisplay,
     effectiveOrderImports,
     effectiveSummaryImports,
     orderData,
@@ -175,7 +188,7 @@ export default function AiInsightsModal({ open, onClose }: Props) {
       <div className="app-card-3d max-h-[min(90vh,520px)] w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl dark:border-slate-700/80 dark:bg-slate-900/95">
         <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700/60">
           <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-slate-50">
-            AI Insights
+            Insights
           </h2>
           <button
             type="button"
@@ -189,7 +202,7 @@ export default function AiInsightsModal({ open, onClose }: Props) {
 
         <div className="max-h-[min(65vh,440px)] overflow-y-auto px-5 py-4">
           {phase === "no_data" ? (
-            <p className="text-sm text-slate-600 dark:text-slate-300">Upload data to use AI Insights</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">Import data to open insights.</p>
           ) : null}
 
           {phase === "loading" ? (
@@ -198,16 +211,16 @@ export default function AiInsightsModal({ open, onClose }: Props) {
                 className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[color:var(--accent)] dark:border-slate-600"
                 aria-hidden
               />
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Reading your numbers...</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Reviewing your metrics...</p>
             </div>
           ) : null}
 
           {phase === "error" ? (
             <div className="space-y-3">
               <div>
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">AI insights are temporarily unavailable</p>
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Insights could not load</p>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Your data is still available — try again in a moment
+                  Your imports are still on this device. Try again in a moment.
                 </p>
               </div>
               <button
@@ -227,40 +240,30 @@ export default function AiInsightsModal({ open, onClose }: Props) {
                   role="status"
                   className="mb-4 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2.5 dark:border-amber-900/40 dark:bg-amber-950/35"
                 >
-                  <p className="text-sm font-medium text-amber-950 dark:text-amber-100">AI insights are temporarily unavailable</p>
+                  <p className="text-sm font-medium text-amber-950 dark:text-amber-100">On-device coaching (AI off)</p>
                   <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-200/90">
-                    Your data is still available — try again in a moment
+                    These bullets use your dashboard numbers only. Retry for an AI pass when the service is back.
                   </p>
                   <button
                     type="button"
                     onClick={() => setAttempt((a) => a + 1)}
                     className="mt-2 text-xs font-semibold text-amber-900 underline-offset-2 hover:underline dark:text-amber-200"
                   >
-                    Retry AI summary
+                    Retry AI
                   </button>
                 </div>
               ) : null}
               <ul className="space-y-2.5">
-                {insights.map((text, i) => {
-                  const isLead = i === 0;
-                  return (
-                    <li
-                      key={`${i}-${text.slice(0, 20)}`}
-                      className={
-                        isLead
-                          ? "rounded-lg bg-[color:color-mix(in_oklab,var(--accent)_10%,transparent)] px-3 py-2.5 dark:bg-[color:color-mix(in_oklab,var(--accent)_12%,transparent)]"
-                          : ""
-                      }
-                    >
-                      <p className="flex gap-2 text-sm leading-snug text-slate-800 dark:text-slate-100">
-                        <span className="mt-[0.35em] shrink-0 text-[color:var(--accent)]" aria-hidden>
-                          •
-                        </span>
-                        <span className={isLead ? "font-semibold" : ""}>{text}</span>
-                      </p>
-                    </li>
-                  );
-                })}
+                {insights.map((text, i) => (
+                  <li key={`${i}-${text.slice(0, 24)}`} className="rounded-lg px-0.5 py-0.5">
+                    <p className="flex gap-2 text-sm font-medium leading-snug text-slate-800 dark:text-slate-100">
+                      <span className="mt-[0.35em] shrink-0 text-[color:var(--accent)]" aria-hidden>
+                        •
+                      </span>
+                      <span>{text}</span>
+                    </p>
+                  </li>
+                ))}
               </ul>
               <div className="mt-5 border-t border-slate-200/80 pt-4 dark:border-slate-700/60">
                 <Link

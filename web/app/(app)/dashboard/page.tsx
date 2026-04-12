@@ -8,6 +8,10 @@ import { AnimatedCurrency } from "../../../components/motion/AnimatedNumber";
 import { IconCost, IconOrders, IconRevenue } from "../../../components/MetricIcons";
 import { useData } from "../../../components/DataProvider";
 import { toNumberLooseCell } from "../../../lib/orderListColumnMap";
+import {
+  aggregateWorkspaceDateRange,
+  formatDashboardViewingDateRangeLabel,
+} from "../../../lib/importMetadata";
 import { DashboardEmptyState } from "../../../components/dashboard/DashboardEmptyState";
 import AiInsightsHeaderButton from "../../../components/dashboard/AiInsightsHeaderButton";
 
@@ -25,6 +29,8 @@ export default function DashboardPage() {
     orderColumnMap,
     estimatedNet,
     costsForNetDisplay,
+    effectiveOrderImports,
+    effectiveSummaryImports,
   } = useData();
 
   const reduceMotion = useReducedMotion();
@@ -38,6 +44,14 @@ export default function DashboardPage() {
     for (const r of orderData.rows) s += toNumberLooseCell(r[k]);
     return s;
   }, [orderData, orderColumnMap]);
+
+  const workspaceDateRange = useMemo(
+    () => aggregateWorkspaceDateRange(effectiveOrderImports, effectiveSummaryImports),
+    [effectiveOrderImports, effectiveSummaryImports],
+  );
+  const dashboardDateRangeLabel = workspaceDateRange
+    ? formatDashboardViewingDateRangeLabel(workspaceDateRange.from, workspaceDateRange.to)
+    : "No import date range available";
 
   if (workspaceEmpty) {
     return (
@@ -71,6 +85,16 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Total Earned</h2>
               <p className="mt-1 text-sm text-white/65">From imported sales data</p>
               <p className="text-sm text-white/55">After fees and estimated shipping</p>
+              <p
+                data-testid="dashboard-date-range-label"
+                className={`mt-3 text-sm leading-snug sm:text-[0.9375rem] ${
+                  workspaceDateRange
+                    ? "font-medium text-teal-100/95"
+                    : "font-normal text-white/50"
+                }`}
+              >
+                {dashboardDateRangeLabel}
+              </p>
               <p
                 data-testid="dashboard-total-earned"
                 className="mt-4 text-4xl font-bold tabular-nums tracking-tight sm:text-5xl"

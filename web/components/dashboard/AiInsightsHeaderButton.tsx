@@ -26,13 +26,13 @@ export default function AiInsightsHeaderButton() {
           type="button"
           disabled
           aria-disabled="true"
-          title="Upload data to use AI Insights"
+          title="Import data to use insights"
           className={`${btnBase} cursor-not-allowed border-slate-200/90 bg-slate-50 px-3 py-1.5 text-slate-400 dark:border-slate-600/80 dark:bg-slate-900/60 dark:text-slate-500`}
         >
-          AI Insights
+          Insights
         </button>
         <p className="text-[10px] font-medium leading-snug text-slate-500 dark:text-slate-400">
-          Upload data to use AI Insights
+          Import data for coaching notes
         </p>
       </div>
     );
@@ -45,7 +45,7 @@ export default function AiInsightsHeaderButton() {
         onClick={() => setOpen(true)}
         className={`${btnBase} border-slate-200/90 bg-white px-3 py-1.5 text-slate-700 hover:border-[color:color-mix(in_oklab,var(--accent)_30%,transparent)] hover:bg-slate-50 dark:border-slate-600/80 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:border-[color:color-mix(in_oklab,var(--accent)_35%,transparent)] dark:hover:bg-slate-800/90`}
       >
-        AI Insights
+        Insights
       </button>
       <AiInsightsModal open={open} onClose={() => setOpen(false)} />
     </>

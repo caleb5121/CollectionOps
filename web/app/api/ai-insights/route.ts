@@ -48,7 +48,7 @@ function firstSentenceOnly(s: string): string {
   return t.slice(0, cut).trim();
 }
 
-const MAX_WORDS = 15;
+const MAX_WORDS = 22;
 
 function clampWords(s: string, maxWords: number): string {
   const t = s.trim();
@@ -77,9 +77,10 @@ function dedupeInsights(list: string[]): string[] {
   return out;
 }
 
-const SYSTEM_PROMPT = `You write terse performance briefings for a small online seller.
-Output only what the user asks for in the user message: short, actionable lines.
-Tone: direct, neutral, no hype, no filler, no emojis.`;
+const SYSTEM_PROMPT = `You are a concise business coach for a small online seller (cards, collectibles, marketplace exports).
+Output only the JSON the user message specifies: short insight lines.
+Tone: practical, evaluative, no hype, no generic praise, no filler, no emojis.
+Each line should interpret what the numbers imply or suggest a concrete next check (not narration).`;
 
 function userPrompt(summary: AiInsightsSummaryPayload): string {
   return `Data summary (JSON):
@@ -89,29 +90,30 @@ Return ONLY valid JSON (no markdown, no prose outside JSON):
 {"insights":["...", "..."]}
 
 Strict rules for each string in "insights":
-- Exactly 3 to 5 items total, never more.
+- Exactly 2 to 4 items total, never more than 4.
 - Exactly one sentence per item.
 - Max ${MAX_WORDS} words per sentence (count every word).
-- No filler ("it appears", "based on the data", "this means", "you may want to consider").
+- Do not restate the same dollar amount or percentage in more than one item.
+- No filler ("it appears", "based on the data", "great job", "overall").
 - No hedging stacks; state the point plainly.
-- Be specific using the numbers in the JSON (revenue, profit, fees, shipping, AOV, top products, dates when relevant).
+- Prefer coaching: what the metric implies, or what to verify next, using numbers from the JSON only.
 
-Only reference numbers and categories that appear in the JSON summary (dashboard-era rollups). Do not introduce new metrics or ratios not implied there.
+Only reference numbers and categories that appear in the JSON summary (dashboard-era rollups). Do not invent metrics.
 
-Prioritize topics in this order when the data supports them:
-1) Profit issues
-2) Fee load vs revenue
-3) Shipping cost vs profit or vs fees
-4) Order size / mix (e.g. low AOV, concentration)
-5) Revenue or trend signal (only if clearly supported)
+Prioritize when the data supports them (skip repeats):
+1) Cost ratio vs gross, or profit at risk
+2) Fees vs estimated shipping (which drags margin more)
+3) Average order value with a concrete improvement target or tactic
+4) Net per order (avgNetPerOrder) as a decision threshold
+5) Concentration (topProductsByRevenue) or refunds if clearly material
 
-If the data is thin, still stay specific—do not invent trends.`;
+If the data is thin, stay specific and do not invent trends.`;
 }
 
 export async function POST(req: Request) {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
-    devLog("OPENAI_API_KEY missing — client should use fallback insights");
+    devLog("OPENAI_API_KEY missing; client should use fallback insights");
     return NextResponse.json({ error: "missing_api_key" }, { status: 503 });
   }
 
@@ -176,7 +178,7 @@ export async function POST(req: Request) {
 
     const normalized = dedupeInsights(
       insights.map((s) => normalizeInsightLine(s)).filter((s) => s.length > 0),
-    ).slice(0, 5);
+    ).slice(0, 4);
     if (normalized.length < 1) {
       devLog("No insights after normalize");
       return NextResponse.json({ error: "too_few_insights" }, { status: 502 });

@@ -80,6 +80,20 @@ export function formatImportRangeLabel(start: Date, end: Date): string {
   return `${startStr} → ${endStr}`;
 }
 
+/** Dashboard hero: full sentence for the active imported date span. */
+export function formatDashboardViewingDateRangeLabel(from: Date, to: Date): string {
+  const sameCalendarMonth =
+    from.getFullYear() === to.getFullYear() && from.getMonth() === to.getMonth();
+  if (sameCalendarMonth) {
+    const monthYear = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(from);
+    return `Viewing data for ${monthYear}`;
+  }
+  const opts: Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
+  const startStr = new Intl.DateTimeFormat("en-US", opts).format(from);
+  const endStr = new Intl.DateTimeFormat("en-US", opts).format(to);
+  return `Viewing data from ${startStr} to ${endStr}`;
+}
+
 export function rangesOverlap(a0: Date, a1: Date, b0: Date, b1: Date): boolean {
   return a0.getTime() <= b1.getTime() && b0.getTime() <= a1.getTime();
 }
