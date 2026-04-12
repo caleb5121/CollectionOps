@@ -4,15 +4,24 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DEFAULT_APP_USER, loadUserProfileFromStorage, useAuth } from "../AuthProvider";
+import { accountDisplayName, useAuth } from "../AuthProvider";
 import { formatToolbarDate, getPageTitle } from "../../lib/pageTitles";
 import ThemeToggle from "./ThemeToggle";
 
+function isPlausibleEmail(s: string): boolean {
+  const t = s.trim();
+  return t.length > 3 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t);
+}
+
 export default function MainToolbar() {
   const pathname = usePathname();
-  const { user, setUser } = useAuth();
+  const { user, setUser, signInWithEmail } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInError, setSignInError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const signInRef = useRef<HTMLDivElement>(null);
 
   const title = useMemo(() => getPageTitle(pathname), [pathname]);
   const settingsPage = pathname === "/settings";
@@ -20,8 +29,13 @@ export default function MainToolbar() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      const t = e.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(t)) {
         setDropdownOpen(false);
+      }
+      if (signInRef.current && !signInRef.current.contains(t)) {
+        setSignInOpen(false);
+        setSignInError(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -60,7 +74,7 @@ export default function MainToolbar() {
               type="button"
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="inline-flex min-w-0 max-w-[min(280px,calc(100vw-9rem))] items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white py-1.5 pl-1.5 pr-2 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_8px_-2px_rgba(15,23,42,0.08),0_8px_24px_-8px_rgba(15,23,42,0.1)] ring-1 ring-slate-900/[0.04] transition-app hover:border-slate-300 hover:shadow-[0_1px_0_rgba(255,255,255,0.98)_inset,0_4px_14px_-4px_rgba(15,23,42,0.12)] active:scale-[0.99] dark:border-slate-700/90 dark:bg-slate-900/80 dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45)]"
-              title={user.email?.trim() ? user.email : undefined}
+              title={user.email.trim() ? user.email : accountDisplayName(user)}
             >
               <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 ring-2 ring-white dark:ring-slate-800">
                 {user.avatarDataUrl ? (
@@ -79,13 +93,13 @@ export default function MainToolbar() {
               </span>
               <span className="hidden min-w-0 flex-1 flex-col items-stretch overflow-hidden text-left sm:flex">
                 <span className="truncate whitespace-nowrap text-sm font-semibold leading-tight text-slate-900 dark:text-slate-50">
-                  {user.storeName}
+                  {accountDisplayName(user)}
                 </span>
                 <span
                   className="truncate overflow-hidden text-ellipsis whitespace-nowrap text-xs text-slate-500 dark:text-slate-400"
-                  title={user.email?.trim() ? user.email : undefined}
+                  title={user.email.trim() ? user.email : undefined}
                 >
-                  {user.email || "-"}
+                  {user.email.trim() || "—"}
                 </span>
               </span>
               <svg
@@ -121,13 +135,63 @@ export default function MainToolbar() {
             )}
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => setUser(loadUserProfileFromStorage() ?? DEFAULT_APP_USER)}
-            className="rounded-xl border border-slate-200/90 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_8px_-2px_rgba(15,23,42,0.08),0_6px_20px_-6px_rgba(15,23,42,0.1)] ring-1 ring-slate-900/5 transition-app hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700/90 dark:bg-slate-900/85 dark:text-slate-100"
-          >
-            Sign In
-          </button>
+          <div className="relative" ref={signInRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setSignInOpen((o) => !o);
+                setSignInError(null);
+              }}
+              className="rounded-xl border border-slate-200/90 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_8px_-2px_rgba(15,23,42,0.08),0_6px_20px_-6px_rgba(15,23,42,0.1)] ring-1 ring-slate-900/5 transition-app hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700/90 dark:bg-slate-900/85 dark:text-slate-100"
+            >
+              Sign In
+            </button>
+            {signInOpen ? (
+              <form
+                className="absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,18rem)] rounded-xl border border-slate-200/90 bg-white p-3 shadow-[0_18px_48px_-8px_rgba(15,23,42,0.2)] ring-1 ring-slate-900/5 dark:border-slate-700/90 dark:bg-slate-900/95 dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.65)]"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!isPlausibleEmail(signInEmail)) {
+                    setSignInError("Enter a valid email address.");
+                    return;
+                  }
+                  signInWithEmail(signInEmail);
+                  setSignInOpen(false);
+                  setSignInEmail("");
+                  setSignInError(null);
+                }}
+              >
+                <label htmlFor="toolbar-signin-email" className="block text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Email
+                </label>
+                <input
+                  id="toolbar-signin-email"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  value={signInEmail}
+                  onChange={(ev) => {
+                    setSignInEmail(ev.target.value);
+                    setSignInError(null);
+                  }}
+                  placeholder="you@example.com"
+                  aria-invalid={signInError ? true : undefined}
+                  className="mt-1 w-full rounded-lg border border-slate-200/90 bg-white px-2.5 py-2 text-sm text-slate-900 outline-none ring-slate-400/30 placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 dark:border-slate-600 dark:bg-slate-950/80 dark:text-slate-100 dark:placeholder:text-slate-500"
+                />
+                {signInError ? (
+                  <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400" role="alert">
+                    {signInError}
+                  </p>
+                ) : null}
+                <button
+                  type="submit"
+                  className="mt-3 w-full rounded-lg border border-teal-600 bg-teal-600 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 dark:border-teal-500 dark:bg-teal-600 dark:hover:bg-teal-500"
+                >
+                  Continue
+                </button>
+              </form>
+            ) : null}
+          </div>
         )}
       </div>
     </header>

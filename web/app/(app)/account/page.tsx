@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { type AppUser, useAuth } from "../../../components/AuthProvider";
+import { accountDisplayName, type AppUser, useAuth } from "../../../components/AuthProvider";
 import { useAccountPreferences } from "../../../components/AccountPreferencesProvider";
 import Card from "../../../components/Card";
 import { useData } from "../../../components/DataProvider";
@@ -461,14 +461,17 @@ export default function AccountPage() {
                 </>
               ) : (
                 <div className="space-y-1 text-center sm:text-left">
-                  <p className="truncate text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-50" title={user.storeName}>
-                    {user.storeName}
+                  <p
+                    className="truncate text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-50"
+                    title={accountDisplayName(user)}
+                  >
+                    {accountDisplayName(user)}
                   </p>
                   <p
                     className="truncate text-sm text-slate-600 dark:text-slate-400"
                     title={user.email.trim() ? user.email : undefined}
                   >
-                    {user.email.trim() || "-"}
+                    {user.email.trim() || "—"}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-500">
                     Member since <span className="tabular-nums text-slate-600 dark:text-slate-400">{joinedDisplay}</span>
