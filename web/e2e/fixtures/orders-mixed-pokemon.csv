@@ -1,0 +1,3 @@
+order_id,order_date,buyer_name,game,item_count,order_total,marketplace_fees,payout_usd,shipping_method,estimated_shipping_usd
+101,2024-08-01,Ash,Pokemon,1,15.00,1.50,13.50,Standard,1.00
+102,2024-08-02,Misty,Pokemon,2,22.50,2.00,20.50,Standard,1.00

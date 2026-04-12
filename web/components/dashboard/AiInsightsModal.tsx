@@ -1,0 +1,280 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useEffect, useId, useState } from "react";
+import {
+  buildAiInsightsSummary,
+  buildFallbackInsights,
+  canRequestAiInsights,
+  parseInsightsResponseBody,
+} from "../../lib/aiInsightsSummary";
+import { useData } from "../DataProvider";
+
+const isDev = process.env.NODE_ENV === "development";
+
+type Props = {
+  open: boolean;
+  onClose: () => void;
+};
+
+export default function AiInsightsModal({ open, onClose }: Props) {
+  const titleId = useId();
+  const {
+    hasDashboardImport,
+    hasOrderImport,
+    derived,
+    estimatedNet,
+    feeRate,
+    shippingEstimatedCost,
+    effectiveOrderImports,
+    effectiveSummaryImports,
+    orderData,
+    orderColumnMap,
+    workspaceStoreLabel,
+  } = useData();
+
+  const [phase, setPhase] = useState<"idle" | "loading" | "done" | "no_data" | "error">("idle");
+  const [insights, setInsights] = useState<string[]>([]);
+  const [degraded, setDegraded] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  const resetForClose = useCallback(() => {
+    setPhase("idle");
+    setInsights([]);
+    setDegraded(false);
+    setAttempt(0);
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      resetForClose();
+      return;
+    }
+
+    const eligible = canRequestAiInsights({
+      hasOrderImport,
+      hasDashboardImport,
+      derived,
+    });
+
+    if (!eligible) {
+      setPhase("no_data");
+      return;
+    }
+
+    const summary = buildAiInsightsSummary({
+      workspaceStoreLabel,
+      effectiveOrderImports,
+      effectiveSummaryImports,
+      derived,
+      estimatedNet,
+      shippingEstimatedCost,
+      feeRate,
+      orderData,
+      orderColumnMap,
+    });
+
+    const fallback = buildFallbackInsights(summary);
+    let cancelled = false;
+    setPhase("loading");
+    setInsights([]);
+    setDegraded(false);
+
+    (async () => {
+      let list: string[] = fallback;
+      let useDegraded = true;
+
+      try {
+        const res = await fetch("/api/ai-insights", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ summary }),
+        });
+
+        let raw: unknown = null;
+        try {
+          raw = await res.json();
+        } catch (e) {
+          if (isDev) console.warn("[AI Insights] Response body is not JSON", e);
+        }
+
+        const fromApi = parseInsightsResponseBody(raw);
+        if (res.ok && fromApi.length > 0) {
+          list = fromApi.slice(0, 5);
+          useDegraded = false;
+        } else {
+          if (isDev) {
+            console.warn("[AI Insights] Using local fallback", {
+              status: res.status,
+              ok: res.ok,
+              parsedCount: fromApi.length,
+            });
+          }
+          list = fallback;
+          useDegraded = true;
+        }
+      } catch (e) {
+        if (isDev) console.warn("[AI Insights] Request failed", e);
+        list = fallback;
+        useDegraded = true;
+      }
+
+      if (cancelled) return;
+
+      if (list.length === 0) {
+        setPhase("error");
+        return;
+      }
+
+      setInsights(list);
+      setDegraded(useDegraded);
+      setPhase("done");
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    open,
+    hasOrderImport,
+    hasDashboardImport,
+    derived,
+    estimatedNet,
+    feeRate,
+    shippingEstimatedCost,
+    effectiveOrderImports,
+    effectiveSummaryImports,
+    orderData,
+    orderColumnMap,
+    workspaceStoreLabel,
+    attempt,
+    resetForClose,
+  ]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="app-card-3d max-h-[min(90vh,520px)] w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl dark:border-slate-700/80 dark:bg-slate-900/95">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700/60">
+          <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-slate-50">
+            AI Insights
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg px-2 py-1 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="max-h-[min(65vh,440px)] overflow-y-auto px-5 py-4">
+          {phase === "no_data" ? (
+            <p className="text-sm text-slate-600 dark:text-slate-300">Upload data to use AI Insights</p>
+          ) : null}
+
+          {phase === "loading" ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-12">
+              <div
+                className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[color:var(--accent)] dark:border-slate-600"
+                aria-hidden
+              />
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Reading your numbers...</p>
+            </div>
+          ) : null}
+
+          {phase === "error" ? (
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">AI insights are temporarily unavailable</p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Your data is still available — try again in a moment
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAttempt((a) => a + 1)}
+                className="rounded-xl border border-slate-200/90 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600/80 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:bg-slate-800/90"
+              >
+                Try again
+              </button>
+            </div>
+          ) : null}
+
+          {phase === "done" && insights.length > 0 ? (
+            <>
+              {degraded ? (
+                <div
+                  role="status"
+                  className="mb-4 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2.5 dark:border-amber-900/40 dark:bg-amber-950/35"
+                >
+                  <p className="text-sm font-medium text-amber-950 dark:text-amber-100">AI insights are temporarily unavailable</p>
+                  <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-200/90">
+                    Your data is still available — try again in a moment
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setAttempt((a) => a + 1)}
+                    className="mt-2 text-xs font-semibold text-amber-900 underline-offset-2 hover:underline dark:text-amber-200"
+                  >
+                    Retry AI summary
+                  </button>
+                </div>
+              ) : null}
+              <ul className="space-y-2.5">
+                {insights.map((text, i) => {
+                  const isLead = i === 0;
+                  return (
+                    <li
+                      key={`${i}-${text.slice(0, 20)}`}
+                      className={
+                        isLead
+                          ? "rounded-lg bg-[color:color-mix(in_oklab,var(--accent)_10%,transparent)] px-3 py-2.5 dark:bg-[color:color-mix(in_oklab,var(--accent)_12%,transparent)]"
+                          : ""
+                      }
+                    >
+                      <p className="flex gap-2 text-sm leading-snug text-slate-800 dark:text-slate-100">
+                        <span className="mt-[0.35em] shrink-0 text-[color:var(--accent)]" aria-hidden>
+                          •
+                        </span>
+                        <span className={isLead ? "font-semibold" : ""}>{text}</span>
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="mt-5 border-t border-slate-200/80 pt-4 dark:border-slate-700/60">
+                <Link
+                  href="/dashboard"
+                  onClick={onClose}
+                  className="flex w-full items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                  Back to Dashboard
+                </Link>
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}

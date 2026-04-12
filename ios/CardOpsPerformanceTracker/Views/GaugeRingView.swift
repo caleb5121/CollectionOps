@@ -71,7 +71,7 @@ struct GaugeRingView: View {
                 // Center content
                 VStack(spacing: 1) {
                     if locked {
-                        Text("—")
+                        Text("-")
                             .font(.system(size: 30, weight: .heavy, design: .default))
                             .foregroundStyle(CardOpsTheme.textTertiary)
                     } else {

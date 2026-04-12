@@ -144,7 +144,7 @@ struct TestSimulatorView: View {
             scenarioButton(
                 index: 1,
                 title: "Scenario 1",
-                subtitle: "Small Seller — PWE only",
+                subtitle: "Small Seller - PWE only",
                 detail: "5 orders/wk · ~$31 revenue · 100% PWE",
                 expected: "Momentum ≈ 50, Flow active & high, Efficiency moderate"
             ) {
@@ -155,7 +155,7 @@ struct TestSimulatorView: View {
             scenarioButton(
                 index: 2,
                 title: "Scenario 2",
-                subtitle: "Mid Seller — Mixed shipping",
+                subtitle: "Mid Seller - Mixed shipping",
                 detail: "31 orders/wk · ~$475 revenue · 80% PWE / 20% pkg",
                 expected: "Momentum depends on late-week, Flow moderate/high, Efficiency high"
             ) {
@@ -166,7 +166,7 @@ struct TestSimulatorView: View {
             scenarioButton(
                 index: 3,
                 title: "Scenario 3",
-                subtitle: "Large Seller — Bulk + big cards",
+                subtitle: "Large Seller - Bulk + big cards",
                 detail: "167 orders/wk · ~$4,270 revenue · 70% PWE / 30% pkg",
                 expected: "Momentum >50 (late surge), Flow may drop, Efficiency lower (AOV spikes)"
             ) {
@@ -292,7 +292,7 @@ struct TestSimulatorView: View {
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(color)
             } else {
-                Text("—")
+                Text("-")
                     .font(.system(size: 28, weight: .heavy, design: .rounded))
                     .foregroundStyle(CardOpsTheme.textTertiary)
             }

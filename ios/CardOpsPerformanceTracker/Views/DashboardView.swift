@@ -225,7 +225,7 @@ struct DashboardView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(CardOpsTheme.efficiencyAmber)
-            Text("Current week is partial — deltas suppressed")
+            Text("Current week is partial - deltas suppressed")
                 .font(.caption)
                 .foregroundStyle(CardOpsTheme.textSecondary)
             Spacer()

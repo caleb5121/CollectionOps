@@ -1,0 +1,2 @@
+order_id,order_date,buyer_name,game,item_count,order_total,marketplace_fees,payout_usd,shipping_method,estimated_shipping_usd
+201,2024-08-03,Luffy,One Piece,1,18.00,1.80,16.20,Standard,1.10

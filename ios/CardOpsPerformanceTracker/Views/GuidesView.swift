@@ -29,7 +29,7 @@ struct GuidesView: View {
                                 "Compares first 3 days vs last 3 days",
                                 "Blends order growth and revenue growth",
                                 "Higher score means increasing activity toward end of week",
-                                "50 is neutral — no change in trend"
+                                "50 is neutral - no change in trend"
                             ]
                         )
 
@@ -40,7 +40,7 @@ struct GuidesView: View {
                                 "Requires at least 2 weeks of uploaded data",
                                 "Measures deviation in orders and revenue from your average",
                                 "Higher score means performing above your baseline",
-                                "50 is neutral — matching your historical average"
+                                "50 is neutral - matching your historical average"
                             ]
                         )
 

@@ -153,7 +153,7 @@ class DashboardViewModel {
     var actionPulse: String {
         guard let week = currentWeek else { return "Upload a weekly export to generate operational signals." }
         if currentWeekIsPartial {
-            return "Current week is partial — waiting for full 7-day data."
+            return "Current week is partial - waiting for full 7-day data."
         }
         let shippingImpact = shippingConfig.blendedShippingCost * Double(week.totalOrders)
         if shippingImpact > week.totalRevenue * 0.18 {
@@ -172,7 +172,7 @@ class DashboardViewModel {
     var insightSignals: [String] {
         var items: [String] = []
         if currentWeekIsPartial {
-            items.append("Current week is partial — deltas suppressed")
+            items.append("Current week is partial - deltas suppressed")
         }
         items.append(revenueDelta >= 0 ? "Revenue improved week over week" : "Revenue cooled week over week")
         items.append(ordersDelta >= 0 ? "Orders increased" : "Orders declined")
