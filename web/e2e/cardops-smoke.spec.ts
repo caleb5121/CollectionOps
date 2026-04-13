@@ -25,7 +25,7 @@ test.beforeEach(async ({ context }) => {
   });
 });
 
-async function openFromSidebar(page: import("@playwright/test").Page, name: string) {
+async function openFromHeaderNav(page: import("@playwright/test").Page, name: string) {
   await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name }).click();
 }
 
@@ -52,21 +52,21 @@ test.describe("Navigation", () => {
     await expect(page).toHaveURL(/\/data$/);
   });
 
-  test("sidebar primary destinations", async ({ page }) => {
+  test("header primary destinations", async ({ page }) => {
     await page.goto("/dashboard");
-    await openFromSidebar(page, "Imports");
+    await openFromHeaderNav(page, "Imports");
     await expect(page.getByRole("heading", { level: 1, name: "Imports" })).toBeVisible();
-    await openFromSidebar(page, "Trends");
+    await openFromHeaderNav(page, "Trends");
     await expect(page.getByRole("heading", { level: 1, name: "Trends" })).toBeVisible();
-    await openFromSidebar(page, "Dashboard");
+    await openFromHeaderNav(page, "Dashboard");
     await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
   });
 
-  test("sidebar settings and FAQs", async ({ page }) => {
+  test("header settings and FAQs", async ({ page }) => {
     await page.goto("/dashboard");
-    await page.getByRole("complementary", { name: "Sidebar" }).getByRole("link", { name: "Settings" }).click();
+    await page.getByRole("navigation", { name: "More" }).getByRole("link", { name: "Settings" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Shipping per order" })).toBeVisible();
-    await page.getByRole("complementary", { name: "Sidebar" }).getByRole("link", { name: "FAQs" }).click();
+    await page.getByRole("navigation", { name: "More" }).getByRole("link", { name: "FAQs" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Help & FAQs" })).toBeVisible();
   });
 });
