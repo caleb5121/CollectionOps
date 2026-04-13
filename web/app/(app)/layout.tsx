@@ -4,6 +4,7 @@ import { SettingsProvider, useSettings } from "../../components/SettingsProvider
 import { AccountPreferencesProvider, useAccountPreferences } from "../../components/AccountPreferencesProvider";
 import { DataProvider } from "../../components/DataProvider";
 import { AuthProvider } from "../../components/AuthProvider";
+import AppSidebar from "../../components/shell/AppSidebar";
 import MainToolbar from "../../components/shell/MainToolbar";
 import { MotionProvider } from "../../components/motion/MotionProvider";
 
@@ -17,11 +18,14 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       includeShippingInProfit={prefs.includeShippingInProfit}
     >
       <MotionProvider>
-        <div className="flex min-h-screen min-w-0 flex-col">
-          <MainToolbar />
-          <main className="app-canvas-texture min-h-0 flex-1 overflow-auto">
-            <div className="relative z-[1] min-h-full">{children}</div>
-          </main>
+        <div className="min-h-screen">
+          <AppSidebar />
+          <div className="ml-28 flex min-h-screen min-w-0 flex-col">
+            <MainToolbar />
+            <main className="app-canvas-texture min-h-0 flex-1 overflow-auto">
+              <div className="relative z-[1] min-h-full">{children}</div>
+            </main>
+          </div>
         </div>
       </MotionProvider>
     </DataProvider>
