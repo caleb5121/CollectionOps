@@ -10,7 +10,7 @@ import ThemeToggle from "./ThemeToggle";
 import { IconDashboard, IconHelp, IconImports, IconSettings, IconTrends } from "./NavIcons";
 
 /** File must exist under web/public (see next.config images). */
-const BRAND_LOGO_SRC = "/logo.svg";
+const BRAND_LOGO_SRC = "/collection-ops-logo.png";
 
 const primaryNav: { href: string; caption: string; Icon: typeof IconDashboard }[] = [
   { href: "/dashboard", caption: "Dashboard", Icon: IconDashboard },
@@ -97,16 +97,16 @@ export default function MainToolbar() {
         <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
           <Link
             href="/dashboard"
-            className="flex shrink-0 rounded-md transition-opacity hover:opacity-90 active:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40"
-            aria-label="CardOps home"
+            className="flex shrink-0 items-center rounded-md transition-opacity hover:opacity-90 active:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40"
+            aria-label="CollectionOps home"
           >
             <Image
               src={BRAND_LOGO_SRC}
-              alt=""
-              width={40}
-              height={40}
-              className="h-10 w-10 shrink-0 object-contain"
-              sizes="40px"
+              alt="CollectionOps"
+              width={200}
+              height={80}
+              className="h-9 w-auto max-w-[min(9.5rem,42vw)] shrink-0 object-contain object-left sm:h-10 sm:max-w-[11rem]"
+              sizes="(max-width: 640px) 140px, 176px"
               priority
               unoptimized
             />
