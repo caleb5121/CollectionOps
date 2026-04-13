@@ -16,7 +16,7 @@ import {
   type TrendsKpiComparison,
 } from "../../../lib/trendsWeekOverWeek";
 import { groupTrendPointsForChart, inferTrendChartGranularity, type TrendChartGranularity } from "../../../lib/trendChartAggregation";
-import { buildTrendInsightsPanel } from "../../../lib/trendInsights";
+import { buildTrendInsightsStructuredPanel } from "../../../lib/trendInsights";
 import MiniSparkline from "../../../components/MiniSparkline";
 
 function formatCurrency(n: number | null | undefined) {
@@ -61,33 +61,6 @@ function formatDataRangeLabel(start: Date, end: Date): string {
   }).format(end);
   if (startStr === endStr) return startStr;
   return `${startStr} → ${endStr}`;
-}
-
-function EmptyTrendsChartIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      width={48}
-      height={48}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <path
-        d="M8 36V12M8 36h32M14 28l8-10 6 5 10-14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="text-slate-300 dark:text-slate-600"
-      />
-      <circle cx="14" cy="28" r="2" className="fill-slate-300 dark:fill-slate-600" />
-      <circle cx="22" cy="18" r="2" className="fill-slate-300 dark:fill-slate-600" />
-      <circle cx="28" cy="23" r="2" className="fill-slate-300 dark:fill-slate-600" />
-      <circle cx="38" cy="9" r="2" className="fill-slate-300 dark:fill-slate-600" />
-    </svg>
-  );
 }
 
 function ComparisonChange({
@@ -170,8 +143,8 @@ export default function TrendsPage() {
     [showFullTrendsUi, chartDisplayData],
   );
 
-  const insightsPanel = useMemo(
-    () => (showFullTrendsUi ? buildTrendInsightsPanel(chartDisplayData, chartGranularity) : null),
+  const insightsStructured = useMemo(
+    () => (showFullTrendsUi ? buildTrendInsightsStructuredPanel(chartDisplayData, chartGranularity) : null),
     [showFullTrendsUi, chartDisplayData, chartGranularity],
   );
 
@@ -233,41 +206,51 @@ export default function TrendsPage() {
       ];
 
   const totalOrdersInBuckets = distributionRows.reduce((s, r) => s + r.count, 0);
+  let dominantBucketIndex = -1;
+  let dominantBucketMax = 0;
+  for (let i = 0; i < distributionRows.length; i++) {
+    const c = distributionRows[i]!.count;
+    if (c > dominantBucketMax) {
+      dominantBucketMax = c;
+      dominantBucketIndex = i;
+    }
+  }
+  if (dominantBucketMax === 0) dominantBucketIndex = -1;
 
   const showComparisonHint = showFullTrendsUi && chartDisplayData.length < 2;
 
   const fadeTransition = reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
-    <PageShell maxWidth="wide-xl">
-      <PageIntroGradient title="Trends" className="sm:p-6">
-        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <p className="max-w-md text-xs font-medium leading-relaxed text-white/70">
-            Detailed view of your performance
-          </p>
-          <Link
-            href="/dashboard"
-            className="shrink-0 self-start rounded-lg border border-white/30 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white shadow-sm backdrop-blur-sm transition hover:bg-white/25"
-          >
-            Back to Dashboard
-          </Link>
-        </div>
-        {showFullTrendsUi && dataRangeLabel ? (
-          <p className="mt-3 text-sm font-normal text-white/80">
-            <span className="tabular-nums">{dataRangeLabel}</span>
-          </p>
-        ) : null}
-        {showFullTrendsUi && trendsHasReviewBatch ? (
-          <p className="mt-2 max-w-xl text-xs font-normal leading-relaxed text-amber-50/95 dark:text-amber-100/90">
-            Some data may need review
-          </p>
-        ) : null}
-        {showComparisonHint ? (
-          <p className="mt-2 max-w-xl text-xs font-normal leading-relaxed text-white/70">
-            Add another day or week of orders so we can compare this period to the previous one on KPIs.
-          </p>
-        ) : null}
-      </PageIntroGradient>
+    <PageShell maxWidth="wide-xl" contentClassName="px-6 pt-5 pb-5 sm:px-8 sm:pt-6 sm:pb-6 lg:px-10">
+      {showFullTrendsUi ? (
+        <PageIntroGradient title="Trends" size="strip">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <div className="min-w-0 flex-1 space-y-1">
+              {dataRangeLabel ? (
+                <p className="text-xs font-medium tabular-nums text-white/90">
+                  <span className="text-white/60">Range · </span>
+                  {dataRangeLabel}
+                </p>
+              ) : (
+                <p className="text-xs text-white/70">Revenue, orders, and fees from your imports</p>
+              )}
+              {trendsHasReviewBatch ? (
+                <p className="text-[11px] font-medium text-amber-100/95">Some data may need review</p>
+              ) : null}
+              {showComparisonHint ? (
+                <p className="text-[11px] text-white/65">Add another period to unlock period-over-period KPIs.</p>
+              ) : null}
+            </div>
+            <Link
+              href="/dashboard"
+              className="shrink-0 self-start rounded-md border border-white/35 bg-white/10 px-2.5 py-1 text-center text-[11px] font-semibold text-white transition hover:bg-white/20 sm:self-center"
+            >
+              Back to Dashboard
+            </Link>
+          </div>
+        </PageIntroGradient>
+      ) : null}
 
       <AnimatePresence mode="wait" initial={false}>
         {!showFullTrendsUi ? (
@@ -278,57 +261,36 @@ export default function TrendsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={fadeTransition}
-            className="flex min-h-[min(72vh,44rem)] flex-col items-center justify-center px-4 py-12 text-center sm:py-16"
+            className="mx-auto max-w-lg py-6 text-center sm:py-7"
           >
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+              See performance over time
+            </h2>
             {trendsValidBatchCount === 0 ? (
-              <>
-                <EmptyTrendsChartIcon className="mb-5 shrink-0" />
-                <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl">
-                  No trends yet
-                </h2>
-                <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                  Upload your first order list to see performance over time
-                </p>
-                <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                  <Link
-                    href="/data"
-                    className="inline-flex items-center justify-center rounded-full bg-[color:var(--accent)] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-app hover:brightness-105 active:translate-y-px"
-                  >
-                    Go to Imports
-                  </Link>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm font-medium text-slate-600 underline-offset-2 hover:underline dark:text-slate-400"
-                  >
-                    Back to Dashboard
-                  </Link>
-                </div>
-              </>
+              <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                Once you upload order data, Trends will show revenue, orders, fees, and momentum across your selected date
+                range.
+              </p>
             ) : (
-              <>
-                <EmptyTrendsChartIcon className="mb-5 shrink-0" />
-                <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl">
-                  No trends yet
-                </h2>
-                <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                  Only fully validated imports feed Trends. Fix your batch on Imports, then return here.
-                </p>
-                <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                  <Link
-                    href="/data"
-                    className="inline-flex items-center justify-center rounded-full bg-[color:var(--accent)] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-app hover:brightness-105 active:translate-y-px"
-                  >
-                    Go to Imports
-                  </Link>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm font-medium text-slate-600 underline-offset-2 hover:underline dark:text-slate-400"
-                  >
-                    Back to Dashboard
-                  </Link>
-                </div>
-              </>
+              <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                Only fully validated imports feed Trends. Fix your batch on Imports, then return here.
+              </p>
             )}
+            <Link
+              href="/data"
+              className="mt-5 inline-flex items-center justify-center rounded-xl bg-[color:var(--accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-app hover:opacity-95 active:translate-y-px"
+            >
+              Go to Imports
+            </Link>
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">Start with one CSV pair</p>
+            <p className="mt-4">
+              <Link
+                href="/dashboard"
+                className="text-xs font-medium text-slate-500 underline-offset-2 hover:underline dark:text-slate-500"
+              >
+                Back to Dashboard
+              </Link>
+            </p>
           </motion.div>
         ) : (
           <motion.div
@@ -337,7 +299,7 @@ export default function TrendsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={fadeTransition}
-            className="mt-6 space-y-8 sm:mt-8"
+            className="mt-4 space-y-5 sm:mt-5"
           >
             <Reveal>
               <TrendAnalysisChart
@@ -415,39 +377,64 @@ export default function TrendsPage() {
               </StaggerItem>
             </Stagger>
 
-            {insightsPanel ? (
+            {insightsStructured ? (
               <Reveal delay={0.03}>
-                <div className="app-section-surface p-5 sm:p-6">
-                  <h2 className="mb-4 text-base font-bold text-slate-900 dark:text-slate-50">Insights</h2>
-                  <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                    Based on {chartGranularity} chart view
+                <div className="app-section-surface p-4 sm:p-5">
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-slate-50">Insights</h2>
+                  <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                    From your {chartGranularity} chart
                   </p>
-                  <ul className="space-y-2.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                    <li>{insightsPanel.bestLine}</li>
-                    <li>{insightsPanel.weakestLine}</li>
-                    <li>{insightsPanel.trendLine}</li>
-                  </ul>
+                  <div className="mt-4 space-y-4">
+                    {[insightsStructured.best, insightsStructured.weakest, insightsStructured.trend].map((block) => (
+                      <div
+                        key={block.label}
+                        className="rounded-lg border border-slate-200/70 bg-white/60 px-3 py-2.5 dark:border-slate-700/55 dark:bg-slate-900/40"
+                      >
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          {block.label}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{block.period}</p>
+                        <p className="mt-1 text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">{block.value}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </Reveal>
             ) : null}
 
             <Reveal delay={0.05}>
-              <div className="app-section-surface p-5 sm:p-6">
-                <h2 className="mb-5 text-base font-bold text-slate-900 dark:text-slate-50">Order Size Breakdown</h2>
-                <div className="space-y-3.5">
-                  {distributionRows.map(({ label, count }) => {
+              <div className="app-section-surface p-4 sm:p-5">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-50">Order size breakdown</h2>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Where your orders fall by price range</p>
+                <div className="mt-4 space-y-3">
+                  {distributionRows.map(({ label, count }, rowIdx) => {
                     const sharePct = totalOrdersInBuckets > 0 ? (count / totalOrdersInBuckets) * 100 : 0;
                     const barPct =
                       totalOrdersInBuckets > 0 ? (count / totalOrdersInBuckets) * 100 : count > 0 ? 100 : 0;
+                    const isDominant = rowIdx === dominantBucketIndex && count > 0;
                     return (
                       <div key={label} className="flex items-center gap-2 sm:gap-3">
-                        <div className="w-[4.5rem] shrink-0 text-sm font-medium text-slate-700 dark:text-slate-300 sm:w-24">
+                        <div
+                          className={`w-[4.5rem] shrink-0 text-sm font-medium sm:w-24 ${isDominant ? "text-slate-900 dark:text-slate-100" : "text-slate-700 dark:text-slate-300"}`}
+                        >
                           {label}
+                          {isDominant ? (
+                            <span className="ml-1 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--accent)]">
+                              Top
+                            </span>
+                          ) : null}
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className={`min-w-0 flex-1 ${isDominant ? "rounded-full ring-2 ring-[color:var(--accent)]/35 ring-offset-2 ring-offset-white dark:ring-offset-slate-900" : ""}`}>
                           <AnimatedBarWidth
+                            thick
                             pct={Math.max(barPct, count > 0 ? 2 : 0)}
-                            className={count > 0 ? "bg-[color:var(--accent)]" : "bg-slate-200 dark:bg-slate-600"}
+                            className={
+                              count > 0
+                                ? isDominant
+                                  ? "bg-[color:var(--accent)]"
+                                  : "bg-slate-400 dark:bg-slate-500"
+                                : "bg-slate-200 dark:bg-slate-600"
+                            }
                           />
                         </div>
                         <div className="flex w-[5.5rem] shrink-0 flex-col items-end text-right sm:w-28">
@@ -465,10 +452,10 @@ export default function TrendsPage() {
               </div>
             </Reveal>
 
-            <div className="flex justify-center pb-2">
+            <div className="flex justify-center pb-1">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200/90 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                className="text-sm font-medium text-slate-500 underline-offset-2 hover:text-slate-800 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
               >
                 Back to Dashboard
               </Link>

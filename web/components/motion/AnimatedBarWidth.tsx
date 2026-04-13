@@ -6,15 +6,19 @@ import { motion, useReducedMotion } from "framer-motion";
 export function AnimatedBarWidth({
   pct,
   className = "",
+  thick = false,
 }: {
   pct: number;
   className?: string;
+  /** Taller track for emphasis (e.g. order-size breakdown). */
+  thick?: boolean;
 }) {
   const reduce = useReducedMotion();
   const w = Math.min(100, Math.max(0, pct));
+  const trackH = thick ? "h-3.5 sm:h-4" : "h-2.5";
 
   return (
-    <div className="h-2.5 min-w-0 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800/90">
+    <div className={`${trackH} min-w-0 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800/90`}>
       <motion.div
         className={`h-full rounded-full ${className}`}
         initial={reduce ? { width: `${w}%` } : { width: 0 }}

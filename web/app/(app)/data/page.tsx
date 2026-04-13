@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import PageShell, { PageIntroGradient } from "../../../components/PageShell";
+import PageShell from "../../../components/PageShell";
 import { useData, type ImportChunk } from "../../../components/DataProvider";
 import Card from "../../../components/Card";
 import InfoTooltip from "../../../components/InfoTooltip";
@@ -103,8 +103,8 @@ function importTrafficPresentation(input: {
   }
   return {
     light: "green",
-    headline: "Data looks good",
-    subtext: "",
+    headline: "You're ready to go",
+    subtext: "Your data has been processed and matched successfully.",
   };
 }
 
@@ -238,6 +238,7 @@ function chunkShowUnmappedHelp(chunk: ImportChunk, kind: "order" | "summary"): b
 
 function UploadZone({
   title,
+  titleDescription,
   helperEmpty,
   imports,
   onFiles,
@@ -254,6 +255,8 @@ function UploadZone({
   duplicateFilenameNotice,
 }: {
   title: string;
+  /** Short line under the section title (what belongs in this slot). */
+  titleDescription: string;
   helperEmpty: string;
   imports: ImportChunk[];
   onFiles: (files: FileList) => void;
@@ -275,64 +278,42 @@ function UploadZone({
   const statusLine = imports.length === 0 ? helperEmpty : slotCardStatusLine(imports);
   const isRejectedLine = imports.length > 0 && statusLine.startsWith("Rejected");
   const pairClash = Boolean(labelPairMismatch && imports.length > 0 && !isRejectedLine);
-  const bannerClass =
-    kind === "order"
-      ? "bg-gradient-to-br from-sky-600 via-sky-600 to-blue-900"
-      : "bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-900";
-  const borderAccent =
-    kind === "order"
-      ? "border-sky-500/60 dark:border-sky-500/50"
-      : "border-teal-500/60 dark:border-teal-500/45";
-  const bannerSubtitleSr =
-    kind === "order" ? "TCGplayer order line items export." : "TCGplayer sales summary export.";
+  const accentBar = kind === "order" ? "border-l-sky-500" : "border-l-teal-600";
   const nextHighlight = Boolean(nextStepHint) && !pairClash;
 
   return (
     <section
       aria-label={regionLabel}
-      className="flex h-full min-h-[22rem] flex-1 flex-col sm:min-h-[23rem]"
+      className="flex h-full min-h-[17rem] flex-1 flex-col sm:min-h-[18rem]"
     >
       <Card
         data-imports-next-highlight={nextHighlight ? "true" : undefined}
         data-imports-label-pair-mismatch={pairClash ? "true" : undefined}
-        className={`flex h-full min-h-[22rem] flex-col !p-0 overflow-hidden border-2 sm:min-h-[23rem] ${borderAccent} ${!uploadsEnabled ? "opacity-70" : ""} ${
+        className={`flex h-full min-h-[17rem] flex-col !p-0 overflow-hidden border border-slate-200/85 dark:border-slate-700/65 sm:min-h-[18rem] ${!uploadsEnabled ? "opacity-70" : ""} ${
           pairClash
-            ? "ring-2 ring-rose-500/75 ring-offset-2 ring-offset-white shadow-lg shadow-rose-900/20 dark:ring-rose-500/55 dark:ring-offset-slate-900 dark:shadow-rose-950/35"
+            ? "ring-2 ring-rose-500/75 ring-offset-2 ring-offset-white shadow-md shadow-rose-900/15 dark:ring-rose-500/55 dark:ring-offset-slate-900 dark:shadow-rose-950/35"
             : nextHighlight
-              ? "ring-2 ring-amber-400/70 ring-offset-2 ring-offset-white shadow-lg shadow-amber-900/15 dark:ring-amber-500/50 dark:ring-offset-slate-900 dark:shadow-amber-900/25"
+              ? "ring-2 ring-amber-400/70 ring-offset-2 ring-offset-white shadow-md shadow-amber-900/10 dark:ring-amber-500/50 dark:ring-offset-slate-900 dark:shadow-amber-900/20"
               : ""
         }`}
       >
         <div
-          className={`relative px-4 py-4 sm:px-5 sm:py-5 ${bannerClass} text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]`}
+          className={`relative border-b border-slate-200/80 bg-slate-50/95 px-4 py-3 dark:border-slate-700/70 dark:bg-slate-900/75 sm:px-4 sm:py-3.5 ${accentBar} border-l-[3px]`}
         >
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.08]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(255,255,255,0.07) 10px, rgba(255,255,255,0.07) 11px)",
-            }}
-          />
           <div className="relative flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="text-lg font-bold leading-tight tracking-tight sm:text-xl">
+              <h3 className="text-base font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-50 sm:text-lg">
                 {title}
-                <span className="sr-only">: {bannerSubtitleSr}</span>
               </h3>
+              <p className="mt-1 text-xs leading-snug text-slate-600 dark:text-slate-400">{titleDescription}</p>
             </div>
-            <div className="shrink-0 rounded-lg bg-white/15 p-1 ring-1 ring-white/25 backdrop-blur-[2px] [&_button]:text-white [&_button]:opacity-95 [&_button]:hover:opacity-100">
+            <div className="shrink-0 rounded-md border border-slate-200/90 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-800">
               <UploadCardInfoTooltip techCap={techCap} />
             </div>
           </div>
         </div>
 
-        <div
-          className={`flex min-h-0 flex-1 flex-col border-t border-slate-200/80 bg-gradient-to-b from-slate-50/90 to-white px-4 py-4 dark:border-slate-700/60 dark:from-slate-900/90 dark:to-slate-950/95 sm:px-5 sm:py-5 ${
-            kind === "order"
-              ? "border-t-sky-200/50 dark:border-t-sky-800/40"
-              : "border-t-teal-200/50 dark:border-t-teal-800/40"
-          }`}
-        >
+        <div className="flex min-h-0 flex-1 flex-col border-slate-200/80 bg-white px-4 py-3 dark:border-slate-700/60 dark:bg-slate-950/40 sm:px-4 sm:py-4">
         {nextStepHint ? (
           <p className="mb-3 rounded-lg border border-amber-300/60 bg-amber-50/95 px-3 py-2 text-[12px] font-semibold text-amber-950 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-100">
             {nextStepHint}
@@ -875,28 +856,35 @@ export default function DataPage() {
   ) : null;
 
   return (
-    <PageShell maxWidth="wide-xl">
-        <div className="relative z-10 space-y-2.5 rounded-2xl border border-sky-200/60 bg-gradient-to-b from-sky-50/80 via-white to-emerald-50/50 p-3 shadow-[0_1px_3px_rgba(15,23,42,0.06)] sm:space-y-3 sm:p-4 dark:border-indigo-900/50 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/50">
-        <PageIntroGradient title="Imports" className="sm:p-6" />
+    <PageShell maxWidth="wide-xl" contentClassName="px-6 pt-5 pb-5 sm:px-8 sm:pt-6 sm:pb-6 lg:px-10">
+      <div className="space-y-3 rounded-lg border border-slate-200/75 bg-white/95 p-3.5 dark:border-slate-700/65 dark:bg-slate-950/40 sm:space-y-3 sm:p-4">
+        <header className="mb-1 border-b border-slate-200/70 pb-3.5 dark:border-slate-700/55">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+            Import your data
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+            Upload one Order List and one Sales Summary for the same date range.
+          </p>
+        </header>
 
         <section
           aria-labelledby="imports-current-upload-heading"
-          className="rounded-2xl border-2 border-sky-400/40 bg-white/95 p-3 shadow-sm sm:p-4 dark:border-sky-800/50 dark:bg-slate-900/90"
+          className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4 dark:border-slate-700/60 dark:bg-slate-900/50"
         >
-          <div className="flex flex-wrap items-start justify-between gap-2 border-b border-sky-200/70 pb-2.5 dark:border-sky-800/45">
+          <div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-200/70 pb-2 dark:border-slate-700/50">
             <div>
               <h2
                 id="imports-current-upload-heading"
-                className="text-sm font-bold uppercase tracking-wide text-sky-950 dark:text-sky-100"
+                className="text-xs font-bold uppercase tracking-wide text-slate-700 dark:text-slate-300"
               >
-                Current Upload
+                Current upload
               </h2>
             </div>
             {currentUploadCollapsed ? (
               <button
                 type="button"
                 onClick={() => setCurrentUploadCollapsed(false)}
-                className="shrink-0 rounded-lg border border-sky-500/70 bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-sky-500 dark:border-sky-600 dark:bg-sky-700 dark:hover:bg-sky-600"
+                className="shrink-0 rounded-lg border border-slate-300/90 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700"
               >
                 Set up next batch
               </button>
@@ -935,9 +923,9 @@ export default function DataPage() {
           </div>
         ) : null}
 
-        <Card className="border-indigo-200/70 bg-white/90 p-3.5 shadow-sm dark:border-indigo-800/40 dark:bg-slate-900/75 sm:p-4">
+        <Card className="border-slate-200/80 bg-white/95 p-3.5 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70 sm:p-4">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <label htmlFor="import-game" className="shrink-0 text-sm font-semibold text-indigo-950 dark:text-indigo-100">
+            <label htmlFor="import-game" className="shrink-0 text-sm font-semibold text-slate-800 dark:text-slate-200">
               Label
             </label>
             <div className="min-w-0 max-w-64 flex-1 sm:flex-initial">
@@ -963,7 +951,7 @@ export default function DataPage() {
           </div>
           {importGame === "Other" ? (
             <div className="mt-3 max-w-64 space-y-1.5">
-              <label htmlFor="import-game-other" className="text-xs font-semibold text-indigo-950 dark:text-indigo-100">
+              <label htmlFor="import-game-other" className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                 Your label
               </label>
               <input
@@ -1005,9 +993,10 @@ export default function DataPage() {
           <h2 id="imports-upload-heading" className="sr-only">
             Upload CSV files
           </h2>
-          <div className="grid gap-4 md:grid-cols-2 md:items-stretch lg:gap-5">
+          <div className="grid gap-3 md:grid-cols-2 md:items-stretch md:gap-4">
             <UploadZone
-              title="Order List"
+              title="1. Order List"
+              titleDescription="Export from TCGplayer Orders (CSV)."
               helperEmpty="Add your Order List to begin"
               imports={orderImports}
               onFiles={runOrderUpload}
@@ -1031,7 +1020,8 @@ export default function DataPage() {
               }
             />
             <UploadZone
-              title="Sales Summary"
+              title="2. Sales Summary"
+              titleDescription="Export from Sales Summary for the same period (CSV)."
               helperEmpty="Add your Sales Summary to continue"
               imports={summaryImports}
               onFiles={runSummaryUpload}
@@ -1075,7 +1065,7 @@ export default function DataPage() {
         {hasFiles && importStatusTone ? (
           <section
             aria-labelledby="imports-batch-status-heading"
-            className="space-y-2 rounded-2xl border border-slate-200/70 bg-white/40 p-3 dark:border-slate-700/55 dark:bg-slate-900/35 sm:p-3.5"
+            className="space-y-2 rounded-xl border border-slate-200/70 bg-white/60 p-3 dark:border-slate-700/55 dark:bg-slate-900/40 sm:p-3.5"
           >
             <h2
               id="imports-batch-status-heading"
@@ -1114,12 +1104,12 @@ export default function DataPage() {
                     {importTraffic.subtext.trim() ? (
                       <p
                         data-testid="imports-workspace-subtext"
-                        className={`text-sm font-medium leading-snug ${
+                        className={`text-sm leading-snug ${
                           importTraffic.light === "green"
-                            ? "text-emerald-900/90 dark:text-emerald-100/90"
+                            ? "font-normal text-emerald-900/85 dark:text-emerald-100/85"
                             : importTraffic.light === "yellow"
-                              ? "text-amber-900/95 dark:text-amber-100/95"
-                              : "text-rose-900/95 dark:text-rose-100/95"
+                              ? "font-medium text-amber-900/95 dark:text-amber-100/95"
+                              : "font-medium text-rose-900/95 dark:text-rose-100/95"
                         }`}
                       >
                         {importTraffic.subtext}
@@ -1293,7 +1283,7 @@ export default function DataPage() {
                     ) : null}
                     <Link
                       href="/dashboard"
-                      className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-500 dark:bg-emerald-700 dark:hover:bg-emerald-600"
+                      className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
                     >
                       Continue to Dashboard
                     </Link>
@@ -1302,11 +1292,19 @@ export default function DataPage() {
                         type="button"
                         data-testid="imports-add-another-game-button"
                         onClick={() => handleAddAnotherGame()}
-                        className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                        className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         Save &amp; continue
                       </button>
                     ) : null}
+                    <button
+                      type="button"
+                      onClick={resetAll}
+                      data-testid="imports-reset-button"
+                      className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      Reset imports
+                    </button>
                     <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm">
                       <Link
                         href="/trends"
@@ -1314,14 +1312,6 @@ export default function DataPage() {
                       >
                         View Trends
                       </Link>
-                      <button
-                        type="button"
-                        onClick={resetAll}
-                        data-testid="imports-reset-button"
-                        className="font-medium text-slate-500 underline-offset-2 hover:text-slate-800 hover:underline dark:text-slate-500 dark:hover:text-slate-300"
-                      >
-                        Reset imports
-                      </button>
                     </div>
                   </>
                 ) : (
@@ -1329,7 +1319,7 @@ export default function DataPage() {
                     type="button"
                     onClick={resetAll}
                     data-testid="imports-reset-button"
-                    className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                    className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
                     Reset imports
                   </button>

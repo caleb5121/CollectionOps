@@ -15,6 +15,18 @@ export type TrendInsightsPanel = {
   trendLine: string;
 };
 
+export type TrendInsightBlock = {
+  label: string;
+  period: string;
+  value: string;
+};
+
+export type TrendInsightsStructuredPanel = {
+  best: TrendInsightBlock;
+  weakest: TrendInsightBlock;
+  trend: TrendInsightBlock;
+};
+
 function directionFromEndpoints(sorted: TrendPoint[]): TrendInsightDirection {
   if (sorted.length < 2) return "flat";
   const first = sorted[0]!.revenue;
@@ -71,6 +83,74 @@ function largestDayOverDay(sorted: TrendPoint[]): { delta: number; fromLabel: st
     fromLabel: sorted[i - 1]!.day,
     toLabel: sorted[i]!.day,
   };
+}
+
+function bucketLabel(granularity: TrendChartGranularity, kind: "best" | "weak"): string {
+  if (granularity === "daily") return kind === "best" ? "Best day" : "Weakest day";
+  if (granularity === "weekly") return kind === "best" ? "Best week" : "Weakest week";
+  return kind === "best" ? "Best month" : "Weakest month";
+}
+
+/** Structured insights for scan-friendly UI (label → period → value). */
+export function buildTrendInsightsStructuredPanel(
+  points: TrendPoint[],
+  granularity: TrendChartGranularity,
+): TrendInsightsStructuredPanel | null {
+  const base = analyzeTrendSeries(points);
+  if (!base) return null;
+  const sorted = [...points].sort((a, b) => a.dateMs - b.dateMs);
+
+  const best: TrendInsightBlock = {
+    label: bucketLabel(granularity, "best"),
+    period: base.best.label,
+    value: formatMoney(base.best.revenue),
+  };
+  const weakest: TrendInsightBlock = {
+    label: bucketLabel(granularity, "weak"),
+    period: base.worst.label,
+    value: formatMoney(base.worst.revenue),
+  };
+
+  let trend: TrendInsightBlock;
+  if (granularity === "daily") {
+    const jump = largestDayOverDay(sorted);
+    trend = jump
+      ? {
+          label: "Trend",
+          period: `${jump.fromLabel} → ${jump.toLabel}`,
+          value: `${jump.delta >= 0 ? "+" : ""}${formatMoney(jump.delta)} day over day`,
+        }
+      : {
+          label: "Trend",
+          period: "Overall",
+          value: directionPhrase(base.direction).replace(/\.$/, ""),
+        };
+  } else if (granularity === "weekly") {
+    if (sorted.length >= 2) {
+      const prev = sorted[sorted.length - 2]!;
+      const last = sorted[sorted.length - 1]!;
+      if (prev.revenue > 0) {
+        const pct = ((last.revenue - prev.revenue) / prev.revenue) * 100;
+        trend = {
+          label: "Trend",
+          period: `${prev.day} → ${last.day}`,
+          value: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}% vs prior week`,
+        };
+      } else {
+        trend = { label: "Trend", period: "Overall", value: directionPhrase(base.direction).replace(/\.$/, "") };
+      }
+    } else {
+      trend = { label: "Trend", period: "Overall", value: directionPhrase(base.direction).replace(/\.$/, "") };
+    }
+  } else {
+    trend = {
+      label: "Trend",
+      period: "Overall",
+      value: directionPhrase(base.direction, true).replace(/\.$/, ""),
+    };
+  }
+
+  return { best, weakest, trend };
 }
 
 /** Copy for the Insights panel, aligned to chart granularity. */

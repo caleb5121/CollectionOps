@@ -4,7 +4,7 @@ export function getPageTitle(pathname: string): string {
     "/dashboard": "Dashboard",
     "/data": "Imports",
     "/trends": "Trends",
-    "/settings": "Shipping per order",
+    "/settings": "Settings",
     "/help": "Help & FAQs",
     "/account": "Account",
   };

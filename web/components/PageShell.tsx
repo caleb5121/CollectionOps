@@ -32,6 +32,7 @@ export default function PageShell({
   descriptionHeaderClassName,
   action,
   maxWidth = "wide",
+  contentClassName,
   children,
 }: {
   description?: string;
@@ -41,13 +42,16 @@ export default function PageShell({
   descriptionHeaderClassName?: string;
   action?: ReactNode;
   maxWidth?: PageShellMaxWidth;
+  /** Override default horizontal/vertical padding (e.g. tighter dashboard pages). */
+  contentClassName?: string;
   children: ReactNode;
 }) {
   const maxW = MAX_WIDTH[maxWidth];
+  const padding = contentClassName ?? PAGE_SHELL_CONTENT_PADDING;
 
   return (
     <div className="min-h-full">
-      <div className={`mx-auto w-full ${maxW} ${PAGE_SHELL_CONTENT_PADDING}`}>
+      <div className={`mx-auto w-full ${maxW} ${padding}`}>
         {description || action ? (
           <header
             className={
@@ -74,31 +78,50 @@ export default function PageShell({
   );
 }
 
-/** Blue gradient intro card - same visual language as Settings / Imports synced banner. */
+/** Blue gradient intro card - same visual language as Settings / synced banners. */
 export function PageIntroGradient({
   title: heading,
   children,
   className = "",
+  size = "default",
 }: {
   title: string;
   children?: ReactNode;
   className?: string;
+  /** `strip` = low-height label bar; `compact` = denser card; `default` = standard. */
+  size?: "default" | "compact" | "strip";
 }) {
+  const shell =
+    size === "strip"
+      ? "rounded-lg px-4 py-2.5 shadow-sm sm:rounded-xl sm:px-4 sm:py-3"
+      : size === "compact"
+        ? "rounded-xl p-4 shadow-sm sm:rounded-xl sm:p-5"
+        : "rounded-xl p-6 shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_2px_8px_-2px_rgba(0,0,0,0.12),0_12px_32px_-8px_rgba(30,58,138,0.35)] sm:rounded-2xl sm:p-8";
+  const titleClass =
+    size === "strip"
+      ? "text-base font-bold tracking-tight text-white sm:text-lg"
+      : size === "compact"
+        ? "text-base font-bold tracking-tight text-white sm:text-lg"
+        : "text-lg font-bold tracking-tight text-white sm:text-xl";
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-800 p-6 shadow-[0_1px_0_rgba(255,255,255,0.25)_inset,0_4px_6px_-1px_rgba(0,0,0,0.12),0_20px_50px_-12px_rgba(30,58,138,0.45),0_32px_64px_-16px_rgba(15,23,42,0.2)] sm:p-8 ${className}`}
+      className={`relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-600 to-blue-800 ${shell} ${className}`}
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.12]"
+        className="pointer-events-none absolute inset-0 opacity-[0.08]"
         style={{
           backgroundImage:
             "repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(255,255,255,0.06) 8px, rgba(255,255,255,0.06) 9px)",
         }}
       />
       <div className="relative">
-        <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">{heading}</h2>
+        <h2 className={titleClass}>{heading}</h2>
         {children != null ? (
-          <div className="mt-2 text-sm leading-relaxed text-white/85">{children}</div>
+          <div
+            className={`text-white/85 ${size === "strip" ? "mt-1 text-xs leading-snug" : size === "compact" ? "mt-1.5 text-xs leading-relaxed sm:text-sm" : "mt-2 text-sm leading-relaxed"}`}
+          >
+            {children}
+          </div>
         ) : null}
       </div>
     </div>

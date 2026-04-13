@@ -9,6 +9,7 @@ import {
   dedupeInsightLines,
   parseInsightsResponseBody,
 } from "../../lib/aiInsightsSummary";
+import { splitInsightLine } from "../../lib/insightDisplay";
 import { useData } from "../DataProvider";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -177,7 +178,7 @@ export default function AiInsightsModal({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
@@ -185,8 +186,8 @@ export default function AiInsightsModal({ open, onClose }: Props) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="app-card-3d max-h-[min(90vh,520px)] w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl dark:border-slate-700/80 dark:bg-slate-900/95">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-4 dark:border-slate-700/60">
+      <div className="max-h-[min(90vh,540px)] w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xl dark:border-slate-700/80 dark:bg-slate-900/95">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-3.5 dark:border-slate-700/60">
           <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-slate-50">
             Insights
           </h2>
@@ -200,35 +201,30 @@ export default function AiInsightsModal({ open, onClose }: Props) {
           </button>
         </div>
 
-        <div className="max-h-[min(65vh,440px)] overflow-y-auto px-5 py-4">
+        <div className="max-h-[min(68vh,460px)] overflow-y-auto px-5 py-4">
           {phase === "no_data" ? (
             <p className="text-sm text-slate-600 dark:text-slate-300">Import data to open insights.</p>
           ) : null}
 
           {phase === "loading" ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-12">
+            <div className="flex flex-col items-center justify-center gap-3 py-10">
               <div
                 className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[color:var(--accent)] dark:border-slate-600"
                 aria-hidden
               />
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Reviewing your metrics...</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Reviewing your metrics…</p>
             </div>
           ) : null}
 
           {phase === "error" ? (
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Insights could not load</p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Your imports are still on this device. Try again in a moment.
-                </p>
-              </div>
+            <div className="space-y-4">
+              <p className="text-sm text-slate-700 dark:text-slate-200">Insights couldn&apos;t load just now.</p>
               <button
                 type="button"
                 onClick={() => setAttempt((a) => a + 1)}
-                className="rounded-xl border border-slate-200/90 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600/80 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:bg-slate-800/90"
+                className="rounded-lg border border-slate-200/90 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-100 dark:border-slate-600/80 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-800"
               >
-                Try again
+                Try enhanced insights
               </button>
             </div>
           ) : null}
@@ -236,40 +232,38 @@ export default function AiInsightsModal({ open, onClose }: Props) {
           {phase === "done" && insights.length > 0 ? (
             <>
               {degraded ? (
-                <div
-                  role="status"
-                  className="mb-4 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2.5 dark:border-amber-900/40 dark:bg-amber-950/35"
-                >
-                  <p className="text-sm font-medium text-amber-950 dark:text-amber-100">On-device coaching (AI off)</p>
-                  <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-200/90">
-                    These bullets use your dashboard numbers only. Retry for an AI pass when the service is back.
+                <div role="status" className="mb-5 rounded-lg border border-slate-200/80 bg-slate-50 px-3 py-2.5 dark:border-slate-600/50 dark:bg-slate-800/50">
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Quick insights (local)</p>
+                  <p className="mt-1 text-xs leading-snug text-slate-600 dark:text-slate-400">
+                    From your dashboard numbers on this device. Enhanced insights use the cloud when available.
                   </p>
                   <button
                     type="button"
                     onClick={() => setAttempt((a) => a + 1)}
-                    className="mt-2 text-xs font-semibold text-amber-900 underline-offset-2 hover:underline dark:text-amber-200"
+                    className="mt-2 text-xs font-semibold text-[color:var(--accent)] underline-offset-2 hover:underline"
                   >
-                    Retry AI
+                    Try enhanced insights
                   </button>
                 </div>
               ) : null}
-              <ul className="space-y-2.5">
-                {insights.map((text, i) => (
-                  <li key={`${i}-${text.slice(0, 24)}`} className="rounded-lg px-0.5 py-0.5">
-                    <p className="flex gap-2 text-sm font-medium leading-snug text-slate-800 dark:text-slate-100">
-                      <span className="mt-[0.35em] shrink-0 text-[color:var(--accent)]" aria-hidden>
-                        •
-                      </span>
-                      <span>{text}</span>
-                    </p>
-                  </li>
-                ))}
+              <ul className="space-y-5">
+                {insights.map((text, i) => {
+                  const { takeaway, detail } = splitInsightLine(text);
+                  return (
+                    <li key={`${i}-${text.slice(0, 24)}`} className="border-b border-slate-100 pb-5 last:border-0 last:pb-0 dark:border-slate-800/80">
+                      <p className="text-sm font-bold leading-snug text-slate-900 dark:text-slate-50">{takeaway}</p>
+                      {detail ? (
+                        <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{detail}</p>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
-              <div className="mt-5 border-t border-slate-200/80 pt-4 dark:border-slate-700/60">
+              <div className="mt-6 border-t border-slate-200/80 pt-4 dark:border-slate-700/60">
                 <Link
                   href="/dashboard"
                   onClick={onClose}
-                  className="flex w-full items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                  className="flex w-full items-center justify-center rounded-lg border border-slate-200/90 bg-transparent px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800/80"
                 >
                   Back to Dashboard
                 </Link>

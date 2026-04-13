@@ -34,7 +34,7 @@ test.describe("Navigation", () => {
     { path: "/dashboard", title: "Dashboard" },
     { path: "/data", title: "Imports" },
     { path: "/trends", title: "Trends" },
-    { path: "/settings", title: "Shipping per order" },
+    { path: "/settings", title: "Settings" },
     { path: "/account", title: "Account" },
     { path: "/help", title: "Help & FAQs" },
   ];
@@ -65,7 +65,7 @@ test.describe("Navigation", () => {
   test("sidebar settings and FAQs", async ({ page }) => {
     await page.goto("/dashboard");
     await page.getByRole("complementary", { name: "Sidebar" }).getByRole("link", { name: "Settings" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Shipping per order" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Settings" })).toBeVisible();
     await page.getByRole("complementary", { name: "Sidebar" }).getByRole("link", { name: "FAQs" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Help & FAQs" })).toBeVisible();
   });
@@ -74,16 +74,18 @@ test.describe("Navigation", () => {
 test.describe("Empty states", () => {
   test("Dashboard shows no-data CTA", async ({ page }) => {
     await page.goto("/dashboard");
-    await expect(page.getByRole("heading", { name: /No data yet/i })).toBeVisible();
-    const cta = page.getByRole("link", { name: "Go to Imports" });
+    await expect(page.getByRole("heading", { name: /Your store snapshot starts here/i })).toBeVisible();
+    const cta = page.getByRole("link", { name: "Import data" });
     await expect(cta).toBeVisible();
     await expect(cta).toBeEnabled();
   });
 
   test("Trends prompts for Order List", async ({ page }) => {
     await page.goto("/trends");
-    await expect(page.getByRole("heading", { name: "No trends yet" })).toBeVisible();
-    await expect(page.getByText(/Upload your first order list to see performance over time/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "See performance over time" })).toBeVisible();
+    await expect(
+      page.getByText(/Once you upload order data, Trends will show revenue, orders, fees, and momentum/i),
+    ).toBeVisible();
     const cta = page.getByRole("link", { name: "Go to Imports" });
     await expect(cta).toBeVisible();
     await cta.click();
@@ -93,6 +95,9 @@ test.describe("Empty states", () => {
   test("Imports asks for label before upload", async ({ page }) => {
     await page.goto("/data");
     await expect(page.getByText(/Pick a label to upload/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Import your data" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Order List upload" }).getByRole("heading", { name: "1. Order List" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Sales Summary upload" }).getByRole("heading", { name: "2. Sales Summary" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Order List upload" }).getByText("Add your Order List to begin")).toBeVisible();
     await expect(page.getByRole("region", { name: "Sales Summary upload" }).getByText("Add your Sales Summary to continue")).toBeVisible();
   });
@@ -108,7 +113,7 @@ test.describe("Imports flow", () => {
 
     await page.getByTestId("upload-summary-csv").setInputFiles(SUMMARY_VALID);
     await expect(page.getByTitle("summary-valid.csv")).toBeVisible();
-    await expect(page.getByTestId("imports-workspace-headline")).toHaveText(/Data looks good/i);
+    await expect(page.getByTestId("imports-workspace-headline")).toHaveText(/You're ready to go/i);
     await page.getByTestId("imports-status-details").locator("summary").click();
     await expect(page.getByTestId("imports-time-alignment-unknown")).toHaveCount(0);
     await expect(page.getByTestId("imports-time-alignment-lines")).toContainText(/Order List:/i);
@@ -291,7 +296,7 @@ test.describe("Trends with data", () => {
 
   test("empty state when no order imports", async ({ page }) => {
     await page.goto("/trends");
-    await expect(page.getByRole("heading", { name: "No trends yet" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "See performance over time" })).toBeVisible();
   });
 
   test("Trends runs normally when Sales Summary has no dates (uses Order List range)", async ({ page }) => {

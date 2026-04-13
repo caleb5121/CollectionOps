@@ -83,10 +83,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <PageShell maxWidth="wide">
+    <PageShell maxWidth="wide" contentClassName="px-6 pt-5 pb-8 sm:px-8 sm:pt-6 sm:pb-10 lg:px-10">
       <div className="rounded-2xl border border-[color:var(--accent)]/25 bg-gradient-to-br from-[color:var(--accent-soft)] via-white to-emerald-50/40 p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_8px_32px_-12px_rgba(13,148,136,0.12)] dark:border-teal-800/45 dark:from-teal-950/50 dark:via-slate-900/70 dark:to-slate-950/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_40px_-16px_rgba(0,0,0,0.35)] sm:p-5">
         <div className="space-y-2">
-          <h2 className="text-xl font-bold tracking-tight text-[color:var(--accent)] sm:text-2xl dark:text-teal-300">
+          <h2 className="text-2xl font-bold tracking-tight text-[color:var(--accent)] sm:text-3xl dark:text-teal-300">
             Base costs
           </h2>
           {shippingItems.map((item: ShippingItem) => {
@@ -164,7 +164,7 @@ export default function SettingsPage() {
         <p className="text-4xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-slate-50 sm:text-5xl md:text-6xl">
           {totalFormatted}
         </p>
-        <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-400">Shipping per order</p>
+        <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-400">Shipping per order</p>
         <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-500">Used in all profit calculations</p>
         <p className="mt-1 text-[11px] leading-snug text-slate-400 dark:text-slate-500">{TYPICAL_RANGE_LABEL}</p>
         {totalExtreme ? (

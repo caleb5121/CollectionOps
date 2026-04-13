@@ -45,14 +45,14 @@ export default function ThemeToggle() {
 
   return (
     <div
-      className="inline-flex rounded-full bg-slate-200/70 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_2px_8px_-2px_rgba(15,23,42,0.1),0_6px_16px_-4px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/80 dark:bg-slate-800/80 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_4px_14px_-2px_rgba(0,0,0,0.45)] dark:ring-slate-700/80"
+      className="inline-flex rounded-full bg-slate-200/70 p-0.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_1px_3px_-1px_rgba(15,23,42,0.1)] ring-1 ring-slate-200/80 dark:bg-slate-800/80 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_2px_8px_-2px_rgba(0,0,0,0.4)] dark:ring-slate-700/80 sm:p-1"
       role="group"
       aria-label="Theme"
     >
       <button
         type="button"
         onClick={() => setTheme("light")}
-        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+        className={`inline-flex min-h-7 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold transition-all sm:min-h-0 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs ${
           mode === "light"
             ? "bg-white text-slate-900 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_6px_-1px_rgba(15,23,42,0.12),0_4px_12px_-2px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:ring-slate-600/80"
             : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -70,7 +70,7 @@ export default function ThemeToggle() {
       <button
         type="button"
         onClick={() => setTheme("dark")}
-        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+        className={`inline-flex min-h-7 items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold transition-all sm:min-h-0 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs ${
           mode === "dark"
             ? "bg-white text-slate-900 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_6px_-1px_rgba(15,23,42,0.12),0_4px_12px_-2px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/80 dark:bg-slate-700 dark:text-slate-100 dark:shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_4px_12px_-2px_rgba(0,0,0,0.5)] dark:ring-slate-600/80"
             : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"

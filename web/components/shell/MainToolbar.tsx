@@ -27,7 +27,6 @@ export default function MainToolbar() {
   const signInRef = useRef<HTMLDivElement>(null);
 
   const title = useMemo(() => getPageTitle(pathname), [pathname]);
-  const settingsPage = pathname === "/settings";
   const dateLabel = useMemo(() => formatToolbarDate(), []);
 
   useEffect(() => {
@@ -46,11 +45,11 @@ export default function MainToolbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex min-h-[120px] shrink-0 items-center justify-between gap-3 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/90 px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_40px_-12px_rgba(15,23,42,0.14)] dark:border-slate-800/90 dark:from-slate-950 dark:to-slate-900/95 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_4px_16px_-4px_rgba(0,0,0,0.45),0_18px_48px_-16px_rgba(0,0,0,0.4)] sm:gap-4 sm:px-6 lg:px-8">
-      <div className="flex min-h-0 min-w-0 flex-1 items-center gap-3 sm:gap-5">
+    <header className="sticky top-0 z-30 flex min-h-0 shrink-0 items-center justify-between gap-2 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/90 px-3 pt-2 pb-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),0_1px_4px_-1px_rgba(15,23,42,0.06)] dark:border-slate-800/90 dark:from-slate-950 dark:to-slate-900/95 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_2px_8px_-2px_rgba(0,0,0,0.35)] sm:gap-3 sm:px-5 sm:pt-2.5 sm:pb-4 lg:px-8">
+      <div className="flex min-h-0 min-w-0 flex-1 items-center gap-2.5 sm:gap-4">
         <Link
           href="/dashboard"
-          className="inline-flex shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
+          className="inline-flex shrink-0 self-center outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
           aria-label="CollectionOps home"
         >
           <Image
@@ -58,55 +57,49 @@ export default function MainToolbar() {
             alt="CollectionOps"
             width={480}
             height={480}
-            className="block h-[120px] w-auto max-w-[min(17.5rem,42vw)] object-contain object-left"
-            sizes="(max-width: 640px) 160px, 280px"
+            className="block h-9 w-auto max-w-[min(7.5rem,34vw)] object-contain object-left sm:h-10 sm:max-w-[min(9rem,28vw)]"
+            sizes="(max-width: 640px) 120px, 160px"
             priority
             unoptimized
           />
         </Link>
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4">
-          <h1
-            className={
-              settingsPage
-                ? "text-[1.65rem] font-bold tracking-tight text-[color:var(--accent)] sm:text-[1.85rem]"
-                : "text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-[1.65rem]"
-            }
-          >
+        <div className="flex min-h-0 min-w-0 flex-1 flex-nowrap items-center gap-x-3 sm:gap-x-4">
+          <h1 className="min-w-0 truncate text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
             {title}
           </h1>
           <button
             type="button"
-            className="inline-flex items-center gap-1 rounded-lg border border-transparent px-1 py-0.5 text-sm text-slate-500 transition-app hover:border-slate-200 hover:bg-slate-50 hover:text-slate-700 active:scale-[0.98] dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-200"
+            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-transparent px-1.5 py-1 text-sm font-normal text-slate-500 transition-app hover:border-slate-200/90 hover:bg-slate-50 hover:text-slate-600 active:scale-[0.98] dark:text-slate-400 dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-300"
             aria-label="Select date"
           >
             {dateLabel}
-            <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <svg className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <ThemeToggle />
         {user ? (
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="inline-flex min-w-0 max-w-[min(280px,calc(100vw-9rem))] items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white py-1.5 pl-1.5 pr-2 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_8px_-2px_rgba(15,23,42,0.08),0_8px_24px_-8px_rgba(15,23,42,0.1)] ring-1 ring-slate-900/[0.04] transition-app hover:border-slate-300 hover:shadow-[0_1px_0_rgba(255,255,255,0.98)_inset,0_4px_14px_-4px_rgba(15,23,42,0.12)] active:scale-[0.99] dark:border-slate-700/90 dark:bg-slate-900/80 dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45)]"
+              className="inline-flex min-h-9 min-w-0 max-w-[min(280px,calc(100vw-9rem))] items-center gap-2 rounded-lg border border-slate-200/90 bg-white py-1 pl-1 pr-1.5 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_1px_4px_-1px_rgba(15,23,42,0.08)] ring-1 ring-slate-900/[0.04] transition-app hover:border-slate-300 active:scale-[0.99] dark:border-slate-700/90 dark:bg-slate-900/80 dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.4)] sm:min-h-10 sm:gap-2.5 sm:rounded-xl sm:py-1.5 sm:pl-1.5 sm:pr-2"
               title={user.email.trim() ? user.email : accountDisplayName(user)}
             >
-              <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-slate-200 ring-2 ring-white dark:ring-slate-800">
+              <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-slate-200 ring-2 ring-white dark:ring-slate-800 sm:h-9 sm:w-9">
                 {user.avatarDataUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element -- data URL from user upload */
-                  <img src={user.avatarDataUrl} alt="" className="h-full w-full object-cover" width={40} height={40} />
+                  <img src={user.avatarDataUrl} alt="" className="h-full w-full object-cover" width={32} height={32} />
                 ) : (
                   <Image
                     src="/logo.svg"
                     alt=""
-                    width={40}
-                    height={40}
+                    width={36}
+                    height={36}
                     className="h-full w-full object-contain p-1.5 dark:opacity-90"
                     unoptimized
                   />
@@ -163,7 +156,7 @@ export default function MainToolbar() {
                 setSignInOpen((o) => !o);
                 setSignInError(null);
               }}
-              className="rounded-xl border border-slate-200/90 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_2px_8px_-2px_rgba(15,23,42,0.08),0_6px_20px_-6px_rgba(15,23,42,0.1)] ring-1 ring-slate-900/5 transition-app hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700/90 dark:bg-slate-900/85 dark:text-slate-100"
+              className="inline-flex min-h-9 items-center rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_1px_4px_-1px_rgba(15,23,42,0.08)] ring-1 ring-slate-900/5 transition-app hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700/90 dark:bg-slate-900/85 dark:text-slate-100 sm:min-h-10 sm:rounded-xl sm:px-4 sm:py-2"
             >
               Sign In
             </button>
