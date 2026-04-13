@@ -1,12 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconDashboard, IconHelp, IconImports, IconSettings, IconTrends } from "./NavIcons";
-
-/** File must exist under web/public (see next.config images). */
-const BRAND_LOGO_SRC = "/logo.svg";
 
 const primaryNav: { href: string; caption: string; Icon: typeof IconDashboard }[] = [
   { href: "/dashboard", caption: "Dashboard", Icon: IconDashboard },
@@ -64,47 +60,28 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <>
-      <Link
-        href="/dashboard"
-        className="fixed left-2 top-2 z-[60] flex shrink-0 rounded-md transition-opacity hover:opacity-90 active:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40"
-        aria-label="CardOps home"
+    <aside
+      className="fixed inset-y-0 left-0 z-40 flex w-28 shrink-0 flex-col border-r border-slate-200/90 bg-gradient-to-b from-white via-white to-slate-50/95 shadow-[inset_1px_0_0_rgba(255,255,255,0.95),inset_-1px_0_0_rgba(15,23,42,0.04),8px_0_32px_-4px_rgba(15,23,42,0.14),16px_0_48px_-8px_rgba(15,23,42,0.08)] dark:border-slate-800/90 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900/95 dark:shadow-[inset_1px_0_0_rgba(255,255,255,0.06),inset_-1px_0_0_rgba(0,0,0,0.35),10px_0_40px_-6px_rgba(0,0,0,0.55)]"
+      aria-label="Sidebar"
+    >
+      <nav
+        className="flex min-h-0 flex-1 flex-col items-center justify-start gap-6 pt-6"
+        aria-label="Primary"
       >
-        <Image
-          src={BRAND_LOGO_SRC}
-          alt=""
-          width={48}
-          height={48}
-          className="h-12 w-12 shrink-0 object-contain"
-          sizes="48px"
-          priority
-          unoptimized
+        {primaryNav.map(({ href, caption, Icon }) => (
+          <RailLink key={href} href={href} caption={caption} Icon={Icon} active={pathname === href} />
+        ))}
+      </nav>
+
+      <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-5 border-t border-slate-200/70 bg-white/50 px-1 pb-6 pt-5 dark:border-slate-800/70 dark:bg-slate-950/50">
+        <RailLink
+          href="/settings"
+          caption="Settings"
+          Icon={IconSettings}
+          active={pathname === "/settings"}
         />
-      </Link>
-
-      <aside
-        className="fixed inset-y-0 left-0 z-40 flex w-28 shrink-0 flex-col border-r border-slate-200/90 bg-gradient-to-b from-white via-white to-slate-50/95 shadow-[inset_1px_0_0_rgba(255,255,255,0.95),inset_-1px_0_0_rgba(15,23,42,0.04),8px_0_32px_-4px_rgba(15,23,42,0.14),16px_0_48px_-8px_rgba(15,23,42,0.08)] dark:border-slate-800/90 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900/95 dark:shadow-[inset_1px_0_0_rgba(255,255,255,0.06),inset_-1px_0_0_rgba(0,0,0,0.35),10px_0_40px_-6px_rgba(0,0,0,0.55)]"
-        aria-label="Sidebar"
-      >
-        <nav
-          className="flex min-h-0 flex-1 flex-col items-center justify-start gap-6 pt-[4.25rem]"
-          aria-label="Primary"
-        >
-          {primaryNav.map(({ href, caption, Icon }) => (
-            <RailLink key={href} href={href} caption={caption} Icon={Icon} active={pathname === href} />
-          ))}
-        </nav>
-
-        <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-5 border-t border-slate-200/70 bg-white/50 px-1 pb-6 pt-5 dark:border-slate-800/70 dark:bg-slate-950/50">
-          <RailLink
-            href="/settings"
-            caption="Settings"
-            Icon={IconSettings}
-            active={pathname === "/settings"}
-          />
-          <RailLink href="/help" caption="FAQs" Icon={IconHelp} active={pathname === "/help"} />
-        </div>
-      </aside>
-    </>
+        <RailLink href="/help" caption="FAQs" Icon={IconHelp} active={pathname === "/help"} />
+      </div>
+    </aside>
   );
 }

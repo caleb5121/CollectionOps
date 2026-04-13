@@ -8,6 +8,9 @@ import { accountDisplayName, useAuth } from "../AuthProvider";
 import { formatToolbarDate, getPageTitle } from "../../lib/pageTitles";
 import ThemeToggle from "./ThemeToggle";
 
+/** Transparent PNG in web/public — replace the file to update artwork. */
+const HEADER_LOGO_SRC = "/logo.png";
+
 function isPlausibleEmail(s: string): boolean {
   const t = s.trim();
   return t.length > 3 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t);
@@ -43,27 +46,45 @@ export default function MainToolbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex h-[60px] shrink-0 items-center justify-between gap-4 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/90 px-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_40px_-12px_rgba(15,23,42,0.14)] dark:border-slate-800/90 dark:from-slate-950 dark:to-slate-900/95 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_4px_16px_-4px_rgba(0,0,0,0.45),0_18px_48px_-16px_rgba(0,0,0,0.4)] sm:px-8 lg:px-10">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1">
-        <h1
-          className={
-            settingsPage
-              ? "text-[1.65rem] font-bold tracking-tight text-[color:var(--accent)] sm:text-[1.85rem]"
-              : "text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-[1.65rem]"
-          }
+    <header className="sticky top-0 z-30 flex min-h-[120px] shrink-0 items-center justify-between gap-3 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/90 px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_40px_-12px_rgba(15,23,42,0.14)] dark:border-slate-800/90 dark:from-slate-950 dark:to-slate-900/95 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_4px_16px_-4px_rgba(0,0,0,0.45),0_18px_48px_-16px_rgba(0,0,0,0.4)] sm:gap-4 sm:px-6 lg:px-8">
+      <div className="flex min-h-0 min-w-0 flex-1 items-center gap-3 sm:gap-5">
+        <Link
+          href="/dashboard"
+          className="inline-flex shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
+          aria-label="CollectionOps home"
         >
-          {title}
-        </h1>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 rounded-lg border border-transparent px-1 py-0.5 text-sm text-slate-500 transition-app hover:border-slate-200 hover:bg-slate-50 hover:text-slate-700 active:scale-[0.98] dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-200"
-          aria-label="Select date"
-        >
-          {dateLabel}
-          <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+          <Image
+            src={HEADER_LOGO_SRC}
+            alt="CollectionOps"
+            width={480}
+            height={480}
+            className="block h-[120px] w-auto max-w-[min(17.5rem,42vw)] object-contain object-left"
+            sizes="(max-width: 640px) 160px, 280px"
+            priority
+            unoptimized
+          />
+        </Link>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-4">
+          <h1
+            className={
+              settingsPage
+                ? "text-[1.65rem] font-bold tracking-tight text-[color:var(--accent)] sm:text-[1.85rem]"
+                : "text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-[1.65rem]"
+            }
+          >
+            {title}
+          </h1>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 rounded-lg border border-transparent px-1 py-0.5 text-sm text-slate-500 transition-app hover:border-slate-200 hover:bg-slate-50 hover:text-slate-700 active:scale-[0.98] dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-200"
+            aria-label="Select date"
+          >
+            {dateLabel}
+            <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div className="flex shrink-0 items-center gap-3 sm:gap-4">
