@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "../AuthProvider";
+import DevAccessPanel from "./DevAccessPanel";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -128,6 +129,7 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
           </button>
         </form>
       )}
+      <DevAccessPanel />
       {alternate ? (
         <p className="mt-5 text-center text-sm text-slate-600 dark:text-slate-400">
           {alternate.lead}{" "}

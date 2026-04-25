@@ -118,9 +118,9 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
 
         const fromApi = parseInsightsResponseBody(raw);
         if (res.ok && fromApi.length > 0) {
-          let merged = fromApi.slice(0, 4);
+          let merged = fromApi.slice(0, 3);
           if (merged.length < 2) {
-            merged = dedupeInsightLines([...merged, ...buildFallbackInsights(summary)]).slice(0, 4);
+            merged = dedupeInsightLines([...merged, ...buildFallbackInsights(summary)]).slice(0, 3);
           }
           if (merged.length >= 2) {
             list = merged;
@@ -287,10 +287,9 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
   })();
 
   const nextMoveStrategies = [
-    "Price cards competitively to appear in more multi-item carts.",
-    "List playsets or related cards to encourage bundled purchases.",
-    "Focus on inventory depth so buyers can purchase multiple cards from you.",
-    "Avoid over-reliance on very low-value single card sales.",
+    "Keep deep inventory in cards buyers commonly need to complete sets.",
+    "Watch avg net per order, not just gross sales, before scaling volume.",
+    "Use a second date range check to confirm this performance is repeatable.",
   ] as const;
 
   const bodyScrollClass =

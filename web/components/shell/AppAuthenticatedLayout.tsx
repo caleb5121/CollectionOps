@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+
+import { DEV_ACCESS_STORAGE_KEY, isLocalDevelopmentClient } from "@/lib/devAccess";
 
 import { AccountPreferencesProvider, useAccountPreferences } from "../AccountPreferencesProvider";
 import { DataProvider } from "../DataProvider";
@@ -12,6 +15,31 @@ import MainToolbar from "./MainToolbar";
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const { estimatedShippingCostPerOrder } = useSettings();
   const { prefs } = useAccountPreferences();
+
+  useEffect(() => {
+    if (!isLocalDevelopmentClient()) return;
+    let cancelled = false;
+    void fetch("/api/dev-access/status")
+      .then(async (res) => {
+        if (!res.ok) return { active: false };
+        return (await res.json()) as { active?: boolean };
+      })
+      .then(async (data) => {
+        if (cancelled || !data.active) return;
+        const hasProfile = Boolean(localStorage.getItem(DEV_ACCESS_STORAGE_KEY));
+        if (hasProfile) return;
+        await fetch("/api/dev-access/logout", { method: "POST" }).catch(() => {
+          /* ignore */
+        });
+        window.location.replace("/login");
+      })
+      .catch(() => {
+        /* ignore */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <DataProvider

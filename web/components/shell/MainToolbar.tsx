@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { accountDisplayName, useAuth } from "../AuthProvider";
+import { useData } from "../DataProvider";
 import { formatToolbarDate, getPageTitle } from "../../lib/pageTitles";
 import ThemeToggle from "./ThemeToggle";
 
@@ -16,11 +17,31 @@ export default function MainToolbar() {
   const isDashboardPage = pathname === "/dashboard";
   const [demoSandboxActive, setDemoSandboxActive] = useState(false);
   const { user, setUser } = useAuth();
+  const { hasAnyImport, savedImportBatches, trendsValidBatchCount } = useData();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isLocalDevHost, setIsLocalDevHost] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const title = useMemo(() => getPageTitle(pathname), [pathname]);
   const dateLabel = useMemo(() => formatToolbarDate(), []);
+  const dashboardCta = useMemo(() => {
+    if (!isDashboardPage || demoSandboxActive) return null;
+
+    if (!user) {
+      return { label: "Try Demo", href: "/data?demo=1" as const };
+    }
+
+    const hasMultipleHistory = savedImportBatches.length > 1 || trendsValidBatchCount > 1;
+    if (hasMultipleHistory) {
+      return { label: "View Trends", href: "/trends" as const };
+    }
+
+    if (!hasAnyImport) {
+      return { label: "Try Demo", href: "/data?demo=1" as const };
+    }
+
+    return { label: "Import Data", href: "/data" as const };
+  }, [isDashboardPage, demoSandboxActive, user, savedImportBatches.length, trendsValidBatchCount, hasAnyImport]);
 
   useEffect(() => {
     try {
@@ -39,6 +60,19 @@ export default function MainToolbar() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") {
+      setIsLocalDevHost(false);
+      return;
+    }
+    if (typeof window === "undefined") {
+      setIsLocalDevHost(false);
+      return;
+    }
+    const host = window.location.hostname;
+    setIsLocalDevHost(host === "localhost" || host === "127.0.0.1");
   }, []);
 
   return (
@@ -71,6 +105,11 @@ export default function MainToolbar() {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        {isLocalDevHost ? (
+          <span className="hidden rounded-lg border border-fuchsia-300/85 bg-fuchsia-50 px-2 py-1 text-[11px] font-bold tracking-wide text-fuchsia-800 dark:border-fuchsia-700/60 dark:bg-fuchsia-950/35 dark:text-fuchsia-200 sm:inline-flex">
+            DEV MODE
+          </span>
+        ) : null}
         {demoSandboxActive ? (
           <>
             <span className="hidden rounded-lg border border-orange-300/80 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-800 dark:border-orange-800/60 dark:bg-orange-950/40 dark:text-orange-300 sm:inline-flex">
@@ -84,12 +123,12 @@ export default function MainToolbar() {
             </Link>
           </>
         ) : null}
-        {isDashboardPage && !demoSandboxActive ? (
+        {dashboardCta ? (
           <Link
-            href="/data?demo=1"
+            href={dashboardCta.href}
             className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] hover:bg-orange-600 active:scale-[0.99]"
           >
-            Try Demo
+            {dashboardCta.label}
           </Link>
         ) : null}
         <ThemeToggle />

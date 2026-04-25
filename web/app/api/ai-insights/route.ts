@@ -39,16 +39,7 @@ function parseInsightsJson(content: string): string[] | null {
   return null;
 }
 
-/** One sentence only; drops anything after first . ! ? */
-function firstSentenceOnly(s: string): string {
-  const t = s.trim().replace(/\s+/g, " ");
-  if (!t) return t;
-  const cut = t.search(/(?<=[.!?])\s/);
-  if (cut === -1) return t;
-  return t.slice(0, cut).trim();
-}
-
-const MAX_WORDS = 22;
+const MAX_WORDS = 52;
 
 function clampWords(s: string, maxWords: number): string {
   const t = s.trim();
@@ -59,7 +50,7 @@ function clampWords(s: string, maxWords: number): string {
 }
 
 function normalizeInsightLine(raw: string): string {
-  let s = firstSentenceOnly(raw);
+  let s = raw.trim();
   s = s.replace(/\s+/g, " ").trim();
   s = clampWords(s, MAX_WORDS);
   return s.trim();
@@ -77,11 +68,16 @@ function dedupeInsights(list: string[]): string[] {
   return out;
 }
 
-const SYSTEM_PROMPT = `You are a concise business coach for a TCGplayer marketplace seller working from export data.
-Output only the JSON the user message specifies: short insight lines.
-Tone: practical, evaluative, no hype, no generic praise, no filler, no emojis.
-Sellers cannot directly control cart or order size on TCGplayer — never imply they can "make buyers" do anything or "increase order size" as a lever. Prefer influence, positioning, pricing, catalog depth, and verification steps.
-Each line should interpret what the numbers imply or suggest a concrete next check (not narration).`;
+const SYSTEM_PROMPT = `You are a concise coach for trading card marketplace sellers (TCGplayer-style).
+Output only the JSON the user message specifies.
+Write in plain, friendly language that sounds human.
+Never give generic ecommerce advice.
+Never suggest bundles, BOGO, cross-sell funnels, upsell funnels, cart minimums, or "focus on expensive cards only."
+Respect marketplace constraints: buyers often search exact cards and sellers cannot force basket size.
+Prefer these angles: order size, average cart value, many small orders vs fewer larger orders, set-completion behavior, inventory depth, shipping pressure, fee pressure, and repeatability checks.
+Each insight must follow this exact structure in one line:
+"What happened: ... Why it matters: ... Smart next move: ..."
+Use only numbers and fields from the provided JSON summary.`;
 
 function userPrompt(summary: AiInsightsSummaryPayload): string {
   return `Data summary (JSON):
@@ -91,23 +87,26 @@ Return ONLY valid JSON (no markdown, no prose outside JSON):
 {"insights":["...", "..."]}
 
 Strict rules for each string in "insights":
-- Exactly 2 to 4 items total, never more than 4.
-- Exactly one sentence per item.
+- 1 to 3 items total, never more than 3.
+- Exactly one line per item using:
+  "What happened: ... Why it matters: ... Smart next move: ..."
 - Max ${MAX_WORDS} words per sentence (count every word).
+- Keep tone simple and human.
+- Keep each segment short and specific.
 - Do not restate the same dollar amount or percentage in more than one item.
-- No filler ("it appears", "based on the data", "great job", "overall").
-- No hedging stacks; state the point plainly.
-- Prefer coaching: what the metric implies, or what to verify next, using numbers from the JSON only.
-- Never tell the seller to "increase order size", "make customers buy more", set cart minimums, or otherwise imply direct control of buyer carts (TCGplayer constraint). Use "encourage", "influence", "position listings", or "worth checking" instead.
+- Avoid filler ("it appears", "based on the data", "great job", "overall").
+- Never imply direct control of buyer carts or demand.
+- Do not suggest bundles, BOGO, cross-sell, upsell, or cart minimum tactics.
 
 Only reference numbers and categories that appear in the JSON summary (dashboard-era rollups). Do not invent metrics.
 
 Prioritize when the data supports them (skip repeats):
-1) Cost ratio vs gross, or profit at risk
-2) Fees vs estimated shipping (which drags margin more)
-3) Average order value framed as basket size context — suggest listing, pricing, or inventory strategies that can influence carts, not commands to buyers
-4) Net per order (avgNetPerOrder) as a decision threshold
-5) Concentration (topProductsByRevenue) or refunds if clearly material
+1) Many small orders vs fewer larger carts
+2) Average order value with shipping/fee pressure
+3) Set-completion behavior signals and inventory depth opportunities
+4) Net per order (avgNetPerOrder) as decision threshold
+5) Repeatability check (verify across date ranges/imports)
+6) Concentration (topProductsByRevenue) or refunds if material
 
 If the data is thin, stay specific and do not invent trends.`;
 }
@@ -180,7 +179,7 @@ export async function POST(req: Request) {
 
     const normalized = dedupeInsights(
       insights.map((s) => normalizeInsightLine(s)).filter((s) => s.length > 0),
-    ).slice(0, 4);
+    ).slice(0, 3);
     if (normalized.length < 1) {
       devLog("No insights after normalize");
       return NextResponse.json({ error: "too_few_insights" }, { status: 502 });

@@ -198,13 +198,13 @@ function costBasisForRatio(s: AiInsightsSummaryPayload): number | null {
 }
 
 const FALLBACK_FILLERS = [
-  "Next upload: compare cost ratio and basket size to this period so you can tell if margin is improving.",
-  "If net looks off, confirm gross and fee columns in the Sales Summary match the marketplace report before changing prices.",
+  "What happened: This window may be too thin for a strong pattern. Why it matters: One unusual week can mislead decisions. Smart next move: Compare another similar date range before changing pricing.",
+  "What happened: Cost and net signals need a quick sanity check. Why it matters: Wrong fee or shipping assumptions can hide real performance. Smart next move: Reconcile summary totals with the marketplace export.",
 ] as const;
 
 /**
  * Local coaching lines when the AI API is unavailable or returns invalid output.
- * 2–4 bullets: evaluative, actionable, minimal number repetition.
+ * 1–3 bullets: TCG marketplace-specific, evaluative, actionable.
  */
 export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
   const revenue = s.totalRevenue;
@@ -223,28 +223,30 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
 
   if (profit != null && profit < 0 && revenue > 0) {
     lines.push(
-      "Estimated net is negative with your current fee and shipping assumptions. Recheck Settings (shipping per order), then confirm the summary matches what the marketplace actually charged.",
+      "What happened: Estimated net is negative in this window. Why it matters: Shipping and fee drag can erase profit even when sales are active. Smart next move: Recheck shipping settings and confirm reported fees match the marketplace export.",
     );
   }
 
-  if (revenue > 0 && costs != null && costs > 0 && lines.length < 4) {
+  if (revenue > 0 && costs != null && costs > 0 && lines.length < 3) {
     const pct = Math.round((costs / revenue) * 1000) / 10;
     let label: string;
     if (pct < 22) label = "fairly lean";
     else if (pct <= 38) label = "in a normal range";
     else label = "a heavy slice of gross";
     lines.push(
-      `Costs are about ${pct}% of gross sales (fees plus estimated shipping in your net). That is ${label} for marketplace selling.`,
+      `What happened: Costs are about ${pct}% of gross in this period. Why it matters: This ${label} can cap profit per order. Smart next move: Review fee-heavy listings and low-value shipments first.`,
     );
     usedCostRatio = true;
   }
 
-  if (fees > 0 && shipEst > 0 && lines.length < 4) {
+  if (fees > 0 && shipEst > 0 && lines.length < 3) {
     if (fees >= shipEst * 1.12) {
-      lines.push("Fees are the larger drag on profit than estimated shipping for this export.");
+      lines.push(
+        "What happened: Fees are a bigger margin drag than shipping in this export. Why it matters: More orders alone will not fix thin per-order net. Smart next move: Tighten pricing on fee-sensitive cards and monitor avg net per order.",
+      );
     } else if (shipEst >= fees * 1.12) {
       lines.push(
-        "Estimated shipping hits margin harder than fees here. Small changes to fulfillment assumptions move net the most.",
+        "What happened: Shipping pressure is higher than fee pressure in this window. Why it matters: Many low-value single orders can dilute profit fast. Smart next move: Prioritize inventory depth that helps buyers complete more cards per cart.",
       );
     }
   }
@@ -254,22 +256,22 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     aov > 0 &&
     Number.isFinite(aov) &&
     orders >= 1 &&
-    lines.length < 4 &&
+    lines.length < 3 &&
     !usedAovDollars
   ) {
     usedAovDollars = true;
     const a = fmtUsd(aov);
     if (aov < 18) {
       lines.push(
-        `Average order value is ${a}. Bundling, cart minimums, or multi-item incentives usually lift basket size faster than chasing more tiny orders.`,
+        `What happened: Average order value is ${a}, with likely many small single-need orders. Why it matters: Profit per shipment can stay thin despite steady traffic. Smart next move: Expand in-demand low-price inventory so buyers can fill multiple missing cards.`,
       );
     } else if (aov < 30) {
       lines.push(
-        `Average order value is ${a}. Raising it above about $30 would widen profit per shipment without needing more buyers.`,
+        `What happened: Average order value is ${a}, suggesting mixed single-card and multi-card carts. Why it matters: Multi-card carts usually absorb shipping and fees better. Smart next move: Deepen overlapping set inventory so one buyer can find more needed cards.`,
       );
     } else {
       lines.push(
-        `Average order value is ${a}. Keep monitoring cost ratio as volume grows so margin does not slip while baskets look healthy.`,
+        `What happened: Average order value is ${a}, which points to larger carts. Why it matters: Your inventory likely matched several buyer needs in one stop. Smart next move: Repeat this category mix and confirm it holds across another date range.`,
       );
     }
   }
@@ -278,31 +280,31 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     avgNet != null &&
     Number.isFinite(avgNet) &&
     orders >= 1 &&
-    lines.length < 4 &&
+    lines.length < 3 &&
     !usedNetPerOrderDollars
   ) {
     usedNetPerOrderDollars = true;
     lines.push(
-      `Net after costs averages about ${fmtUsd(avgNet)} per order. Use that when judging promos or small price moves.`,
+      `What happened: Net after costs is about ${fmtUsd(avgNet)} per order. Why it matters: This is the cleanest signal of whether current order mix is sustainable. Smart next move: Track this number weekly before making pricing changes.`,
     );
   }
 
-  if (s.refunds != null && s.refunds > 0 && revenue > 0 && lines.length < 4) {
+  if (s.refunds != null && s.refunds > 0 && revenue > 0 && lines.length < 3) {
     const rPct = (s.refunds / revenue) * 100;
     if (rPct >= 2.5) {
       lines.push(
-        `Refunds are about ${Math.round(rPct)}% of gross in this window. If that is unusual, inspect the worst SKUs or fulfillment issues before cutting prices.`,
+        `What happened: Refunds are about ${Math.round(rPct)}% of gross in this window. Why it matters: Returns can quietly erase gains from otherwise healthy sales. Smart next move: Check repeat refund SKUs before adjusting broad pricing.`,
       );
     }
   }
 
   const top = s.topProductsByRevenue[0];
-  if (top && revenue > 0 && lines.length < 4) {
+  if (top && revenue > 0 && lines.length < 3) {
     const share = top.revenue / revenue;
     if (share >= 0.36) {
       const label = safeProductLabel(top.name);
       lines.push(
-        `${label} carries a large share of revenue here. Strong, but thin demand elsewhere raises risk if that line slows.`,
+        `What happened: ${label} drives a large share of revenue. Why it matters: Heavy reliance on one line reduces repeatability if demand shifts. Smart next move: Add nearby inventory buyers often need in the same cart.`,
       );
     }
   }
@@ -311,16 +313,16 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     s.feeRate != null &&
     s.feeRate > 0 &&
     revenue > 0 &&
-    lines.length < 4 &&
+    lines.length < 3 &&
     !usedCostRatio
   ) {
     const fr = (s.feeRate * 100).toFixed(1);
     lines.push(
-      `Effective fee rate is about ${fr}% of gross. Build listing and promo math on that take, not on headline sales.`,
+      `What happened: Effective fee rate is about ${fr}% of gross. Why it matters: Fee pressure sets a hard floor on profitable low-value orders. Smart next move: Audit low-margin cards where fees consume most of each sale.`,
     );
   }
 
-  let out = dedupeInsightLines(lines).slice(0, 4);
+  let out = dedupeInsightLines(lines).slice(0, 3);
 
   let fillerIdx = 0;
   while (out.length < 2 && fillerIdx < FALLBACK_FILLERS.length) {
@@ -330,7 +332,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
 
   if (out.length === 0) {
     return [
-      "Import Order List and Sales Summary to unlock basket size, cost ratio, and per-order net from your own files.",
+      "What happened: No usable order and sales summary signals are available yet. Why it matters: Insights stay generic without marketplace export data. Smart next move: Import Order List and Sales Summary, then rerun insights.",
     ];
   }
 
@@ -338,7 +340,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     out = dedupeInsightLines([...out, FALLBACK_FILLERS[0]]);
   }
 
-  return out.slice(0, 4);
+  return out.slice(0, 3);
 }
 
 /** Parse JSON body from /api/ai-insights: `{ "insights": [...] }` or a raw string array. */

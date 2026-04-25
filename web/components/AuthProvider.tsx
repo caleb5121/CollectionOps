@@ -4,6 +4,8 @@ import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import { ACCOUNT_PREFS_STORAGE_KEY } from "../lib/accountPreferences";
+import { CARDOPS_IMPORT_STORAGE_KEY } from "./DataProvider";
+import { DEV_ACCESS_STORAGE_KEY, type DevAccessKind, isLocalDevelopmentClient } from "../lib/devAccess";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../lib/supabase/client";
 
 /** Single identity: header, Account, and exports all read from this shape. */
@@ -162,6 +164,8 @@ type AuthCtx = {
   setUser: (next: AppUser | null) => void | Promise<void>;
   /** Sends a Supabase magic link / OTP email. `login` does not create new users; `signup` allows new users. */
   sendMagicLink: (email: string, kind: "login" | "signup") => Promise<{ error: string | null }>;
+  /** Localhost-only developer shortcut auth (development only). */
+  devLogin: (kind: DevAccessKind) => Promise<{ error: string | null }>;
   updateProfile: (patch: Partial<Pick<AppUser, "storeName" | "email" | "avatarDataUrl">>) => void;
 };
 
@@ -170,10 +174,58 @@ const AuthContext = createContext<AuthCtx | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUserState] = useState<AppUser | null>(null);
 
+  const loadDevAccessUser = useCallback((): AppUser | null => {
+    if (!isLocalDevelopmentClient()) return null;
+    try {
+      const raw = localStorage.getItem(DEV_ACCESS_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      return normalizeUserRecord(parsed);
+    } catch {
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isLocalDevelopmentClient()) return;
+    let cancelled = false;
+    void fetch("/api/dev-access/status")
+      .then(async (res) => {
+        if (!res.ok) return { active: false };
+        return (await res.json()) as { active?: boolean };
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const active = Boolean(data.active);
+        if (!active) {
+          try {
+            localStorage.removeItem(DEV_ACCESS_STORAGE_KEY);
+          } catch {
+            /* ignore */
+          }
+          return;
+        }
+        const devUser = loadDevAccessUser();
+        if (devUser) {
+          setUserState(devUser);
+          return;
+        }
+        void fetch("/api/dev-access/logout", { method: "POST" }).catch(() => {
+          /* ignore */
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadDevAccessUser]);
+
   useEffect(() => {
     const sb = getSupabaseBrowserClient();
     if (!sb) {
-      setUserState(null);
+      setUserState(loadDevAccessUser());
       return;
     }
 
@@ -185,7 +237,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserState(next);
         persistUserProfile(next);
       } else {
-        setUserState(null);
+        setUserState(loadDevAccessUser());
       }
     });
 
@@ -198,14 +250,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserState(next);
         persistUserProfile(next);
       } else {
-        setUserState(null);
+        setUserState(loadDevAccessUser());
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [loadDevAccessUser]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
@@ -231,6 +283,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const sb = getSupabaseBrowserClient();
       if (sb) {
         await sb.auth.signOut();
+      }
+      if (isLocalDevelopmentClient()) {
+        try {
+          localStorage.removeItem(DEV_ACCESS_STORAGE_KEY);
+        } catch {
+          /* ignore */
+        }
+        try {
+          await fetch("/api/dev-access/logout", { method: "POST" });
+        } catch {
+          /* ignore */
+        }
       }
       clearLegacyAuthSession();
       setUserState(null);
@@ -260,6 +324,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: mapMagicLinkError(error.message ?? "Could not send magic link.", kind) };
   }, []);
 
+  const devLogin = useCallback(async (kind: DevAccessKind) => {
+    if (!isLocalDevelopmentClient()) {
+      return { error: "Developer access is only available on localhost in development." };
+    }
+
+    const profiles: Record<DevAccessKind, AppUser> = {
+      caleb: {
+        storeName: "Caleb Card Ops",
+        email: "caleb.firebaugh@gmail.com",
+        avatarDataUrl: null,
+        joinedAtIso: new Date().toISOString(),
+      },
+      empty: {
+        storeName: "New Test Store",
+        email: "dev-empty-user@localhost.test",
+        avatarDataUrl: null,
+        joinedAtIso: new Date().toISOString(),
+      },
+      demo: {
+        storeName: "Demo Data Store",
+        email: "dev-demo-user@localhost.test",
+        avatarDataUrl: null,
+        joinedAtIso: new Date().toISOString(),
+      },
+    };
+
+    try {
+      const res = await fetch("/api/dev-access/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind }),
+      });
+      if (!res.ok) {
+        return { error: "Could not start dev access session." };
+      }
+      const profile = profiles[kind];
+      if (kind === "empty") {
+        localStorage.removeItem(CARDOPS_IMPORT_STORAGE_KEY);
+      }
+      setUserState(profile);
+      persistUserProfile(profile);
+      localStorage.setItem(DEV_ACCESS_STORAGE_KEY, JSON.stringify(profile));
+      return { error: null };
+    } catch {
+      return { error: "Could not start dev access session." };
+    }
+  }, []);
+
   const updateProfile = useCallback(
     (patch: Partial<Pick<AppUser, "storeName" | "email" | "avatarDataUrl">>) => {
       setUserState((prev) => {
@@ -280,7 +392,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <AuthContext.Provider value={{ user, setUser, sendMagicLink, updateProfile }}>
+    <AuthContext.Provider value={{ user, setUser, sendMagicLink, devLogin, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

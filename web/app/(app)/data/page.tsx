@@ -494,25 +494,26 @@ function UploadZone({
 const DEMO_OPTIONS = [
   {
     id: "low" as const,
-    label: "Low Volume",
+    label: "Low Margin Month",
     orderFile: "sample_low_month_orders.csv",
     salesFile: "sample_low_month_sales_v2.csv",
   },
   {
     id: "standard" as const,
-    label: "Standard",
+    label: "Standard Store Month",
     orderFile: "sample_standard_month_orders.csv",
     salesFile: "sample_standard_month_sales_v2.csv",
   },
   {
     id: "peak" as const,
-    label: "Peak Month",
+    label: "High Volume Month",
     orderFile: "sample_peak_month_orders.csv",
     salesFile: "sample_peak_month_sales_v2.csv",
   },
 ] as const;
 
 type DemoSetId = (typeof DEMO_OPTIONS)[number]["id"] | "";
+const DEMO_LOADING_LINES = ["Loading sample orders...", "Calculating fees...", "Building dashboard..."] as const;
 
 export default function DataPage() {
   const searchParams = useSearchParams();
@@ -562,6 +563,7 @@ export default function DataPage() {
   const [importSuccessFlash, setImportSuccessFlash] = useState(false);
   const [demoSetId, setDemoSetId] = useState<DemoSetId>("");
   const [demoLoading, setDemoLoading] = useState(false);
+  const [demoLoadingStep, setDemoLoadingStep] = useState(0);
   const demoLoadInFlightRef = useRef(false);
   const demoSessionInitializedRef = useRef(false);
   const prevDemoModeRef = useRef(false);
@@ -584,6 +586,7 @@ export default function DataPage() {
 
     demoLoadInFlightRef.current = true;
     setDemoLoading(true);
+    setDemoLoadingStep(0);
     try {
       resetAll();
       const [ordersRes, salesRes] = await Promise.all([
@@ -607,8 +610,17 @@ export default function DataPage() {
     } finally {
       demoLoadInFlightRef.current = false;
       setDemoLoading(false);
+      setDemoLoadingStep(0);
     }
   }, [demoSetId, handleFile, isDemoMode, orderImports, resetAll, summaryImports]);
+
+  useEffect(() => {
+    if (!demoLoading) return;
+    const id = window.setInterval(() => {
+      setDemoLoadingStep((prev) => (prev < DEMO_LOADING_LINES.length - 1 ? prev + 1 : prev));
+    }, 800);
+    return () => window.clearInterval(id);
+  }, [demoLoading]);
 
   const handleExitDemoMode = useCallback(() => {
     demoLoadInFlightRef.current = false;
@@ -1134,7 +1146,7 @@ export default function DataPage() {
               </button>
             </div>
             <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-              Pick a sample month to see how CollectionOps works.
+              Choose a sample month, then click View Demo Dashboard.
             </p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
               <div className="min-w-0 flex-1 sm:max-w-md">
@@ -1164,7 +1176,7 @@ export default function DataPage() {
                 onClick={() => void handleDemoLoad()}
                 className="inline-flex shrink-0 items-center justify-center rounded-xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-orange-600 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-orange-500"
               >
-                {demoLoading ? "Loading…" : "Load demo"}
+                {demoLoading ? DEMO_LOADING_LINES[demoLoadingStep] : "View Demo Dashboard"}
               </button>
             </div>
           </section>
@@ -1590,17 +1602,30 @@ export default function DataPage() {
                       disabled={savingForDashboard}
                       className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
                     >
-                      {savingForDashboard ? "Saving…" : "Continue to Dashboard"}
+                      {savingForDashboard ? "Saving…" : "View Dashboard Results"}
                     </button>
-                    {canAddAnotherGame ? (
+                    {canAddAnotherGame && !isDemoMode ? (
                       <button
                         type="button"
                         data-testid="imports-add-another-game-button"
                         onClick={() => handleAddAnotherGame()}
                         className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
-                        Save &amp; continue
+                        Save Batch For Later
                       </button>
+                    ) : null}
+                    {canAddAnotherGame && !isDemoMode ? (
+                      <p className="mx-auto w-full max-w-md text-center text-xs text-slate-500 dark:text-slate-400">
+                        Save this batch now and combine future uploads later.
+                      </p>
+                    ) : null}
+                    {isDemoMode ? (
+                      <Link
+                        href="/data?demo=1"
+                        className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        Try Another Demo Month
+                      </Link>
                     ) : null}
                     <button
                       type="button"
