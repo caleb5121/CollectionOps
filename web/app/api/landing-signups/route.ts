@@ -16,9 +16,7 @@ const DATA_DIR = path.join(process.cwd(), ".local-data");
 const DATA_FILE = path.join(DATA_DIR, "landing-signups.json");
 const SUPABASE_TABLE = "landing_signups";
 const NOTIFICATION_TO = "bt2026@brickthread.com";
-const RUNTIME = "nodejs";
-
-export const runtime = RUNTIME;
+export const runtime = "nodejs";
 
 let writeQueue: Promise<void> = Promise.resolve();
 
@@ -30,14 +28,15 @@ async function readSignups(): Promise<LandingSignup[]> {
     return parsed
       .filter((item) => item && typeof item === "object")
       .map((item) => {
-        const row = item as { email?: unknown; firstName?: unknown; createdAt?: unknown };
+        const row = item as { email?: unknown; firstName?: unknown; source?: unknown; createdAt?: unknown };
         return {
           email: typeof row.email === "string" ? row.email : "",
           firstName: typeof row.firstName === "string" ? row.firstName : undefined,
+          source: typeof row.source === "string" && row.source.trim() ? row.source.trim() : "landing_get_updates",
           createdAt: typeof row.createdAt === "string" ? row.createdAt : "",
         };
       })
-      .filter((item) => item.email && item.createdAt);
+      .filter((item) => item.email && item.source && item.createdAt);
   } catch {
     return [];
   }
