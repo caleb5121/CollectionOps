@@ -256,7 +256,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         shouldCreateUser: kind === "signup",
       },
     });
-    return { error: error?.message ?? null };
+    if (!error) return { error: null };
+    return { error: mapMagicLinkError(error.message ?? "Could not send magic link.", kind) };
   }, []);
 
   const updateProfile = useCallback(
@@ -289,4 +290,18 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
+}
+
+function mapMagicLinkError(message: string, kind: "login" | "signup"): string {
+  const m = message.toLowerCase();
+
+  if (m.includes("too many") || m.includes("rate limit") || m.includes("security purposes")) {
+    return "Too many emails sent. Please wait a few minutes and try again.";
+  }
+
+  if (kind === "login" && m.includes("signups not allowed for otp")) {
+    return "No account found. Create an account first.";
+  }
+
+  return message;
 }
