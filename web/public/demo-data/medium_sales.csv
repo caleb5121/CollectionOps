@@ -1,0 +1,2 @@
+GrossSales,OrderCount,ProductAmount,TotalFees,ShippingAmount,TotalRefundAmount,RefundedOrders,RefundedFees,Adjustments,NetSalesMinusFees,NetSales
+830.53,62,760.67,121.39,69.86,0,0,0,0,709.14,709.14

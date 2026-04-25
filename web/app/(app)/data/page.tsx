@@ -495,20 +495,26 @@ const DEMO_OPTIONS = [
   {
     id: "low" as const,
     label: "Low Margin Month",
-    orderFile: "sample_low_month_orders.csv",
-    salesFile: "sample_low_month_sales_v2.csv",
+    orderFile: "low_orders.csv",
+    salesFile: "low_sales.csv",
   },
   {
     id: "standard" as const,
     label: "Standard Store Month",
-    orderFile: "sample_standard_month_orders.csv",
-    salesFile: "sample_standard_month_sales_v2.csv",
+    orderFile: "medium_orders.csv",
+    salesFile: "medium_sales.csv",
   },
   {
     id: "peak" as const,
     label: "High Volume Month",
-    orderFile: "sample_peak_month_orders.csv",
-    salesFile: "sample_peak_month_sales_v2.csv",
+    orderFile: "high_orders.csv",
+    salesFile: "high_sales.csv",
+  },
+  {
+    id: "growth" as const,
+    label: "Growth Month",
+    orderFile: "high_orders.csv",
+    salesFile: "high_sales.csv",
   },
 ] as const;
 
@@ -590,8 +596,8 @@ export default function DataPage() {
     try {
       resetAll();
       const [ordersRes, salesRes] = await Promise.all([
-        fetch(`/demo-data/${meta.orderFile}`),
-        fetch(`/demo-data/${meta.salesFile}`),
+        fetch(`/api/demo-data/${meta.orderFile}`),
+        fetch(`/api/demo-data/${meta.salesFile}`),
       ]);
       if (!ordersRes.ok || !salesRes.ok) {
         throw new Error(`Demo fetch failed (orders ${ordersRes.status}, sales ${salesRes.status})`);
