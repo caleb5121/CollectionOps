@@ -75,8 +75,13 @@ Never give generic ecommerce advice.
 Never suggest bundles, BOGO, cross-sell funnels, upsell funnels, cart minimums, or "focus on expensive cards only."
 Respect marketplace constraints: buyers often search exact cards and sellers cannot force basket size.
 Prefer these angles: order size, average cart value, many small orders vs fewer larger orders, set-completion behavior, inventory depth, shipping pressure, fee pressure, and repeatability checks.
-Each insight must follow this exact structure in one line:
-"What happened: ... Why it matters: ... Smart next move: ..."
+Each insight should follow this internal flow:
+1) what happened
+2) why it matters
+3) smart next move
+But do NOT always print those exact labels. Prefer natural short heading style, then 1-3 short sentences.
+Example style:
+"Small orders added up. Buyers likely found exact cards they needed, including cheap singles. Good signal, but thin orders can get eaten by fees and shipping. Keep listing set-filler cards and watch net left after shipping."
 Use only numbers and fields from the provided JSON summary.`;
 
 function userPrompt(summary: AiInsightsSummaryPayload): string {
@@ -88,8 +93,9 @@ Return ONLY valid JSON (no markdown, no prose outside JSON):
 
 Strict rules for each string in "insights":
 - 1 to 3 items total, never more than 3.
-- Exactly one line per item using:
-  "What happened: ... Why it matters: ... Smart next move: ..."
+- Each item starts with a natural short heading sentence (3-8 words), then brief plain-language coaching.
+- Keep the internal flow: what happened -> why it matters -> smart next move.
+- Do not always print the literal labels "What happened", "Why it matters", "Smart next move".
 - Max ${MAX_WORDS} words per sentence (count every word).
 - Keep tone simple and human.
 - Keep each segment short and specific.

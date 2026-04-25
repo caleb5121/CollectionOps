@@ -9,6 +9,18 @@ const PUBLIC_PREFIX_PATHS = ["/auth/callback"];
 const DEMO_COOKIE = "cardops_public_demo";
 const DEMO_ALLOWED_PATHS = new Set(["/data", "/dashboard"]);
 
+function normalizePathname(pathname: string): string {
+  if (!pathname) return "/";
+  if (pathname === "/") return "/";
+  return pathname.replace(/\/+$/, "") || "/";
+}
+
+function isTruthyDemoParam(value: string | null): boolean {
+  if (!value) return false;
+  const v = value.trim().toLowerCase();
+  return v === "1" || v === "true" || v === "yes";
+}
+
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_EXACT_PATHS.has(pathname)) return true;
   return PUBLIC_PREFIX_PATHS.some((prefix) => pathname.startsWith(prefix));
@@ -26,8 +38,8 @@ function isBypassedPath(pathname: string): boolean {
  * - Logged out + protected app route -> `/login`
  */
 export async function updateSession(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  const wantsDemo = request.nextUrl.searchParams.get("demo") === "1";
+  const pathname = normalizePathname(request.nextUrl.pathname);
+  const wantsDemo = isTruthyDemoParam(request.nextUrl.searchParams.get("demo"));
   const demoCookie = request.cookies.get(DEMO_COOKIE)?.value === "1";
   const isDemoPath = DEMO_ALLOWED_PATHS.has(pathname);
   const shouldAllowDemo = isDemoPath && (wantsDemo || demoCookie);

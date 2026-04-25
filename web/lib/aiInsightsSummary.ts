@@ -198,8 +198,8 @@ function costBasisForRatio(s: AiInsightsSummaryPayload): number | null {
 }
 
 const FALLBACK_FILLERS = [
-  "What happened: This window may be too thin for a strong pattern. Why it matters: One unusual week can mislead decisions. Smart next move: Compare another similar date range before changing pricing.",
-  "What happened: Cost and net signals need a quick sanity check. Why it matters: Wrong fee or shipping assumptions can hide real performance. Smart next move: Reconcile summary totals with the marketplace export.",
+  "This month may be too thin. One unusual week can mislead decisions. Compare another similar date range before changing pricing.",
+  "Quick numbers check first. Wrong fee or shipping assumptions can hide true performance. Reconcile summary totals with the marketplace export.",
 ] as const;
 
 /**
@@ -223,7 +223,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
 
   if (profit != null && profit < 0 && revenue > 0) {
     lines.push(
-      "What happened: Estimated net is negative in this window. Why it matters: Shipping and fee drag can erase profit even when sales are active. Smart next move: Recheck shipping settings and confirm reported fees match the marketplace export.",
+      "Profit flipped negative. Shipping and fee drag can erase gains even with active sales. Recheck shipping settings and confirm reported fees against the marketplace export.",
     );
   }
 
@@ -234,7 +234,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     else if (pct <= 38) label = "in a normal range";
     else label = "a heavy slice of gross";
     lines.push(
-      `What happened: Costs are about ${pct}% of gross in this period. Why it matters: This ${label} can cap profit per order. Smart next move: Review fee-heavy listings and low-value shipments first.`,
+      `Costs are taking ${pct}% of gross. That ${label} can cap profit per order. Review fee-heavy listings and low-value shipments first.`,
     );
     usedCostRatio = true;
   }
@@ -242,11 +242,11 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
   if (fees > 0 && shipEst > 0 && lines.length < 3) {
     if (fees >= shipEst * 1.12) {
       lines.push(
-        "What happened: Fees are a bigger margin drag than shipping in this export. Why it matters: More orders alone will not fix thin per-order net. Smart next move: Tighten pricing on fee-sensitive cards and monitor avg net per order.",
+        "Fees are eating the little wins. More orders alone will not fix thin per-order net. Tighten pricing on fee-sensitive cards and monitor avg net per order.",
       );
     } else if (shipEst >= fees * 1.12) {
       lines.push(
-        "What happened: Shipping pressure is higher than fee pressure in this window. Why it matters: Many low-value single orders can dilute profit fast. Smart next move: Prioritize inventory depth that helps buyers complete more cards per cart.",
+        "Shipping pressure is heavier here. Many low-value single orders can dilute profit fast. Prioritize inventory depth that helps buyers complete more cards per cart.",
       );
     }
   }
@@ -263,15 +263,15 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     const a = fmtUsd(aov);
     if (aov < 18) {
       lines.push(
-        `What happened: Average order value is ${a}, with likely many small single-need orders. Why it matters: Profit per shipment can stay thin despite steady traffic. Smart next move: Expand in-demand low-price inventory so buyers can fill multiple missing cards.`,
+        `Small orders added up. Average order value is ${a}, likely from single-need buyers. Keep listing in-demand low-price set fillers, then watch net left after shipping.`,
       );
     } else if (aov < 30) {
       lines.push(
-        `What happened: Average order value is ${a}, suggesting mixed single-card and multi-card carts. Why it matters: Multi-card carts usually absorb shipping and fees better. Smart next move: Deepen overlapping set inventory so one buyer can find more needed cards.`,
+        `Mixed cart sizes showed up. Average order value is ${a}, with both single-card and multi-card behavior. Deepen overlapping set inventory so one buyer can find more needed cards.`,
       );
     } else {
       lines.push(
-        `What happened: Average order value is ${a}, which points to larger carts. Why it matters: Your inventory likely matched several buyer needs in one stop. Smart next move: Repeat this category mix and confirm it holds across another date range.`,
+        `Your inventory depth helped. Average order value is ${a}, which points to larger carts. Repeat this category mix and confirm it holds across another date range.`,
       );
     }
   }
@@ -285,7 +285,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
   ) {
     usedNetPerOrderDollars = true;
     lines.push(
-      `What happened: Net after costs is about ${fmtUsd(avgNet)} per order. Why it matters: This is the cleanest signal of whether current order mix is sustainable. Smart next move: Track this number weekly before making pricing changes.`,
+      `Net per order is your truth signal. You are averaging about ${fmtUsd(avgNet)} after costs per order. Track this weekly before making pricing changes.`,
     );
   }
 
@@ -293,7 +293,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     const rPct = (s.refunds / revenue) * 100;
     if (rPct >= 2.5) {
       lines.push(
-        `What happened: Refunds are about ${Math.round(rPct)}% of gross in this window. Why it matters: Returns can quietly erase gains from otherwise healthy sales. Smart next move: Check repeat refund SKUs before adjusting broad pricing.`,
+        `Refunds are quietly trimming gains. Refunds are about ${Math.round(rPct)}% of gross in this window. Check repeat refund SKUs before changing broad pricing.`,
       );
     }
   }
@@ -304,7 +304,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
     if (share >= 0.36) {
       const label = safeProductLabel(top.name);
       lines.push(
-        `What happened: ${label} drives a large share of revenue. Why it matters: Heavy reliance on one line reduces repeatability if demand shifts. Smart next move: Add nearby inventory buyers often need in the same cart.`,
+        `${label} is carrying a lot. Heavy reliance on one line can reduce repeatability if demand shifts. Add nearby inventory buyers often need in the same cart.`,
       );
     }
   }
@@ -318,7 +318,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
   ) {
     const fr = (s.feeRate * 100).toFixed(1);
     lines.push(
-      `What happened: Effective fee rate is about ${fr}% of gross. Why it matters: Fee pressure sets a hard floor on profitable low-value orders. Smart next move: Audit low-margin cards where fees consume most of each sale.`,
+      `Fee pressure is setting the floor. Effective fee rate is about ${fr}% of gross. Audit low-margin cards where fees consume most of each sale.`,
     );
   }
 
@@ -332,7 +332,7 @@ export function buildFallbackInsights(s: AiInsightsSummaryPayload): string[] {
 
   if (out.length === 0) {
     return [
-      "What happened: No usable order and sales summary signals are available yet. Why it matters: Insights stay generic without marketplace export data. Smart next move: Import Order List and Sales Summary, then rerun insights.",
+      "No usable signals yet. Insights stay generic without order and sales summary exports. Import both files, then rerun insights.",
     ];
   }
 
