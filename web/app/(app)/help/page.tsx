@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import Card from "../../../components/Card";
 import PageShell from "../../../components/PageShell";
 
-const SUPPORT_EMAIL = "BrickThread@gmail.com";
+const SUPPORT_EMAIL = "bt2026@brickthread.com";
 
 const SECTION_SCROLL_HIGHLIGHT_MS = 2000;
 const SECTION_SCROLL_HIGHLIGHT_DELAY_MS = 600;

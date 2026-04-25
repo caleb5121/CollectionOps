@@ -182,3 +182,120 @@ body {
     animation: none !important;
   }
 }
+
+/* --- Landing page: animated mesh gradient + subtle text drift --- */
+@keyframes landing-gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 40%;
+  }
+  50% {
+    background-position: 100% 60%;
+  }
+}
+
+@keyframes landing-aurora-drift {
+  0%,
+  100% {
+    transform: translate(-3%, -2%) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(4%, 3%) scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes landing-shimmer {
+  0% {
+    background-position: 120% center;
+  }
+  100% {
+    background-position: -120% center;
+  }
+}
+
+@keyframes landing-gentle-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Full-bleed hero only — use on the top landing section (not the whole page). */
+.landing-hero-surface {
+  position: relative;
+  isolation: isolate;
+  background-color: #020617;
+  background-image: linear-gradient(
+      132deg,
+      #020617 0%,
+      #0c1e2e 18%,
+      #0e3a4f 38%,
+      #134e4a 52%,
+      #164e63 68%,
+      #0f2847 85%,
+      #020617 100%
+    ),
+    radial-gradient(ellipse 100% 80% at 10% 20%, rgba(34, 211, 238, 0.14), transparent 55%),
+    radial-gradient(ellipse 90% 70% at 90% 80%, rgba(59, 130, 246, 0.12), transparent 50%);
+  background-size: 240% 240%, 100% 100%, 100% 100%;
+  background-blend-mode: normal, screen, screen;
+  animation: landing-gradient-shift 24s ease-in-out infinite;
+}
+
+.landing-hero-surface::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 55% 45% at 30% 35%, rgba(45, 212, 191, 0.12), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 75% 65%, rgba(56, 189, 248, 0.1), transparent 50%);
+  mix-blend-mode: screen;
+  animation: landing-aurora-drift 32s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-surface {
+    animation: none !important;
+    background-size: 100% 100%, 100% 100%, 100% 100% !important;
+  }
+  .landing-hero-surface::before {
+    animation: none !important;
+    transform: none !important;
+  }
+  .landing-headline-shimmer {
+    animation: none !important;
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    color: #f8fafc !important;
+  }
+  .landing-subtle-float {
+    animation: none !important;
+  }
+}
+
+.landing-headline-shimmer {
+  background-image: linear-gradient(
+    105deg,
+    #f8fafc 0%,
+    #f8fafc 38%,
+    #cffafe 50%,
+    #f8fafc 62%,
+    #f8fafc 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: landing-shimmer 10s ease-in-out infinite;
+}
+
+.landing-subtle-float {
+  animation: landing-gentle-y 5s ease-in-out infinite;
+}

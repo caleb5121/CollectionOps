@@ -75,6 +75,7 @@ export type ImportDuplicateFilenameNotice = {
 
 /** Persisted import payload. All pages read via `useData()`; storage uses this key only. */
 export const CARDOPS_IMPORT_STORAGE_KEY = "cardops-import-data-v1";
+const DEMO_SANDBOX_SESSION_KEY = "cardops-demo-sandbox";
 
 type PersistedImportStateV1 = {
   version: 1;
@@ -168,6 +169,11 @@ function loadImportStateFromStorage(): PersistedImportStateV3 | null {
 
 function saveImportStateToStorage(state: PersistedImportStateV3): void {
   if (typeof window === "undefined") return;
+  try {
+    if (sessionStorage.getItem(DEMO_SANDBOX_SESSION_KEY) === "1") return;
+  } catch {
+    // ignore; continue to best-effort save
+  }
   try {
     localStorage.setItem(CARDOPS_IMPORT_STORAGE_KEY, JSON.stringify(state));
   } catch {

@@ -1,7 +1,10 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useState } from "react";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+
 import { ACCOUNT_PREFS_STORAGE_KEY } from "../lib/accountPreferences";
+import { getSupabaseBrowserClient, isSupabaseConfigured } from "../lib/supabase/client";
 
 /** Single identity: header, Account, and exports all read from this shape. */
 export type AppUser = {
@@ -13,17 +16,13 @@ export type AppUser = {
 };
 
 export const USER_PROFILE_STORAGE_KEY = "cardops-user-profile-v1";
+/** Legacy local session key — cleared when Supabase session is active. */
 export const AUTH_SESSION_STORAGE_KEY = "cardops-auth-session-v1";
 const LEGACY_LOCAL_PROFILE_KEY = "cardops-local-profile-v1";
 
 /** Former `DEFAULT_APP_USER` seed — remove so it is not treated as a real profile. */
 const LEGACY_DEMO_STORE = "Sophia Card Shop";
 const LEGACY_DEMO_EMAIL = "sophia.martinez@northridgecards.example";
-
-export type AuthSessionV1 = {
-  authEmail: string;
-  signedInAtIso: string;
-};
 
 /** Human-readable label from the email local-part when no store name is set. */
 export function accountDisplayName(user: AppUser): string {
@@ -41,47 +40,13 @@ export function fallbackLabelFromEmail(email: string): string {
   return spaced || "Account";
 }
 
-function loadAuthSession(): AuthSessionV1 | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-    if (!raw) return null;
-    const o = JSON.parse(raw) as Record<string, unknown>;
-    const authEmail = typeof o.authEmail === "string" ? o.authEmail.trim() : "";
-    const signedInAtIso = typeof o.signedInAtIso === "string" ? o.signedInAtIso : "";
-    if (!authEmail || !signedInAtIso) return null;
-    return { authEmail, signedInAtIso };
-  } catch {
-    return null;
-  }
-}
-
-function persistAuthSession(session: AuthSessionV1): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
-  } catch {
-    /* quota or privacy mode */
-  }
-}
-
-function clearAuthSession(): void {
+function clearLegacyAuthSession(): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
   } catch {
     /* ignore */
   }
-}
-
-function mergeSessionWithProfile(session: AuthSessionV1, profile: AppUser | null): AppUser {
-  const email = session.authEmail.trim();
-  return {
-    storeName: profile?.storeName?.trim() ?? "",
-    email,
-    avatarDataUrl: profile?.avatarDataUrl ?? null,
-    joinedAtIso: profile?.joinedAtIso?.trim() || session.signedInAtIso,
-  };
 }
 
 /** Accept stored JSON; map legacy `displayName` to `storeName`. */
@@ -122,10 +87,7 @@ export function loadUserProfileFromStorage(): AppUser | null {
     const rawUser = localStorage.getItem(USER_PROFILE_STORAGE_KEY);
     if (rawUser) {
       const data = JSON.parse(rawUser) as Record<string, unknown>;
-      if (
-        data.storeName === LEGACY_DEMO_STORE &&
-        data.email === LEGACY_DEMO_EMAIL
-      ) {
+      if (data.storeName === LEGACY_DEMO_STORE && data.email === LEGACY_DEMO_EMAIL) {
         localStorage.removeItem(USER_PROFILE_STORAGE_KEY);
       } else {
         const parsed = normalizeUserRecord(data);
@@ -170,17 +132,36 @@ export function loadUserProfileFromStorage(): AppUser | null {
   return null;
 }
 
-function hydrateUserFromStorage(): AppUser | null {
-  const session = loadAuthSession();
-  if (!session) return null;
+function mergeProfileWithSupabaseUser(sbUser: User): AppUser {
+  const email = (sbUser.email ?? "").trim();
   const profile = loadUserProfileFromStorage();
-  return mergeSessionWithProfile(session, profile);
+  const profileEmail = profile?.email?.trim().toLowerCase() ?? "";
+  const sameAccount = !profileEmail || profileEmail === email.toLowerCase();
+
+  const storeName = sameAccount
+    ? (profile?.storeName?.trim() ?? "")
+    : typeof sbUser.user_metadata?.store_name === "string"
+      ? String(sbUser.user_metadata.store_name).trim()
+      : "";
+
+  const avatarDataUrl = sameAccount ? (profile?.avatarDataUrl ?? null) : null;
+
+  const joinedAtIso =
+    (sameAccount && profile?.joinedAtIso?.trim()) || sbUser.created_at || new Date().toISOString();
+
+  return {
+    storeName,
+    email,
+    avatarDataUrl,
+    joinedAtIso,
+  };
 }
 
 type AuthCtx = {
   user: AppUser | null;
-  setUser: (user: AppUser | null) => void;
-  signInWithEmail: (email: string) => void;
+  setUser: (next: AppUser | null) => void | Promise<void>;
+  /** Sends a Supabase magic link / OTP email. `login` does not create new users; `signup` allows new users. */
+  sendMagicLink: (email: string, kind: "login" | "signup") => Promise<{ error: string | null }>;
   updateProfile: (patch: Partial<Pick<AppUser, "storeName" | "email" | "avatarDataUrl">>) => void;
 };
 
@@ -189,77 +170,93 @@ const AuthContext = createContext<AuthCtx | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUserState] = useState<AppUser | null>(null);
 
-  useLayoutEffect(() => {
-    const hydrated = hydrateUserFromStorage();
-    /* eslint-disable react-hooks/set-state-in-effect -- restore session + profile before paint */
-    setUserState(hydrated);
-    /* eslint-enable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    const sb = getSupabaseBrowserClient();
+    if (!sb) {
+      setUserState(null);
+      return;
+    }
+
+    void sb.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
+      const { session } = data;
+      if (session?.user) {
+        clearLegacyAuthSession();
+        const next = mergeProfileWithSupabaseUser(session.user);
+        setUserState(next);
+        persistUserProfile(next);
+      } else {
+        setUserState(null);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = sb.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+      if (session?.user) {
+        clearLegacyAuthSession();
+        const next = mergeProfileWithSupabaseUser(session.user);
+        setUserState(next);
+        persistUserProfile(next);
+      } else {
+        setUserState(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
     function onStorage(e: StorageEvent) {
-      if (!e.newValue) {
-        if (e.key === AUTH_SESSION_STORAGE_KEY || e.key === USER_PROFILE_STORAGE_KEY) {
-          setUserState(hydrateUserFromStorage());
+      if (e.key !== USER_PROFILE_STORAGE_KEY) return;
+      const sb = getSupabaseBrowserClient();
+      if (!sb) return;
+      void sb.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
+        const { session } = data;
+        if (session?.user) {
+          setUserState(mergeProfileWithSupabaseUser(session.user));
         }
-        return;
-      }
-      if (e.key === USER_PROFILE_STORAGE_KEY) {
-        try {
-          const session = loadAuthSession();
-          if (!session) return;
-          const parsed = normalizeUserRecord(JSON.parse(e.newValue) as Record<string, unknown>);
-          setUserState(mergeSessionWithProfile(session, parsed));
-        } catch {
-          /* ignore */
-        }
-        return;
-      }
-      if (e.key === AUTH_SESSION_STORAGE_KEY) {
-        try {
-          const o = JSON.parse(e.newValue) as Record<string, unknown>;
-          const authEmail = typeof o.authEmail === "string" ? o.authEmail.trim() : "";
-          const signedInAtIso = typeof o.signedInAtIso === "string" ? o.signedInAtIso : "";
-          if (!authEmail || !signedInAtIso) {
-            setUserState(null);
-            return;
-          }
-          const session: AuthSessionV1 = { authEmail, signedInAtIso };
-          const profile = loadUserProfileFromStorage();
-          setUserState(mergeSessionWithProfile(session, profile));
-        } catch {
-          /* ignore */
-        }
-      }
+      });
     }
+
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const setUser = useCallback((next: AppUser | null) => {
-    setUserState(next);
-    if (next) {
-      const prev = loadAuthSession();
-      const signedInAtIso = prev?.signedInAtIso ?? new Date().toISOString();
-      persistAuthSession({ authEmail: next.email.trim(), signedInAtIso });
-      persistUserProfile(next);
-    } else {
-      clearAuthSession();
+  const setUser = useCallback(async (next: AppUser | null) => {
+    if (next === null) {
+      const sb = getSupabaseBrowserClient();
+      if (sb) {
+        await sb.auth.signOut();
+      }
+      clearLegacyAuthSession();
+      setUserState(null);
+      return;
     }
-  }, []);
-
-  const signInWithEmail = useCallback((emailRaw: string) => {
-    const authEmail = emailRaw.trim();
-    if (!authEmail) return;
-    const prev = loadAuthSession();
-    const signedInAtIso =
-      prev && prev.authEmail === authEmail ? prev.signedInAtIso : new Date().toISOString();
-    const session: AuthSessionV1 = { authEmail, signedInAtIso };
-    persistAuthSession(session);
-    const profile = loadUserProfileFromStorage();
-    const next = mergeSessionWithProfile(session, profile);
     setUserState(next);
     persistUserProfile(next);
+  }, []);
+
+  const sendMagicLink = useCallback(async (emailRaw: string, kind: "login" | "signup") => {
+    const sb = getSupabaseBrowserClient();
+    if (!sb) {
+      return {
+        error:
+          "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your environment.",
+      };
+    }
+    const email = emailRaw.trim();
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        shouldCreateUser: kind === "signup",
+      },
+    });
+    return { error: error?.message ?? null };
   }, []);
 
   const updateProfile = useCallback(
@@ -271,14 +268,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const trimmed = patch.email.trim();
           next = {
             ...next,
-            email: trimmed || prev.email.trim() || loadAuthSession()?.authEmail.trim() || "",
+            email: trimmed || prev.email.trim() || "",
           };
         }
         persistUserProfile(next);
-        const sess = loadAuthSession();
-        if (sess && next.email.trim()) {
-          persistAuthSession({ authEmail: next.email.trim(), signedInAtIso: sess.signedInAtIso });
-        }
         return next;
       });
     },
@@ -286,7 +279,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <AuthContext.Provider value={{ user, setUser, signInWithEmail, updateProfile }}>
+    <AuthContext.Provider value={{ user, setUser, sendMagicLink, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

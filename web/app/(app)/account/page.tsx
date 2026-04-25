@@ -12,7 +12,7 @@ import ThemeToggle from "../../../components/shell/ThemeToggle";
 import { GAME_FILTER_OPTIONS, type GameFilterValue } from "../../../lib/games";
 import { aggregateWorkspaceDateRange, formatImportRangeLabel } from "../../../lib/importMetadata";
 import type { DateFormatId } from "../../../lib/accountPreferences";
-import { resizeImageToJpegDataUrl } from "../../../lib/profileImage";
+import LogoEditorModal, { type LogoEditorSource } from "../../../components/LogoEditorModal";
 
 type ProfileDraft = Pick<AppUser, "storeName" | "email" | "avatarDataUrl">;
 
@@ -167,6 +167,8 @@ export default function AccountPage() {
   const [editMode, setEditMode] = useState(false);
   const [profileNotice, setProfileNotice] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const [logoEditorOpen, setLogoEditorOpen] = useState(false);
+  const [logoEditorSource, setLogoEditorSource] = useState<LogoEditorSource | null>(null);
 
   const totalImportFiles = effectiveOrderImports.length + effectiveSummaryImports.length;
 
@@ -279,27 +281,40 @@ export default function AccountPage() {
     window.setTimeout(() => setProfileNotice(null), 4000);
   };
 
-  const onPhotoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onPhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!user) return;
     if (!file?.type.startsWith("image/")) return;
-    const dataUrl = await resizeImageToJpegDataUrl(file);
-    if (!dataUrl) {
-      setProfileNotice("Could not use that image. Try a smaller JPG or PNG.");
-      window.setTimeout(() => setProfileNotice(null), 4500);
-      return;
-    }
+    setLogoEditorSource({ kind: "file", file });
+    setLogoEditorOpen(true);
+  };
+
+  const closeLogoEditor = () => {
+    setLogoEditorOpen(false);
+    setLogoEditorSource(null);
+  };
+
+  const handleLogoEditorSave = (dataUrl: string) => {
+    if (!user) return;
     updateProfile({ avatarDataUrl: dataUrl });
     setDraft((d) => ({ ...d, avatarDataUrl: dataUrl }));
     setProfileNotice("Photo updated.");
     window.setTimeout(() => setProfileNotice(null), 3500);
   };
 
+  const openLogoEditorExisting = () => {
+    const src = editMode ? draft.avatarDataUrl : user?.avatarDataUrl;
+    if (!user || !src) return;
+    setLogoEditorSource({ kind: "dataUrl", dataUrl: src });
+    setLogoEditorOpen(true);
+  };
+
   const avatarSrc = editMode ? draft.avatarDataUrl : user?.avatarDataUrl;
 
   return (
     <PageShell maxWidth="wide">
+      <LogoEditorModal open={logoEditorOpen} source={logoEditorSource} onClose={closeLogoEditor} onSave={handleLogoEditorSave} />
       <div className="space-y-7">
         {/* 1. Data / workspace summary */}
         <Card className="border-[color:var(--accent)]/20 bg-gradient-to-br from-[color:var(--accent-soft)]/50 via-white to-sky-50/40 p-5 shadow-sm dark:via-slate-900/80 dark:to-slate-950/90 sm:p-6">
@@ -387,7 +402,7 @@ export default function AccountPage() {
               {profileNotice}
             </p>
           ) : null}
-          <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-start">
+          <div id="logo-editor" className="mt-4 flex scroll-mt-24 flex-col gap-5 sm:flex-row sm:items-start">
             <div className="flex shrink-0 flex-col items-center gap-2 sm:items-start">
               <div className="relative h-16 w-16 overflow-hidden rounded-full border border-slate-200/90 bg-gradient-to-br from-slate-50 to-slate-100 shadow-md ring-2 ring-white dark:border-slate-600/80 dark:from-slate-800 dark:to-slate-900 dark:ring-slate-900/80">
                 {avatarSrc ? (
@@ -404,14 +419,25 @@ export default function AccountPage() {
                   />
                 )}
               </div>
-              <button
-                type="button"
-                disabled={!user}
-                onClick={() => photoInputRef.current?.click()}
-                className={`${secondaryBtnClass} text-xs disabled:opacity-50`}
-              >
-                Change photo
-              </button>
+              <div className="flex flex-col items-center gap-1.5 sm:items-start">
+                <button
+                  type="button"
+                  disabled={!user}
+                  onClick={() => photoInputRef.current?.click()}
+                  className={`${secondaryBtnClass} text-xs disabled:opacity-50`}
+                >
+                  Change photo
+                </button>
+                {user && avatarSrc ? (
+                  <button
+                    type="button"
+                    onClick={openLogoEditorExisting}
+                    className="text-xs font-semibold text-[color:var(--accent)] hover:underline dark:text-teal-400"
+                  >
+                    Edit logo
+                  </button>
+                ) : null}
+              </div>
             </div>
             <div className="min-w-0 flex-1">
               {!user ? (

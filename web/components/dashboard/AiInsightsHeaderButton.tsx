@@ -15,9 +15,15 @@ type Props = {
   /** `hero` = light button on dark dashboard card; `toolbar` = previous shell placement. */
   variant?: "toolbar" | "hero";
   className?: string;
+  /** `inline` expands content in the page (no blur). `modal` = overlay. */
+  presentation?: "modal" | "inline";
 };
 
-export default function AiInsightsHeaderButton({ variant = "toolbar", className = "" }: Props) {
+export default function AiInsightsHeaderButton({
+  variant = "toolbar",
+  className = "",
+  presentation = "modal",
+}: Props) {
   const [open, setOpen] = useState(false);
   const { hasDashboardImport, hasOrderImport, derived } = useData();
 
@@ -67,7 +73,7 @@ export default function AiInsightsHeaderButton({ variant = "toolbar", className 
       <button type="button" onClick={() => setOpen(true)} className={btnClass}>
         View insights
       </button>
-      <AiInsightsModal open={open} onClose={() => setOpen(false)} />
+      <AiInsightsModal open={open} onClose={() => setOpen(false)} presentation={presentation} />
     </>
   );
 }

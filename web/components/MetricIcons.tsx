@@ -1,13 +1,26 @@
 /** Minimal inline icons for KPI rows - 20×20, currentColor. */
 
+/** Sales / “You sold” — small trend line + arrow up. */
 export function IconRevenue({ className = "h-5 w-5" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-      <path d="M4 14V10h3v4H4zm5-6V4h3v4H9zm5 8v-6h3v6h-3z" />
+    <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden>
+      <path
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.5 14.5L7.5 10l3 2.5L15.5 5"
+      />
+      <path
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12.5 5h3v3"
+      />
     </svg>
   );
 }
 
+/** Orders — envelope. */
 export function IconOrders({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden>
@@ -15,12 +28,13 @@ export function IconOrders({ className = "h-5 w-5" }: { className?: string }) {
         strokeWidth={1.75}
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M5 7h10l-1 9H6L5 7zm2-3h6v3H7V4z"
+        d="M3.5 7.5L10 12l6.5-4.5V15.5H3.5V7.5z"
       />
     </svg>
   );
 }
 
+/** Costs / fees — dollar bill. */
 export function IconCost({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden>
@@ -28,7 +42,13 @@ export function IconCost({ className = "h-5 w-5" }: { className?: string }) {
         strokeWidth={1.75}
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M6 5h8v2H6V5zm0 4h4v4H6V9zm0 6h8v2H6v-2zm8-4h-2v-2h2v2z"
+        d="M5 6.5h10a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1v-5a1 1 0 011-1z"
+      />
+      {/* simple $ */}
+      <path
+        strokeWidth={1.85}
+        strokeLinecap="round"
+        d="M10 7.5v5M8.35 9.2c.35-.45 1-.7 1.65-.7s1.3.25 1.65.7.35 1-.05 1.45-.75.75-1.6.75-1.35.25-1.35.75.35.55 1.05.8 1.65.8s1.3-.25 1.65-.7"
       />
     </svg>
   );

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import PageShell from "../../../components/PageShell";
-import { useData, type ImportChunk } from "../../../components/DataProvider";
+import { CARDOPS_IMPORT_STORAGE_KEY, useData, type ImportChunk } from "../../../components/DataProvider";
 import Card from "../../../components/Card";
 import InfoTooltip from "../../../components/InfoTooltip";
 import { IMPORT_GAME_OPTIONS, type ImportGameId } from "../../../lib/games";
@@ -24,10 +25,14 @@ import type { ImportBatchStatus } from "../../../lib/importSessionBatch";
 import type { CrossFileFinancialConsistency } from "../../../lib/crossFileFinancialCheck";
 import type { ImportTimeAlignment } from "../../../lib/crossFileTimeAlignment";
 import type { ImportLabelMismatch } from "../../../lib/importHardening";
+import { useAuth } from "../../../components/AuthProvider";
+import { upsertCurrentUserStoreData } from "../../../lib/supabase/userStoreData";
 
 const RECOMMENDED_MAX_FILES_UI = 12;
 const IMPORT_GAME_STORAGE_KEY = "cardops-import-selected-game";
 const IMPORT_GAME_CUSTOM_STORAGE_KEY = "cardops-import-custom-label";
+const DEMO_SANDBOX_SESSION_KEY = "cardops-demo-sandbox";
+const DEMO_BACKUP_IMPORT_STATE_KEY = "cardops-demo-backup-import-state";
 
 function formatImportSessionUsd(n: number) {
   return n.toLocaleString(undefined, { style: "currency", currency: "USD" });
@@ -108,6 +113,9 @@ function importTrafficPresentation(input: {
   };
 }
 
+/** Reserved import label for bundled demo CSVs only (never hydrate into normal Imports). */
+const DEMO_GAME_LABEL = "Demo Data";
+
 function readStoredImportLabel(): { choice: ImportGameId | ""; custom: string } {
   if (typeof window === "undefined") return { choice: "", custom: "" };
   try {
@@ -125,6 +133,51 @@ function readStoredImportLabel(): { choice: ImportGameId | ""; custom: string } 
     /* ignore */
   }
   return { choice: "", custom: "" };
+}
+
+function isDemoGameLabelPair(choice: ImportGameId | "", custom: string): boolean {
+  return choice === "Other" && custom.trim() === DEMO_GAME_LABEL;
+}
+
+function purgeDemoGameLabelStorage(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const s = localStorage.getItem(IMPORT_GAME_STORAGE_KEY);
+    const c = localStorage.getItem(IMPORT_GAME_CUSTOM_STORAGE_KEY) ?? "";
+    if (isDemoGameLabelPair(s as ImportGameId | "", c)) {
+      localStorage.removeItem(IMPORT_GAME_STORAGE_KEY);
+      localStorage.removeItem(IMPORT_GAME_CUSTOM_STORAGE_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+function backupRealImportStateForDemo(): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (sessionStorage.getItem(DEMO_BACKUP_IMPORT_STATE_KEY) !== null) return;
+    const raw = localStorage.getItem(CARDOPS_IMPORT_STORAGE_KEY);
+    sessionStorage.setItem(DEMO_BACKUP_IMPORT_STATE_KEY, raw ?? "__empty__");
+  } catch {
+    /* ignore */
+  }
+}
+
+function restoreRealImportStateAfterDemo(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const snap = sessionStorage.getItem(DEMO_BACKUP_IMPORT_STATE_KEY);
+    if (snap === null) return;
+    if (snap === "__empty__") {
+      localStorage.removeItem(CARDOPS_IMPORT_STORAGE_KEY);
+    } else {
+      localStorage.setItem(CARDOPS_IMPORT_STORAGE_KEY, snap);
+    }
+    sessionStorage.removeItem(DEMO_BACKUP_IMPORT_STATE_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 function slotCardStatusLine(imports: ImportChunk[]): string {
@@ -437,11 +490,41 @@ function UploadZone({
   );
 }
 
+/** Built-in demo CSV pairs under /public/demo-data (loaded only in ?demo=1 mode). */
+const DEMO_OPTIONS = [
+  {
+    id: "low" as const,
+    label: "Low Volume",
+    orderFile: "sample_low_month_orders.csv",
+    salesFile: "sample_low_month_sales_v2.csv",
+  },
+  {
+    id: "standard" as const,
+    label: "Standard",
+    orderFile: "sample_standard_month_orders.csv",
+    salesFile: "sample_standard_month_sales_v2.csv",
+  },
+  {
+    id: "peak" as const,
+    label: "Peak Month",
+    orderFile: "sample_peak_month_orders.csv",
+    salesFile: "sample_peak_month_sales_v2.csv",
+  },
+] as const;
+
+type DemoSetId = (typeof DEMO_OPTIONS)[number]["id"] | "";
+
 export default function DataPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const isDemoMode = searchParams.get("demo") === "1";
+  const { user } = useAuth();
+
   const {
     orderImports,
     summaryImports,
     error,
+    handleFile,
     handleFiles,
     removeImportFile,
     resetAll,
@@ -462,6 +545,9 @@ export default function DataPage() {
     removeSessionBatch,
     replaceSessionBatchWithDraft,
     importProgress,
+    derived,
+    estimatedNet,
+    costsForNetDisplay,
   } = useData();
 
   const orderListCalculationReady = draftImportEvaluation.orderListCalculationReady;
@@ -474,8 +560,117 @@ export default function DataPage() {
   const [currentUploadCollapsed, setCurrentUploadCollapsed] = useState(false);
   const [highlightSavedBatchId, setHighlightSavedBatchId] = useState<string | null>(null);
   const [importSuccessFlash, setImportSuccessFlash] = useState(false);
+  const [demoSetId, setDemoSetId] = useState<DemoSetId>("");
+  const [demoLoading, setDemoLoading] = useState(false);
+  const demoLoadInFlightRef = useRef(false);
+  const demoSessionInitializedRef = useRef(false);
+  const prevDemoModeRef = useRef(false);
+  const lastDemoLoadKeyRef = useRef<(typeof DEMO_OPTIONS)[number]["id"] | null>(null);
   const skipImportFlashHydration = useRef(true);
   const prevLastImportMs = useRef<number | null>(null);
+
+  const handleDemoLoad = useCallback(async () => {
+    if (!isDemoMode || demoSetId === "") return;
+    const meta = DEMO_OPTIONS.find((d) => d.id === demoSetId);
+    if (!meta) return;
+    if (demoLoadInFlightRef.current) return;
+    if (
+      lastDemoLoadKeyRef.current === meta.id &&
+      orderImports.some((c) => c.fileName === meta.orderFile) &&
+      summaryImports.some((c) => c.fileName === meta.salesFile)
+    ) {
+      return;
+    }
+
+    demoLoadInFlightRef.current = true;
+    setDemoLoading(true);
+    try {
+      resetAll();
+      const [ordersRes, salesRes] = await Promise.all([
+        fetch(`/demo-data/${meta.orderFile}`),
+        fetch(`/demo-data/${meta.salesFile}`),
+      ]);
+      if (!ordersRes.ok || !salesRes.ok) {
+        throw new Error(`Demo fetch failed (orders ${ordersRes.status}, sales ${salesRes.status})`);
+      }
+      const [ordersText, salesText] = await Promise.all([ordersRes.text(), salesRes.text()]);
+      const gameLabel = DEMO_GAME_LABEL;
+      setImportGame("Other");
+      setImportGameOtherText(gameLabel);
+      const orderFile = new File([ordersText], meta.orderFile, { type: "text/csv" });
+      const salesFile = new File([salesText], meta.salesFile, { type: "text/csv" });
+      await handleFile(orderFile, "order", { game: gameLabel });
+      await handleFile(salesFile, "summary", { game: gameLabel });
+      lastDemoLoadKeyRef.current = meta.id;
+    } catch (e) {
+      console.error("Demo load failed:", e);
+    } finally {
+      demoLoadInFlightRef.current = false;
+      setDemoLoading(false);
+    }
+  }, [demoSetId, handleFile, isDemoMode, orderImports, resetAll, summaryImports]);
+
+  const handleExitDemoMode = useCallback(() => {
+    demoLoadInFlightRef.current = false;
+    demoSessionInitializedRef.current = false;
+    setDemoLoading(false);
+    setDemoSetId("");
+    setImportGame("");
+    setImportGameOtherText("");
+    setBatchSavedNotice(null);
+    resetAll();
+    purgeDemoGameLabelStorage();
+    restoreRealImportStateAfterDemo();
+    try {
+      sessionStorage.removeItem(DEMO_SANDBOX_SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
+    if (typeof window !== "undefined") {
+      window.location.assign("/data");
+    }
+  }, [resetAll]);
+
+  useEffect(() => {
+    const wasDemoMode = prevDemoModeRef.current;
+    prevDemoModeRef.current = isDemoMode;
+    let hasDemoSessionFlag = false;
+    try {
+      hasDemoSessionFlag = sessionStorage.getItem(DEMO_SANDBOX_SESSION_KEY) === "1";
+      if (isDemoMode) sessionStorage.setItem(DEMO_SANDBOX_SESSION_KEY, "1");
+      else sessionStorage.removeItem(DEMO_SANDBOX_SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
+
+    if (!isDemoMode && (wasDemoMode || hasDemoSessionFlag)) {
+      demoLoadInFlightRef.current = false;
+      demoSessionInitializedRef.current = false;
+      restoreRealImportStateAfterDemo();
+      purgeDemoGameLabelStorage();
+      if (typeof window !== "undefined") {
+        window.location.assign("/data");
+      }
+    }
+  }, [isDemoMode]);
+
+  useEffect(() => {
+    if (!isDemoMode) {
+      demoSessionInitializedRef.current = false;
+      return;
+    }
+    if (demoSessionInitializedRef.current) return;
+    demoSessionInitializedRef.current = true;
+    backupRealImportStateForDemo();
+    demoLoadInFlightRef.current = false;
+    setDemoLoading(false);
+    setDemoSetId("");
+    setImportGame("");
+    setImportGameOtherText("");
+    setBatchSavedNotice(null);
+    resetAll();
+    purgeDemoGameLabelStorage();
+  }, [isDemoMode, resetAll]);
 
   useEffect(() => {
     const ms = lastImportDate?.getTime() ?? null;
@@ -495,7 +690,25 @@ export default function DataPage() {
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
+      if (!isDemoMode) {
+        purgeDemoGameLabelStorage();
+        const { choice, custom } = readStoredImportLabel();
+        setImportGame(choice);
+        setImportGameOtherText(choice === "Other" ? custom : "");
+        setGameHydrated(true);
+        return;
+      }
+
       const { choice, custom } = readStoredImportLabel();
+      const noDraftFiles = orderImports.length === 0 && summaryImports.length === 0;
+      if (isDemoGameLabelPair(choice, custom) && noDraftFiles) {
+        purgeDemoGameLabelStorage();
+        setImportGame("");
+        setImportGameOtherText("");
+        setGameHydrated(true);
+        return;
+      }
+
       setImportGame((prev) => (prev !== "" ? prev : choice));
       setImportGameOtherText((prev) => {
         if (prev !== "") return prev;
@@ -503,11 +716,16 @@ export default function DataPage() {
       });
       setGameHydrated(true);
     });
+
     return () => cancelAnimationFrame(id);
-  }, []);
+  }, [isDemoMode, orderImports.length, summaryImports.length]);
 
   useEffect(() => {
     if (!gameHydrated || !importGame) return;
+    if (!isDemoMode && isDemoGameLabelPair(importGame, importGameOtherText)) return;
+    if (isDemoMode && isDemoGameLabelPair(importGame, importGameOtherText) && orderImports.length === 0 && summaryImports.length === 0) {
+      return;
+    }
     try {
       localStorage.setItem(IMPORT_GAME_STORAGE_KEY, importGame);
       if (importGame === "Other") {
@@ -518,7 +736,7 @@ export default function DataPage() {
     } catch {
       /* ignore */
     }
-  }, [importGame, importGameOtherText, gameHydrated]);
+  }, [importGame, importGameOtherText, gameHydrated, isDemoMode, orderImports.length, summaryImports.length]);
 
   const effectiveImportLabel = useMemo(() => {
     if (!importGame) return "";
@@ -526,7 +744,7 @@ export default function DataPage() {
     return importGame;
   }, [importGame, importGameOtherText]);
 
-  const uploadsEnabled = Boolean(effectiveImportLabel);
+  const uploadsEnabled = Boolean(effectiveImportLabel) && !isDemoMode;
 
   const canAddAnotherGame =
     workspaceReady && orderImports.length > 0 && summaryImports.length > 0 && !importProgress;
@@ -693,6 +911,36 @@ export default function DataPage() {
       : financialConsistencyLevel === "warn"
         ? "text-xs font-medium leading-snug text-amber-900/95 dark:text-amber-200/90"
         : "text-xs font-medium leading-snug text-orange-900/95 dark:text-orange-200/90";
+
+  const [savingForDashboard, setSavingForDashboard] = useState(false);
+
+  const handleContinueToDashboard = useCallback(async () => {
+    if (!workspaceReady || savingForDashboard) return;
+    setSavingForDashboard(true);
+    try {
+      if (user) {
+        await upsertCurrentUserStoreData({
+          total_revenue: derived.grossSales,
+          total_orders: derived.orders,
+          total_costs: costsForNetDisplay ?? 0,
+          total_profit: estimatedNet ?? derived.netAfterFees ?? 0,
+        });
+      }
+      router.push("/dashboard");
+    } finally {
+      setSavingForDashboard(false);
+    }
+  }, [
+    workspaceReady,
+    savingForDashboard,
+    user,
+    derived.grossSales,
+    derived.orders,
+    derived.netAfterFees,
+    costsForNetDisplay,
+    estimatedNet,
+    router,
+  ]);
 
   const savedBatchesSection =
     savedBatchSummaries.length > 0 ? (
@@ -866,6 +1114,61 @@ export default function DataPage() {
             Upload one Order List and one Sales Summary for the same date range.
           </p>
         </header>
+
+        {isDemoMode ? (
+          <section
+            aria-labelledby="imports-try-demo-heading"
+            data-testid="imports-try-demo-section"
+            className="rounded-2xl border-2 border-orange-300/90 bg-gradient-to-br from-orange-50 via-white to-amber-50 p-4 shadow-md dark:border-orange-800/55 dark:from-orange-950/35 dark:via-slate-900 dark:to-slate-950 sm:p-5"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <h2 id="imports-try-demo-heading" className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                Try demo data
+              </h2>
+              <button
+                type="button"
+                onClick={handleExitDemoMode}
+                className="inline-flex items-center justify-center rounded-lg border border-orange-300/90 bg-white px-3 py-1.5 text-xs font-semibold text-orange-800 transition hover:bg-orange-50 dark:border-orange-700/70 dark:bg-slate-900 dark:text-orange-300 dark:hover:bg-orange-950/30"
+              >
+                Exit demo
+              </button>
+            </div>
+            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+              Pick a sample month to see how CollectionOps works.
+            </p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+              <div className="min-w-0 flex-1 sm:max-w-md">
+                <label htmlFor="imports-demo-set" className="sr-only">
+                  Demo sample
+                </label>
+                <select
+                  id="imports-demo-set"
+                  data-testid="imports-demo-set-select"
+                  value={demoSetId}
+                  onChange={(e) => setDemoSetId(e.target.value as DemoSetId)}
+                  disabled={demoLoading}
+                  className="app-inset-well w-full rounded-xl border-2 border-orange-200/90 bg-white px-3 py-3 text-sm font-medium text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-orange-800/50 dark:bg-slate-950/90 dark:text-slate-100"
+                >
+                  <option value="">Choose a demo set...</option>
+                  {DEMO_OPTIONS.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                data-testid="imports-demo-load-button"
+                disabled={demoSetId === "" || demoLoading}
+                onClick={() => void handleDemoLoad()}
+                className="inline-flex shrink-0 items-center justify-center rounded-xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-orange-600 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-orange-500"
+              >
+                {demoLoading ? "Loading…" : "Load demo"}
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <section
           aria-labelledby="imports-current-upload-heading"
@@ -1281,12 +1584,14 @@ export default function DataPage() {
                         Data loaded successfully
                       </p>
                     ) : null}
-                    <Link
-                      href="/dashboard"
+                    <button
+                      type="button"
+                      onClick={() => void handleContinueToDashboard()}
+                      disabled={savingForDashboard}
                       className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
                     >
-                      Continue to Dashboard
-                    </Link>
+                      {savingForDashboard ? "Saving…" : "Continue to Dashboard"}
+                    </button>
                     {canAddAnotherGame ? (
                       <button
                         type="button"

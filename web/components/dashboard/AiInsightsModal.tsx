@@ -17,9 +17,23 @@ const isDev = process.env.NODE_ENV === "development";
 type Props = {
   open: boolean;
   onClose: () => void;
+  /** `inline` = expand in page flow below the trigger (no dim/blur overlay). `modal` = centered overlay. */
+  presentation?: "modal" | "inline";
 };
 
-export default function AiInsightsModal({ open, onClose }: Props) {
+type StatusTone = "good" | "warn" | "risk";
+
+function toneClasses(tone: StatusTone): string {
+  if (tone === "good") {
+    return "border-emerald-200/90 bg-emerald-50 text-emerald-800 dark:border-emerald-700/70 dark:bg-emerald-950/30 dark:text-emerald-300";
+  }
+  if (tone === "warn") {
+    return "border-amber-200/90 bg-amber-50 text-amber-800 dark:border-amber-700/70 dark:bg-amber-950/30 dark:text-amber-300";
+  }
+  return "border-rose-200/90 bg-rose-50 text-rose-800 dark:border-rose-700/70 dark:bg-rose-950/30 dark:text-rose-300";
+}
+
+export default function AiInsightsModal({ open, onClose, presentation = "modal" }: Props) {
   const titleId = useId();
   const {
     hasDashboardImport,
@@ -176,32 +190,132 @@ export default function AiInsightsModal({ open, onClose }: Props) {
 
   if (!open) return null;
 
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-[2px]"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="max-h-[min(90vh,540px)] w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xl dark:border-slate-700/80 dark:bg-slate-900/95">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-3.5 dark:border-slate-700/60">
-          <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-slate-50">
-            Insights
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg px-2 py-1 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
+  const gross = derived.grossSales;
+  const net = estimatedNet ?? 0;
+  const fees = costsForNetDisplay ?? 0;
+  const keepPct = gross > 0 ? Math.max(0, Math.min(100, (net / gross) * 100)) : 0;
+  const feePct = gross > 0 ? Math.max(0, Math.min(100, (fees / gross) * 100)) : 0;
+  const revenuePct = gross > 0 ? 100 : 0;
+  const netPctForBar = gross > 0 ? Math.max(0, Math.min(100, (Math.max(0, net) / gross) * 100)) : 0;
+  const orderCount = derived.orders;
+  const aov = derived.aov ?? 0;
 
-        <div className="max-h-[min(68vh,460px)] overflow-y-auto px-5 py-4">
+  const profitHealth: { label: string; tone: StatusTone; detail: string } =
+    keepPct >= 70
+      ? { label: "Healthy", tone: "good", detail: `You're keeping about ${keepPct.toFixed(0)}% after costs.` }
+      : keepPct >= 50
+        ? { label: "Watch", tone: "warn", detail: `You keep about ${keepPct.toFixed(0)}% after costs in this range.` }
+        : { label: "Risk", tone: "risk", detail: `You keep about ${keepPct.toFixed(0)}% after costs right now.` };
+
+  const feesImpact: { label: string; tone: StatusTone; detail: string } =
+    feePct < 30
+      ? { label: "Low", tone: "good", detail: `Fees and shipping are about ${feePct.toFixed(0)}% of revenue.` }
+      : feePct < 40
+        ? { label: "Moderate", tone: "warn", detail: `Fees and shipping are about ${feePct.toFixed(0)}% of revenue.` }
+        : { label: "High", tone: "risk", detail: `Fees and shipping are about ${feePct.toFixed(0)}% of revenue.` };
+
+  const aovLabel = aov.toLocaleString(undefined, { style: "currency", currency: "USD" });
+  const orderSize: { label: string; tone: StatusTone; detail: string } =
+    aov >= 28
+      ? {
+          label: "Strong",
+          tone: "good",
+          detail: `Average order is ${aovLabel}. Basket size looks healthy here — often multi-item checkouts in this window.`,
+        }
+      : aov >= 16
+        ? {
+            label: "Mixed",
+            tone: "warn",
+            detail: `Average order is ${aovLabel}. On TCGplayer you can't control cart size directly — you can still influence baskets through how you price and position listings, plus inventory depth.`,
+          }
+        : {
+            label: "Small",
+            tone: "risk",
+            detail: `Average order is ${aovLabel}. You can't control cart size directly, but you can influence it through pricing and inventory strategy.`,
+          };
+
+  const takeawayLine =
+    keepPct >= 60 && aov < 18
+      ? "⚡ You're profitable, but small order sizes are holding back total profit potential."
+      : keepPct < 50
+        ? "⚡ Costs are eating too much of revenue in this window."
+        : "⚡ Your store is profitable — there's room to influence how buyers build carts.";
+
+  function softenInsightLine(line: string): string {
+    const t = line.trim();
+    const lower = t.toLowerCase();
+    if (
+      lower.includes("increase aov") ||
+      lower.includes("increase order") ||
+      (lower.includes("order size") &&
+        (lower.includes("increase") || lower.includes("raise") || lower.includes("grow"))) ||
+      lower.includes("cart minimum") ||
+      lower.includes("buy more") ||
+      lower.includes("make customers") ||
+      lower.includes("force buyers") ||
+      lower.includes("make them buy")
+    ) {
+      return "Small order sizes are limiting total profit, even though margins are strong";
+    }
+    return t;
+  }
+
+  const actionableTips = (() => {
+    const fromInsights = insights
+      .map((line) => softenInsightLine(splitInsightLine(line).takeaway.trim()))
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((line) => line.replace(/^[•💡]\s*/, "").trim())
+      .map((line) => `• ${line}`);
+    if (fromInsights.length >= 2) return fromInsights;
+    const fallback: string[] = [];
+    if (aov < 18) {
+      fallback.push("• Small order sizes are limiting total profit, even though margins are strong");
+    }
+    if (feePct >= 35) {
+      fallback.push(
+        "• Fees take a large share of gross — positioning higher-value listings can help fees matter less per dollar sold.",
+      );
+    }
+    if (orderCount < 12) {
+      fallback.push("• Add another date range when you can to confirm trends with more orders.");
+    }
+    while (fallback.length < 2) {
+      fallback.push("• Keep comparing similar windows to see how buyer behavior shifts.");
+    }
+    return fallback.slice(0, 2);
+  })();
+
+  const nextMoveStrategies = [
+    "Price cards competitively to appear in more multi-item carts.",
+    "List playsets or related cards to encourage bundled purchases.",
+    "Focus on inventory depth so buyers can purchase multiple cards from you.",
+    "Avoid over-reliance on very low-value single card sales.",
+  ] as const;
+
+  const bodyScrollClass =
+    presentation === "inline"
+      ? "overflow-visible px-5 py-4"
+      : "min-h-0 flex-1 overflow-y-auto px-5 py-4";
+
+  const panelHeader = (
+    <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-5 py-3.5 dark:border-slate-700/60">
+      <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-slate-50">
+        Insights
+      </h2>
+      <button
+        type="button"
+        onClick={onClose}
+        className="rounded-lg px-2 py-1 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        aria-label="Close"
+      >
+        ✕
+      </button>
+    </div>
+  );
+
+  const panelBody = (
+    <div className={bodyScrollClass}>
           {phase === "no_data" ? (
             <p className="text-sm text-slate-600 dark:text-slate-300">Import data to open insights.</p>
           ) : null}
@@ -246,19 +360,81 @@ export default function AiInsightsModal({ open, onClose }: Props) {
                   </button>
                 </div>
               ) : null}
-              <ul className="space-y-5">
-                {insights.map((text, i) => {
-                  const { takeaway, detail } = splitInsightLine(text);
-                  return (
-                    <li key={`${i}-${text.slice(0, 24)}`} className="border-b border-slate-100 pb-5 last:border-0 last:pb-0 dark:border-slate-800/80">
-                      <p className="text-sm font-bold leading-snug text-slate-900 dark:text-slate-50">{takeaway}</p>
-                      {detail ? (
-                        <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{detail}</p>
-                      ) : null}
+              <div className="rounded-xl border border-cyan-200/80 bg-cyan-50/70 px-3.5 py-3 dark:border-cyan-700/70 dark:bg-cyan-950/30">
+                <p className="text-sm font-bold leading-snug text-cyan-900 dark:text-cyan-100">{takeawayLine}</p>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <article className={`rounded-xl border px-3 py-3 ${toneClasses(profitHealth.tone)}`}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide">Profit Health</p>
+                  <p className="mt-1 text-sm font-bold">{profitHealth.label}</p>
+                  <p className="mt-1 text-xs leading-snug opacity-90">{profitHealth.detail}</p>
+                </article>
+                <article className={`rounded-xl border px-3 py-3 ${toneClasses(feesImpact.tone)}`}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide">Fees Impact</p>
+                  <p className="mt-1 text-sm font-bold">{feesImpact.label}</p>
+                  <p className="mt-1 text-xs leading-snug opacity-90">{feesImpact.detail}</p>
+                </article>
+                <article className={`rounded-xl border px-3 py-3 ${toneClasses(orderSize.tone)}`}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide">Order Size</p>
+                  <p className="mt-1 text-sm font-bold">{orderSize.label}</p>
+                  <p className="mt-1 text-xs leading-snug opacity-90">{orderSize.detail}</p>
+                </article>
+              </div>
+
+              <section className="mt-4 rounded-xl border border-slate-200/85 bg-white/70 px-3.5 py-3 dark:border-slate-700/70 dark:bg-slate-800/45">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Visual Breakdown</h3>
+                <div className="mt-3 space-y-2.5">
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-200">
+                      <span>Revenue</span>
+                      <span>{gross.toLocaleString(undefined, { style: "currency", currency: "USD" })}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-200/80 dark:bg-slate-700/70">
+                      <div className="h-full rounded-full bg-cyan-500" style={{ width: `${revenuePct}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-200">
+                      <span>Fees</span>
+                      <span>{fees.toLocaleString(undefined, { style: "currency", currency: "USD" })}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-200/80 dark:bg-slate-700/70">
+                      <div className="h-full rounded-full bg-amber-500" style={{ width: `${feePct}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1 flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-200">
+                      <span>Net</span>
+                      <span>{net.toLocaleString(undefined, { style: "currency", currency: "USD" })}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-200/80 dark:bg-slate-700/70">
+                      <div className="h-full rounded-full bg-emerald-500" style={{ width: `${netPctForBar}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="mt-4 rounded-xl border border-slate-200/85 bg-slate-50/70 px-3.5 py-3 dark:border-slate-700/70 dark:bg-slate-800/45">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Actionable insights</h3>
+                <ul className="mt-2 space-y-2 pl-0.5">
+                  {actionableTips.map((tip, i) => (
+                    <li key={`${i}-${tip}`} className="text-sm font-medium leading-snug text-slate-800 dark:text-slate-100">
+                      {tip}
                     </li>
-                  );
-                })}
-              </ul>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="mt-4 rounded-xl border border-slate-200/85 bg-white/70 px-3.5 py-3 dark:border-slate-700/70 dark:bg-slate-800/45">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Next move</h3>
+                <ul className="mt-2 list-disc space-y-2 pl-4 text-sm font-medium leading-snug text-slate-800 dark:text-slate-100">
+                  {nextMoveStrategies.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+
               <div className="mt-6 border-t border-slate-200/80 pt-4 dark:border-slate-700/60">
                 <Link
                   href="/dashboard"
@@ -270,7 +446,35 @@ export default function AiInsightsModal({ open, onClose }: Props) {
               </div>
             </>
           ) : null}
-        </div>
+    </div>
+  );
+
+  if (presentation === "inline") {
+    return (
+      <div
+        className="w-full max-w-none overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-lg dark:border-slate-700/80 dark:bg-slate-900/95"
+        role="region"
+        aria-labelledby={titleId}
+      >
+        {panelHeader}
+        {panelBody}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-slate-900/35 p-4 pt-8 sm:pt-12"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="my-auto flex max-h-[min(92vh,720px)] w-full max-w-[min(100%,92rem)] flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xl dark:border-slate-700/80 dark:bg-slate-900/95">
+        {panelHeader}
+        {panelBody}
       </div>
     </div>
   );

@@ -11,23 +11,24 @@ import ThemeToggle from "./ThemeToggle";
 /** Transparent PNG in web/public — replace the file to update artwork. */
 const HEADER_LOGO_SRC = "/logo.png";
 
-function isPlausibleEmail(s: string): boolean {
-  const t = s.trim();
-  return t.length > 3 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t);
-}
-
 export default function MainToolbar() {
   const pathname = usePathname();
-  const { user, setUser, signInWithEmail } = useAuth();
+  const isDashboardPage = pathname === "/dashboard";
+  const [demoSandboxActive, setDemoSandboxActive] = useState(false);
+  const { user, setUser } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [signInOpen, setSignInOpen] = useState(false);
-  const [signInEmail, setSignInEmail] = useState("");
-  const [signInError, setSignInError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const signInRef = useRef<HTMLDivElement>(null);
 
   const title = useMemo(() => getPageTitle(pathname), [pathname]);
   const dateLabel = useMemo(() => formatToolbarDate(), []);
+
+  useEffect(() => {
+    try {
+      setDemoSandboxActive(sessionStorage.getItem("cardops-demo-sandbox") === "1");
+    } catch {
+      setDemoSandboxActive(false);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -35,21 +36,19 @@ export default function MainToolbar() {
       if (dropdownRef.current && !dropdownRef.current.contains(t)) {
         setDropdownOpen(false);
       }
-      if (signInRef.current && !signInRef.current.contains(t)) {
-        setSignInOpen(false);
-        setSignInError(null);
-      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex min-h-0 shrink-0 items-center justify-between gap-2 border-b border-slate-200/80 bg-gradient-to-b from-white to-slate-50/90 px-3 pt-2 pb-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),0_1px_4px_-1px_rgba(15,23,42,0.06)] dark:border-slate-800/90 dark:from-slate-950 dark:to-slate-900/95 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_2px_8px_-2px_rgba(0,0,0,0.35)] sm:gap-3 sm:px-5 sm:pt-2.5 sm:pb-4 lg:px-8">
-      <div className="flex min-h-0 min-w-0 flex-1 items-center gap-2.5 sm:gap-4">
+    <header className="sticky top-0 z-30 flex min-h-0 shrink-0 items-center justify-between gap-2 border-b border-sky-300/80 bg-gradient-to-r from-cyan-100 via-sky-50 to-indigo-100 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),0_3px_14px_-4px_rgba(14,116,144,0.24),0_20px_42px_-20px_rgba(99,102,241,0.35)] dark:border-slate-700/90 dark:from-cyan-950/45 dark:via-slate-900 dark:to-indigo-950/55 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_-10px_rgba(6,182,212,0.28),0_24px_44px_-22px_rgba(99,102,241,0.38)] sm:gap-3 sm:px-5 sm:py-2 lg:px-8">
+      <span className="sr-only">{dateLabel}</span>
+      <div className="flex min-h-0 min-w-0 flex-1 items-center">
+        <div className="flex min-h-0 min-w-0 items-center gap-1 sm:gap-2">
         <Link
           href="/dashboard"
-          className="inline-flex shrink-0 self-center outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
+          className="inline-flex shrink-0 items-center self-center outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
           aria-label="CollectionOps home"
         >
           <Image
@@ -57,30 +56,42 @@ export default function MainToolbar() {
             alt="CollectionOps"
             width={480}
             height={480}
-            className="block h-9 w-auto max-w-[min(7.5rem,34vw)] object-contain object-left sm:h-10 sm:max-w-[min(9rem,28vw)]"
-            sizes="(max-width: 640px) 120px, 160px"
+            className="h-16 w-auto object-contain sm:h-[4.75rem] lg:h-[5.25rem]"
+            sizes="(max-width: 640px) 128px, 148px"
             priority
             unoptimized
           />
         </Link>
-        <div className="flex min-h-0 min-w-0 flex-1 flex-nowrap items-center gap-x-3 sm:gap-x-4">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-nowrap items-center gap-x-2 sm:gap-x-3">
           <h1 className="min-w-0 truncate text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
             {title}
           </h1>
-          <button
-            type="button"
-            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-transparent px-1.5 py-1 text-sm font-normal text-slate-500 transition-app hover:border-slate-200/90 hover:bg-slate-50 hover:text-slate-600 active:scale-[0.98] dark:text-slate-400 dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-300"
-            aria-label="Select date"
-          >
-            {dateLabel}
-            <svg className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+        </div>
         </div>
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        {demoSandboxActive ? (
+          <>
+            <span className="hidden rounded-lg border border-orange-300/80 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-800 dark:border-orange-800/60 dark:bg-orange-950/40 dark:text-orange-300 sm:inline-flex">
+              Demo mode
+            </span>
+            <Link
+              href="/data"
+              className="inline-flex items-center justify-center rounded-lg border border-orange-300/90 bg-white px-3 py-1.5 text-xs font-semibold text-orange-800 transition hover:bg-orange-50 dark:border-orange-700/70 dark:bg-slate-900 dark:text-orange-300 dark:hover:bg-orange-950/30"
+            >
+              Exit demo
+            </Link>
+          </>
+        ) : null}
+        {isDashboardPage && !demoSandboxActive ? (
+          <Link
+            href="/data?demo=1"
+            className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] hover:bg-orange-600 active:scale-[0.99]"
+          >
+            Try Demo
+          </Link>
+        ) : null}
         <ThemeToggle />
         {user ? (
           <div className="relative" ref={dropdownRef}>
@@ -129,16 +140,30 @@ export default function MainToolbar() {
             {dropdownOpen && (
               <div className="absolute right-0 top-full z-50 mt-2 min-w-[200px] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1.5 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_18px_48px_-8px_rgba(15,23,42,0.2),0_8px_24px_-6px_rgba(15,23,42,0.12)] ring-1 ring-slate-900/5 dark:border-slate-700/90 dark:bg-slate-900/95 dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.65)]">
                 <Link
+                  href="/dashboard"
+                  className="block px-4 py-2.5 text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Link
                   href="/account"
                   className="block px-4 py-2.5 text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
                   onClick={() => setDropdownOpen(false)}
                 >
                   Account
                 </Link>
+                <Link
+                  href="/account#logo-editor"
+                  className="block px-4 py-2.5 text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Logo editor
+                </Link>
                 <button
                   type="button"
                   onClick={() => {
-                    setUser(null);
+                    void setUser(null);
                     setDropdownOpen(false);
                   }}
                   className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
@@ -149,62 +174,19 @@ export default function MainToolbar() {
             )}
           </div>
         ) : (
-          <div className="relative" ref={signInRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setSignInOpen((o) => !o);
-                setSignInError(null);
-              }}
-              className="inline-flex min-h-9 items-center rounded-lg border border-slate-200/90 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_1px_4px_-1px_rgba(15,23,42,0.08)] ring-1 ring-slate-900/5 transition-app hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700/90 dark:bg-slate-900/85 dark:text-slate-100 sm:min-h-10 sm:rounded-xl sm:px-4 sm:py-2"
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/login"
+              className="whitespace-nowrap text-sm font-medium text-slate-600 underline decoration-slate-400/55 underline-offset-[5px] transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
             >
-              Sign In
-            </button>
-            {signInOpen ? (
-              <form
-                className="absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,18rem)] rounded-xl border border-slate-200/90 bg-white p-3 shadow-[0_18px_48px_-8px_rgba(15,23,42,0.2)] ring-1 ring-slate-900/5 dark:border-slate-700/90 dark:bg-slate-900/95 dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.65)]"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!isPlausibleEmail(signInEmail)) {
-                    setSignInError("Enter a valid email address.");
-                    return;
-                  }
-                  signInWithEmail(signInEmail);
-                  setSignInOpen(false);
-                  setSignInEmail("");
-                  setSignInError(null);
-                }}
-              >
-                <label htmlFor="toolbar-signin-email" className="block text-xs font-medium text-slate-600 dark:text-slate-400">
-                  Email
-                </label>
-                <input
-                  id="toolbar-signin-email"
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  value={signInEmail}
-                  onChange={(ev) => {
-                    setSignInEmail(ev.target.value);
-                    setSignInError(null);
-                  }}
-                  placeholder="you@example.com"
-                  aria-invalid={signInError ? true : undefined}
-                  className="mt-1 w-full rounded-lg border border-slate-200/90 bg-white px-2.5 py-2 text-sm text-slate-900 outline-none ring-slate-400/30 placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 dark:border-slate-600 dark:bg-slate-950/80 dark:text-slate-100 dark:placeholder:text-slate-500"
-                />
-                {signInError ? (
-                  <p className="mt-1.5 text-xs font-medium text-red-600 dark:text-red-400" role="alert">
-                    {signInError}
-                  </p>
-                ) : null}
-                <button
-                  type="submit"
-                  className="mt-3 w-full rounded-lg border border-teal-600 bg-teal-600 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 dark:border-teal-500 dark:bg-teal-600 dark:hover:bg-teal-500"
-                >
-                  Continue
-                </button>
-              </form>
-            ) : null}
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              className="whitespace-nowrap rounded-lg border border-teal-600/90 bg-white/95 px-3 py-1.5 text-sm font-semibold text-teal-900 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_1px_3px_-1px_rgba(15,118,110,0.2)] ring-1 ring-teal-900/[0.06] transition hover:bg-teal-50 active:scale-[0.99] dark:border-teal-500/75 dark:bg-teal-950/55 dark:text-teal-100 dark:ring-teal-400/10 dark:hover:bg-teal-950/85 sm:px-3.5 sm:py-2"
+            >
+              Create account
+            </Link>
           </div>
         )}
       </div>

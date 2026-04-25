@@ -2,6 +2,8 @@
 export function getPageTitle(pathname: string): string {
   const map: Record<string, string> = {
     "/dashboard": "Dashboard",
+    "/login": "Log in",
+    "/signup": "Create account",
     "/data": "Imports",
     "/trends": "Trends",
     "/settings": "Settings",
