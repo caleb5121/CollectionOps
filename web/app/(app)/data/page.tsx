@@ -677,8 +677,8 @@ export default function DataPage() {
     demoLoadInFlightRef.current = false;
     setDemoLoading(false);
     setDemoSetId("");
-    setImportGame("");
-    setImportGameOtherText("");
+    setImportGame("Other");
+    setImportGameOtherText(DEMO_GAME_LABEL);
     setBatchSavedNotice(null);
     resetAll();
     purgeDemoGameLabelStorage();
@@ -1248,12 +1248,14 @@ export default function DataPage() {
                 id="import-game"
                 data-testid="import-game-select"
                 className={`${selectClass} mt-0 w-full max-w-none`}
-                value={importGame}
+                value={isDemoMode ? "Other" : importGame}
                 onChange={(e) => {
+                  if (isDemoMode) return;
                   const v = e.target.value as ImportGameId | "";
                   setImportGame(v);
                   if (v !== "Other") setImportGameOtherText("");
                 }}
+                disabled={isDemoMode}
               >
                 <option value="">Choose label…</option>
                 {IMPORT_GAME_OPTIONS.map((g) => (
@@ -1264,7 +1266,7 @@ export default function DataPage() {
               </select>
             </div>
           </div>
-          {importGame === "Other" ? (
+          {importGame === "Other" || isDemoMode ? (
             <div className="mt-3 max-w-64 space-y-1.5">
               <label htmlFor="import-game-other" className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                 Your label
@@ -1273,15 +1275,24 @@ export default function DataPage() {
                 id="import-game-other"
                 data-testid="import-game-other-input"
                 type="text"
-                value={importGameOtherText}
-                onChange={(e) => setImportGameOtherText(e.target.value)}
+                value={isDemoMode ? DEMO_GAME_LABEL : importGameOtherText}
+                onChange={(e) => {
+                  if (isDemoMode) return;
+                  setImportGameOtherText(e.target.value);
+                }}
                 placeholder="e.g. My shop name or game title"
                 autoComplete="off"
                 className={`${selectClass} mt-1`}
+                disabled={isDemoMode}
               />
             </div>
           ) : null}
-          {!uploadsEnabled ? (
+          {isDemoMode ? (
+            <p className="mt-2 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+              Demo mode uses a locked sample upload so you can preview the dashboard.
+            </p>
+          ) : null}
+          {!uploadsEnabled && !isDemoMode ? (
             <p className="mt-1.5 text-[11px] font-medium text-amber-800 dark:text-amber-300">
               {importGame === "Other" ? "Type your label to upload." : "Pick a label to upload."}
             </p>
