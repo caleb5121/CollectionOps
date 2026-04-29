@@ -127,12 +127,18 @@ export default function Home() {
               CollectionOps
             </span>
           </motion.div>
-          <nav className="flex shrink-0 items-center" aria-label="Landing actions">
+          <nav className="flex shrink-0 items-center gap-2" aria-label="Landing actions">
             <Link
               href="/login"
+              className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/25 bg-white/10 px-[0.95rem] text-sm font-semibold text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-white/15 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-3.5 max-[380px]:text-[0.82rem] sm:h-11 sm:px-5 sm:text-[0.94rem]"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/signup"
               className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-white px-[1.05rem] text-sm font-semibold text-slate-900 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] ring-1 ring-white/25 transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-4 max-[380px]:text-[0.82rem] sm:h-11 sm:px-6 sm:text-[0.94rem]"
             >
-              Log In/ Sign up
+              Sign up
             </Link>
           </nav>
         </motion.header>

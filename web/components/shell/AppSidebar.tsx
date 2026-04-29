@@ -69,6 +69,7 @@ export default function AppSidebar() {
 
   async function submitFeedback(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (feedbackSending) return;
     setFeedbackSuccess("");
     setFeedbackError("");
     if (!feedbackEmail.trim() || !feedbackMessage.trim()) {
@@ -86,18 +87,19 @@ export default function AppSidebar() {
           message: feedbackMessage.trim(),
         }),
       });
-      if (!res.ok) throw new Error("send_failed");
-      const data = (await res.json()) as { notificationSent?: boolean };
-      setFeedbackSuccess(
-        data.notificationSent === false
-          ? "Thanks, your feedback was saved. Email notification is temporarily unavailable."
-          : "Thanks, your feedback was sent",
-      );
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || data.ok !== true) {
+        throw new Error(data.error || "send_failed");
+      }
+      setFeedbackSuccess("Thanks, your feedback was sent.");
       setFeedbackName("");
       setFeedbackEmail("");
       setFeedbackMessage("");
-    } catch {
-      setFeedbackError("Could not send feedback. Please try again.");
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Feedback submission failed", error);
+      }
+      setFeedbackError("Feedback could not be sent. Please email support@collectionops.com.");
     } finally {
       setFeedbackSending(false);
     }

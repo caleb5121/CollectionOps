@@ -29,3 +29,47 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Supabase Signup Email Branding
+
+Signup verification emails are sent by Supabase Auth (GoTrue), not by app code in this repo.
+The app only requests an OTP email and sets the redirect target to `/auth/callback`.
+
+### Where branding is controlled
+
+In your Supabase project dashboard:
+
+1. Open `Authentication` -> `Email Templates`
+2. Select the `Confirm signup` template
+3. Update the subject and body copy
+
+Recommended copy:
+
+- Subject: `Confirm your CollectionOps account`
+- Body:
+
+```html
+<h2>Welcome to CollectionOps.</h2>
+<p>Confirm your email to finish setting up your account and start using your seller dashboard.</p>
+<p><a href="{{ .ConfirmationURL }}">Confirm your account</a></p>
+<p>If you did not create this account, you can ignore this email.</p>
+```
+
+### Redirect setup (important)
+
+To keep verification links returning to the app correctly:
+
+1. Open `Authentication` -> `URL Configuration`
+2. Set `Site URL` to your app base URL (for local dev, e.g. `http://localhost:3000`)
+3. Add redirect URL(s) including:
+   - `http://localhost:3000/auth/callback`
+   - your production `https://.../auth/callback`
+
+### Sender branding
+
+If emails still appear as "Supabase Auth", configure a custom sender:
+
+1. Open `Authentication` -> `Providers` -> `Email`
+2. Configure custom SMTP sender name/address (for example: `CollectionOps <no-reply@collectionops.com>`)
+
+Without custom SMTP, Supabase default sender branding may remain visible even with custom template text.

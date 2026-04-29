@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageShell from "../../../components/PageShell";
 import { useSettings, type ShippingItem } from "../../../components/SettingsProvider";
 
@@ -45,6 +45,9 @@ export default function SettingsPage() {
   const [draftName, setDraftName] = useState("");
   const [draftCost, setDraftCost] = useState(0);
   const [draftNameFocused, setDraftNameFocused] = useState(false);
+  const [saveNotice, setSaveNotice] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const hasDraftInput = draftName.trim() !== "" || draftCost > 0;
 
   const totalExtreme = isTotalExtreme(estimatedShippingCostPerOrder);
 
@@ -54,20 +57,70 @@ export default function SettingsPage() {
   });
 
   function handleAddItem() {
-    if (draftName.trim() !== "" || draftCost > 0) {
-      addShippingItem({ name: draftName.trim(), cost: draftCost });
+    let ok = true;
+    if (hasDraftInput) {
+      ok = addShippingItem({ name: draftName.trim(), cost: draftCost });
       setDraftName("");
       setDraftCost(0);
     } else {
-      addShippingItem();
+      ok = addShippingItem();
+    }
+    if (ok) {
+      setSaveError("");
+      setSaveNotice(hasDraftInput ? "Item saved" : "Saved.");
+    } else {
+      setSaveNotice("");
+      setSaveError("Could not save item. Please try again.");
     }
   }
 
   function handleReset() {
-    resetShippingDefaults();
+    const ok = resetShippingDefaults();
     setDraftName("");
     setDraftCost(0);
+    if (ok) {
+      setSaveError("");
+      setSaveNotice("Saved.");
+    } else {
+      setSaveNotice("");
+      setSaveError("Could not save item. Please try again.");
+    }
   }
+
+  function handleCancelDraft() {
+    setDraftName("");
+    setDraftCost(0);
+    setSaveError("");
+    setSaveNotice("");
+  }
+
+  function handleUpdateItem(id: string, updates: Partial<Pick<ShippingItem, "name" | "cost">>) {
+    const ok = updateShippingItem(id, updates);
+    if (ok) {
+      setSaveError("");
+      setSaveNotice("Saved.");
+    } else {
+      setSaveNotice("");
+      setSaveError("Could not save item. Please try again.");
+    }
+  }
+
+  function handleRemoveItem(id: string) {
+    const ok = removeShippingItem(id);
+    if (ok) {
+      setSaveError("");
+      setSaveNotice("Saved.");
+    } else {
+      setSaveNotice("");
+      setSaveError("Could not save item. Please try again.");
+    }
+  }
+
+  useEffect(() => {
+    if (!saveNotice) return;
+    const id = window.setTimeout(() => setSaveNotice(""), 1500);
+    return () => window.clearTimeout(id);
+  }, [saveNotice]);
 
   const inputClass =
     "app-inset-well rounded-lg border border-slate-200/90 bg-white px-3 py-2 text-sm text-slate-900 transition-[box-shadow,border-color] placeholder:text-slate-400 focus:border-[color:var(--accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--accent)]/25 dark:border-slate-600/90 dark:bg-slate-950/80 dark:text-slate-100 dark:placeholder:text-slate-500";
@@ -89,6 +142,12 @@ export default function SettingsPage() {
           <h2 className="text-2xl font-bold tracking-tight text-[color:var(--accent)] sm:text-3xl dark:text-teal-300">
             Base costs
           </h2>
+          <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Changes save automatically.</p>
+          {saveError ? (
+            <p className="text-xs font-semibold text-rose-700 dark:text-rose-300">{saveError}</p>
+          ) : saveNotice ? (
+            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">{saveNotice}</p>
+          ) : null}
           {shippingItems.map((item: ShippingItem) => {
             const extreme = isLineExtreme(item.cost);
             return (
@@ -97,7 +156,7 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     value={item.name}
-                    onChange={(e) => updateShippingItem(item.id, { name: e.target.value })}
+                    onChange={(e) => handleUpdateItem(item.id, { name: e.target.value })}
                     placeholder="Name"
                     className={`min-w-0 flex-1 ${inputClass}`}
                   />
@@ -106,13 +165,13 @@ export default function SettingsPage() {
                     step="0.01"
                     min="0"
                     value={item.cost || ""}
-                    onChange={(e) => updateShippingItem(item.id, { cost: Number(e.target.value) || 0 })}
+                    onChange={(e) => handleUpdateItem(item.id, { cost: Number(e.target.value) || 0 })}
                     placeholder="0.00"
                     className={`w-24 shrink-0 tabular-nums ${inputClass}`}
                   />
                   <button
                     type="button"
-                    onClick={() => removeShippingItem(item.id)}
+                    onClick={() => handleRemoveItem(item.id)}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[color:var(--accent)] transition-colors hover:bg-[color:var(--accent-soft)] dark:hover:bg-teal-950/40"
                     aria-label="Remove item"
                   >
@@ -149,7 +208,32 @@ export default function SettingsPage() {
             placeholder="0.00"
             className={`w-24 shrink-0 tabular-nums ${inputClass}`}
           />
-          <div className="h-9 w-9 shrink-0" aria-hidden />
+          {hasDraftInput ? (
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCancelDraft}
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300/90 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAddItem}
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-[color:var(--accent)] px-3 py-2 text-sm font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_4px_14px_-2px_var(--accent-glow)] transition-[transform,filter] hover:brightness-110 active:translate-y-px"
+              >
+                Save item
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAddItem}
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-[color:var(--accent)] px-3 py-2 text-sm font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_4px_14px_-2px_var(--accent-glow)] transition-[transform,filter] hover:brightness-110 active:translate-y-px"
+            >
+              + Add item
+            </button>
+          )}
         </div>
         </div>
       </div>
@@ -174,7 +258,7 @@ export default function SettingsPage() {
         ) : null}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={handleReset}
@@ -189,16 +273,6 @@ export default function SettingsPage() {
             />
           </svg>
           Reset shipping costs
-        </button>
-        <button
-          type="button"
-          onClick={handleAddItem}
-          className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--accent)] px-3 py-2 text-sm font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_4px_14px_-2px_var(--accent-glow)] transition-[transform,filter] hover:brightness-110 active:translate-y-px"
-        >
-          <svg className="h-4 w-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add item
         </button>
       </div>
     </PageShell>

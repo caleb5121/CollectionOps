@@ -14,7 +14,21 @@ function safeNumber(v: number): number {
   return Number.isFinite(v) ? v : 0;
 }
 
+function isMissingSessionError(error: unknown): boolean {
+  const maybe = error as { name?: string; message?: string; code?: string } | null;
+  const message = (maybe?.message ?? "").toLowerCase();
+  const name = (maybe?.name ?? "").toLowerCase();
+  const code = (maybe?.code ?? "").toLowerCase();
+  return (
+    message.includes("auth session missing") ||
+    name.includes("authsessionmissingerror") ||
+    code === "auth_session_missing"
+  );
+}
+
 function logSupabaseError(prefix: string, error: unknown) {
+  if (process.env.NODE_ENV !== "development") return;
+  if (isMissingSessionError(error)) return;
   if (!error) {
     console.error(prefix, "Unknown error (empty error object).");
     return;
@@ -38,7 +52,9 @@ export async function upsertCurrentUserStoreData(input: Omit<UserStoreDataRow, "
     error: userError,
   } = await sb.auth.getUser();
   if (userError || !user) {
-    console.error("Could not resolve authenticated user for store data upsert.", userError);
+    if (userError && !isMissingSessionError(userError) && process.env.NODE_ENV === "development") {
+      console.error("Could not resolve authenticated user for store data upsert.", userError);
+    }
     return false;
   }
 
@@ -87,7 +103,9 @@ export async function fetchCurrentUserStoreData(): Promise<UserStoreDataRow | nu
     error: userError,
   } = await sb.auth.getUser();
   if (userError || !user) {
-    if (userError) console.error("Could not resolve authenticated user for store data fetch.", userError);
+    if (userError && !isMissingSessionError(userError) && process.env.NODE_ENV === "development") {
+      console.error("Could not resolve authenticated user for store data fetch.", userError);
+    }
     return null;
   }
 

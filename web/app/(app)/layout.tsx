@@ -5,6 +5,18 @@ import AppAuthenticatedLayout from "../../components/shell/AppAuthenticatedLayou
 import { DEV_ACCESS_COOKIE, isLocalDevelopmentRequestHost } from "../../lib/devAccess";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
 
+function isMissingSessionError(error: unknown): boolean {
+  const maybe = error as { name?: string; message?: string; code?: string } | null;
+  const message = (maybe?.message ?? "").toLowerCase();
+  const name = (maybe?.name ?? "").toLowerCase();
+  const code = (maybe?.code ?? "").toLowerCase();
+  return (
+    message.includes("auth session missing") ||
+    name.includes("authsessionmissingerror") ||
+    code === "auth_session_missing"
+  );
+}
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const headerStore = await headers();
   const cookieStore = await cookies();
@@ -21,9 +33,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect("/login");
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch (error) {
+    if (!isMissingSessionError(error) && process.env.NODE_ENV === "development") {
+      console.error("Failed to resolve Supabase auth user in app layout", error);
+    }
+  }
   if (!user && middlewareDemoAllowed) {
     return <AppAuthenticatedLayout>{children}</AppAuthenticatedLayout>;
   }

@@ -21,7 +21,10 @@ async function readSubmissions(): Promise<FeedbackSubmission[]> {
     const raw = await readFile(DATA_FILE, "utf8");
     const parsed = JSON.parse(raw) as unknown;
     return Array.isArray(parsed) ? (parsed as FeedbackSubmission[]) : [];
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Failed to read feedback submissions", error);
+    }
     return [];
   }
 }
@@ -44,7 +47,10 @@ export async function POST(req: Request) {
   let body: unknown;
   try {
     body = await req.json();
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Invalid feedback JSON payload", error);
+    }
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
@@ -60,11 +66,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "missing_required_fields" }, { status: 400 });
   }
 
-  await persistSubmission({
-    ...(safeName ? { name: safeName } : {}),
-    email: safeEmail,
-    message: safeMessage,
-  });
+  try {
+    await persistSubmission({
+      ...(safeName ? { name: safeName } : {}),
+      email: safeEmail,
+      message: safeMessage,
+    });
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Failed to persist feedback submission", error);
+    }
+    return NextResponse.json({ ok: false, error: "storage_failed" }, { status: 500 });
+  }
 
   const host = process.env.FEEDBACK_SMTP_HOST?.trim();
   const user = process.env.FEEDBACK_SMTP_USER?.trim();
@@ -101,7 +114,10 @@ export async function POST(req: Request) {
       text,
     });
     return NextResponse.json({ ok: true, notificationSent: true, storage: "local_file" });
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Feedback email notification failed", error);
+    }
     return NextResponse.json({ ok: true, notificationSent: false, storage: "local_file" });
   }
 }

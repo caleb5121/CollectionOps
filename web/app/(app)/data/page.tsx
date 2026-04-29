@@ -851,6 +851,7 @@ export default function DataPage() {
 
   const onlyOrderUploaded = orderImports.length > 0 && summaryImports.length === 0;
   const onlySummaryUploaded = summaryImports.length > 0 && orderImports.length === 0;
+  const importComplete = workspaceReady && orderImports.length > 0 && summaryImports.length > 0;
 
   const financialConsistencyLevel = importFinancialConsistency?.level ?? "ok";
 
@@ -1605,6 +1606,19 @@ export default function DataPage() {
               <div className="mt-5 space-y-4 border-t border-slate-200/75 pt-5 dark:border-slate-600/45">
                 {workspaceReady ? (
                   <>
+                    {importComplete ? (
+                      <div className="mx-auto w-full max-w-md rounded-xl border border-emerald-300/80 bg-emerald-50/95 px-4 py-3.5 dark:border-emerald-700/55 dark:bg-emerald-950/35">
+                        <h3 className="text-base font-bold text-emerald-950 dark:text-emerald-100">Import complete</h3>
+                        <p className="mt-1 text-sm text-emerald-900/95 dark:text-emerald-200/95">
+                          Your dashboard has been updated with this batch.
+                        </p>
+                        {isDemoMode ? (
+                          <p className="mt-1.5 text-xs font-medium text-emerald-900/90 dark:text-emerald-200/90">
+                            Demo imports are temporary and reset when you leave demo mode.
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
                     {importSuccessFlash ? (
                       <p
                         className="text-center text-sm font-medium text-emerald-800 dark:text-emerald-200"
@@ -1619,7 +1633,7 @@ export default function DataPage() {
                       disabled={savingForDashboard}
                       className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl bg-[color:var(--accent)] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
                     >
-                      {savingForDashboard ? "Saving…" : "View Dashboard Results"}
+                      {savingForDashboard ? "Saving..." : "View dashboard"}
                     </button>
                     {canAddAnotherGame && !isDemoMode ? (
                       <button
@@ -1628,12 +1642,12 @@ export default function DataPage() {
                         onClick={() => handleAddAnotherGame()}
                         className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
-                        Save Batch For Later
+                        Add more files to this batch
                       </button>
                     ) : null}
                     {canAddAnotherGame && !isDemoMode ? (
                       <p className="mx-auto w-full max-w-md text-center text-xs text-slate-500 dark:text-slate-400">
-                        Save this batch now and combine future uploads later.
+                        Continue building this batch with additional uploads in this session.
                       </p>
                     ) : null}
                     {isDemoMode ? (
@@ -1648,7 +1662,7 @@ export default function DataPage() {
                       type="button"
                       onClick={resetAll}
                       data-testid="imports-reset-button"
-                      className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                      className="mx-auto flex w-full max-w-md items-center justify-center rounded-xl border border-slate-300/90 bg-slate-50 px-6 py-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                     >
                       Reset imports
                     </button>

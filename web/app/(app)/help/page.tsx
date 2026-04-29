@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import Card from "../../../components/Card";
 import PageShell from "../../../components/PageShell";
 
-const SUPPORT_EMAIL = "bt2026@brickthread.com";
+const SUPPORT_EMAIL = "support@collectionops.com";
 
 const SECTION_SCROLL_HIGHLIGHT_MS = 2000;
 const SECTION_SCROLL_HIGHLIGHT_DELAY_MS = 600;
@@ -489,27 +489,17 @@ export default function HelpPage() {
 
         <section className="scroll-mt-24 border-t border-slate-200/80 pt-8 dark:border-slate-700/80 sm:pt-10">
           <h2 className="text-xl font-bold tracking-tight text-slate-950 dark:text-slate-50">Still stuck?</h2>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
-            <div className="min-w-0 flex-1 text-sm leading-relaxed">
-              <p className="text-slate-800 dark:text-slate-200">
-                📧{" "}
-                <a
-                  href={`mailto:${SUPPORT_EMAIL}`}
-                  className="font-semibold text-teal-700 underline decoration-teal-600/40 underline-offset-2 transition hover:text-teal-800 hover:decoration-teal-700 dark:text-teal-400 dark:decoration-teal-500/40 dark:hover:text-teal-300"
-                >
-                  {SUPPORT_EMAIL}
-                </a>
-              </p>
-              <p className="mt-2 text-slate-600 dark:text-slate-400">We usually respond within 24 hours.</p>
-            </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm leading-relaxed">
+            <p className="font-semibold text-slate-900 dark:text-slate-100">{SUPPORT_EMAIL}</p>
             <button
               type="button"
               onClick={copySupportEmail}
-              className="inline-flex h-9 shrink-0 items-center justify-center self-start rounded-lg border border-slate-200/90 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600/80 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:mt-0.5"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-slate-200/90 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600/80 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             >
-              {emailCopied ? "Copied" : "Copy email"}
+              {emailCopied ? "Copied!" : "Copy email"}
             </button>
           </div>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">We usually respond within 24 hours.</p>
         </section>
       </div>
     </PageShell>

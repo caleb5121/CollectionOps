@@ -9,6 +9,18 @@ const PUBLIC_PREFIX_PATHS = ["/auth/callback"];
 const DEMO_COOKIE = "cardops_public_demo";
 const DEMO_ALLOWED_PATHS = new Set(["/data", "/dashboard"]);
 
+function isMissingSessionError(error: unknown): boolean {
+  const maybe = error as { name?: string; message?: string; code?: string } | null;
+  const message = (maybe?.message ?? "").toLowerCase();
+  const name = (maybe?.name ?? "").toLowerCase();
+  const code = (maybe?.code ?? "").toLowerCase();
+  return (
+    message.includes("auth session missing") ||
+    name.includes("authsessionmissingerror") ||
+    code === "auth_session_missing"
+  );
+}
+
 function normalizePathname(pathname: string): string {
   if (!pathname) return "/";
   if (pathname === "/") return "/";
@@ -102,9 +114,15 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch (error) {
+    if (!isMissingSessionError(error) && process.env.NODE_ENV === "development") {
+      console.error("Supabase getUser failed in middleware", error);
+    }
+  }
   const host = request.headers.get("host");
   const devCookie = request.cookies.get(DEV_ACCESS_COOKIE)?.value ?? "";
   const isLocalDevBypass = isLocalDevelopmentRequestHost(host) && ["caleb", "empty", "demo"].includes(devCookie);

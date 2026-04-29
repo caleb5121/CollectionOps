@@ -7,6 +7,7 @@ import { useAuth } from "../AuthProvider";
 import DevAccessPanel from "./DevAccessPanel";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const RESEND_COOLDOWN_SECONDS = 30;
 
 type Props = {
   title: string;
@@ -27,6 +28,16 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
   const [authNotice, setAuthNotice] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendNotice, setResendNotice] = useState("");
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const id = window.setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (user) router.replace("/dashboard");
@@ -61,23 +72,41 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
     );
   }
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    setSent(false);
+  async function requestMagicLink() {
     const v = email.trim().toLowerCase();
     if (!EMAIL_RE.test(v)) {
       setError("Enter a valid email address.");
-      return;
+      return false;
     }
     setSending(true);
     const { error: linkError } = await sendMagicLink(v, otpKind);
     setSending(false);
     if (linkError) {
       setError(linkError);
-      return;
+      return false;
     }
+    return true;
+  }
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setResendNotice("");
+    setSent(false);
+    const ok = await requestMagicLink();
+    if (!ok) return;
     setSent(true);
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+  }
+
+  async function onResend() {
+    if (sending || resendCooldown > 0) return;
+    setError("");
+    setResendNotice("");
+    const ok = await requestMagicLink();
+    if (!ok) return;
+    setResendNotice("Email sent again.");
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
   }
 
   return (
@@ -90,10 +119,29 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
         </p>
       ) : null}
       {sent ? (
-        <p className="mt-6 rounded-lg border border-teal-200/90 bg-teal-50/90 px-4 py-3 text-sm leading-relaxed text-teal-950 dark:border-teal-800/50 dark:bg-teal-950/40 dark:text-teal-100">
-          Check your email for a sign-in link. You can close this tab; after you click the link you will be signed in
-          and sent to your dashboard.
-        </p>
+        <div className="mt-6 space-y-3">
+          <p className="rounded-lg border border-teal-200/90 bg-teal-50/90 px-4 py-3 text-sm leading-relaxed text-teal-950 dark:border-teal-800/50 dark:bg-teal-950/40 dark:text-teal-100">
+            {otpKind === "signup"
+              ? "Check your email to confirm your CollectionOps account. After you confirm, you will be signed in and sent to your dashboard."
+              : "Check your email for a sign-in link. You can close this tab; after you click the link you will be signed in and sent to your dashboard."}
+          </p>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => void onResend()}
+              disabled={sending || resendCooldown > 0}
+              className="inline-flex h-9 items-center justify-center rounded-lg border border-slate-300/90 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              {sending ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend email"}
+            </button>
+            {resendNotice ? <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">{resendNotice}</p> : null}
+          </div>
+          {error ? (
+            <p className="text-xs font-medium text-red-600 dark:text-red-400" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
       ) : (
         <form onSubmit={(e) => void onSubmit(e)} className="mt-6 space-y-4">
           <div>

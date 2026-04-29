@@ -64,12 +64,13 @@ function loadItems(): ShippingItem[] {
   return DEFAULT_ITEMS;
 }
 
-function saveItems(items: ShippingItem[]) {
-  if (typeof window === "undefined") return;
+function saveItems(items: ShippingItem[]): boolean {
+  if (typeof window === "undefined") return true;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    return true;
   } catch {
-    // ignore
+    return false;
   }
 }
 
@@ -80,10 +81,10 @@ function generateId() {
 type SettingsContextValue = {
   shippingItems: ShippingItem[];
   setShippingItems: (items: ShippingItem[]) => void;
-  addShippingItem: (initial?: Partial<Pick<ShippingItem, "name" | "cost">>) => void;
-  resetShippingDefaults: () => void;
-  removeShippingItem: (id: string) => void;
-  updateShippingItem: (id: string, updates: Partial<Pick<ShippingItem, "name" | "cost">>) => void;
+  addShippingItem: (initial?: Partial<Pick<ShippingItem, "name" | "cost">>) => boolean;
+  resetShippingDefaults: () => boolean;
+  removeShippingItem: (id: string) => boolean;
+  updateShippingItem: (id: string, updates: Partial<Pick<ShippingItem, "name" | "cost">>) => boolean;
   /** Writes the current breakdown to localStorage again (for an explicit Save action). */
   saveShippingSettings: () => void;
   estimatedShippingCostPerOrder: number;
@@ -119,6 +120,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addShippingItem = useCallback((initial?: Partial<Pick<ShippingItem, "name" | "cost">>) => {
+    let saved = true;
     setShippingItemsState((prev) => {
       const next = [
         ...prev,
@@ -128,34 +130,39 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           cost: Number(initial?.cost) || 0,
         },
       ];
-      saveItems(next);
+      saved = saveItems(next);
       return next;
     });
+    return saved;
   }, []);
 
   const resetShippingDefaults = useCallback(() => {
     const next = DEFAULT_SHIPPING_ITEMS.map((item) => ({ ...item }));
     setShippingItemsState(next);
-    saveItems(next);
+    return saveItems(next);
   }, []);
 
   const removeShippingItem = useCallback((id: string) => {
+    let saved = true;
     setShippingItemsState((prev) => {
       const next = prev.filter((i) => i.id !== id);
       if (next.length === 0) return prev;
-      saveItems(next);
+      saved = saveItems(next);
       return next;
     });
+    return saved;
   }, []);
 
   const updateShippingItem = useCallback((id: string, updates: Partial<Pick<ShippingItem, "name" | "cost">>) => {
+    let saved = true;
     setShippingItemsState((prev) => {
       const next = prev.map((i) =>
         i.id === id ? { ...i, ...updates } : i
       );
-      saveItems(next);
+      saved = saveItems(next);
       return next;
     });
+    return saved;
   }, []);
 
   const saveShippingSettings = useCallback(() => {

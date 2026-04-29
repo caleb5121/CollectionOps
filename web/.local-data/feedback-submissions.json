@@ -10,5 +10,11 @@
     "email": "angry@gmail.com",
     "message": "You suck!",
     "createdAt": "2026-04-25T17:06:25.105Z"
+  },
+  {
+    "name": "Test User",
+    "email": "test@example.com",
+    "message": "Feedback smoke test",
+    "createdAt": "2026-04-29T15:08:36.815Z"
   }
 ]
