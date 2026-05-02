@@ -151,15 +151,16 @@ export default function Home() {
               transition={{ duration: 0.35 }}
             >
               <motion.h1
-                className="w-full min-w-0 text-[2rem] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[2.25rem] lg:text-[2.45rem] lg:leading-[1.12] xl:text-[2.65rem] 2xl:text-[2.75rem]"
+                className="w-full min-w-0 text-[1.55rem] font-extrabold leading-tight tracking-tight text-white sm:text-[1.68rem] md:text-[1.78rem] lg:text-[clamp(1.45rem,1.35rem+0.55vw,1.95rem)] xl:text-[clamp(1.55rem,1.2rem+0.9vw,2.05rem)]"
                 initial={motionOn ? { opacity: 0, y: 12 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.02 }}
               >
-                Know if your TCGplayer store is actually working.
+                Know if your TCGplayer store is actually working. Whether you have 10 listings or 10,000, you deserve
+                to see what your store is actually doing.
               </motion.h1>
               <motion.p
-                className="mt-6 w-full max-w-[34rem] text-left text-[0.92rem] leading-[1.65] text-slate-200/95 sm:mt-7 sm:text-[0.975rem] sm:leading-[1.62]"
+                className="mt-6 w-full max-w-[34rem] text-left text-[1.02rem] leading-[1.65] text-slate-200/95 sm:mt-7 sm:text-[1.06rem] sm:leading-[1.62]"
                 initial={motionOn ? { opacity: 0, y: 8 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.08 }}
