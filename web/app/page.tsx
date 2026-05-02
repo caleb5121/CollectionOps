@@ -34,26 +34,15 @@ function HeroVisual({ animate }: { animate: boolean }) {
       animate={animate ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.55, delay: 0.1, ease: easeOut }}
     >
-      <motion.div
-        className="relative h-full w-full"
-        animate={animate ? { y: [0, -7, 0] } : undefined}
-        transition={{
-          duration: 6,
-          repeat: animate ? Infinity : 0,
-          ease: "easeInOut",
-          delay: 0.85,
-        }}
-      >
-        <Image
-          src="/landing-hero-dashboard.png"
-          alt="Seller using CollectionOps on a tablet — dashboard with profit, fees, and insights"
-          fill
-          className="h-full w-full object-cover object-[56%_35%] lg:object-right"
-          sizes="(max-width: 1023px) 100vw, 50vw"
-          priority
-          quality={92}
-        />
-      </motion.div>
+      <Image
+        src="/landing-hero-dashboard.png"
+        alt="Seller using CollectionOps on a tablet — dashboard with profit, fees, and insights"
+        fill
+        className="h-full w-full object-cover object-[56%_35%] lg:object-right"
+        sizes="(max-width: 1023px) 100vw, 50vw"
+        priority
+        quality={92}
+      />
     </motion.div>
   );
 }
@@ -138,49 +127,31 @@ export default function Home() {
               CollectionOps
             </span>
           </motion.div>
-          <motion.nav
-            className="flex shrink-0 items-center gap-2"
-            aria-label="Landing actions"
-            initial={motionOn ? { opacity: 0 } : false}
-            animate={motionOn ? { opacity: 1 } : undefined}
-            transition={{ duration: 0.4, delay: 0.12, ease: easeOut }}
-          >
-            <motion.div
-              initial={motionOn ? { opacity: 0, x: 10 } : false}
-              animate={motionOn ? { opacity: 1, x: 0 } : undefined}
-              transition={{ duration: 0.38, delay: 0.18, ease: easeOut }}
+          <nav className="flex shrink-0 items-center gap-2" aria-label="Landing actions">
+            <Link
+              href="/login"
+              className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/25 bg-white/10 px-[0.95rem] text-sm font-semibold text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-white/15 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-3.5 max-[380px]:text-[0.82rem] sm:h-11 sm:px-5 sm:text-[0.94rem]"
             >
-              <Link
-                href="/login"
-                className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/25 bg-white/10 px-[0.95rem] text-sm font-semibold text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-white/15 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-3.5 max-[380px]:text-[0.82rem] sm:h-11 sm:px-5 sm:text-[0.94rem]"
-              >
-                Log in
-              </Link>
-            </motion.div>
-            <motion.div
-              initial={motionOn ? { opacity: 0, x: 10 } : false}
-              animate={motionOn ? { opacity: 1, x: 0 } : undefined}
-              transition={{ duration: 0.38, delay: 0.26, ease: easeOut }}
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-white px-[1.05rem] text-sm font-semibold text-slate-900 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] ring-1 ring-white/25 transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-4 max-[380px]:text-[0.82rem] sm:h-11 sm:px-6 sm:text-[0.94rem]"
             >
-              <Link
-                href="/signup"
-                className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-white px-[1.05rem] text-sm font-semibold text-slate-900 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] ring-1 ring-white/25 transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-4 max-[380px]:text-[0.82rem] sm:h-11 sm:px-6 sm:text-[0.94rem]"
-              >
-                Sign up
-              </Link>
-            </motion.div>
-          </motion.nav>
+              Sign up
+            </Link>
+          </nav>
         </motion.header>
 
-        <div className="relative z-[1] mx-auto grid w-full max-w-[1920px] grid-cols-1 gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-0">
+        <div className="relative z-[1] mx-auto grid w-full max-w-[1920px] grid-cols-1 gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-0 lg:min-h-[min(90svh,56rem)]">
             <motion.div
-              className={`flex min-w-0 flex-col items-start justify-center px-4 pb-6 text-left sm:px-6 sm:pb-8 lg:min-h-0 lg:justify-center lg:px-8 lg:pb-10 lg:pr-10 xl:pl-12 xl:pr-12 ${contentPad}`}
+              className={`flex min-w-0 flex-col items-start justify-center px-4 pb-12 text-left sm:px-6 sm:pb-14 lg:min-h-0 lg:justify-center lg:px-8 lg:pb-20 lg:pr-10 xl:pl-12 xl:pr-12 ${contentPad}`}
               initial={motionOn ? { opacity: 0 } : false}
               animate={motionOn ? { opacity: 1 } : undefined}
               transition={{ duration: 0.35 }}
             >
               <motion.h1
-                className="min-w-0 text-[2rem] font-extrabold leading-[1.12] tracking-tight text-white sm:text-[2.25rem] lg:text-[2.45rem] lg:leading-[1.1] xl:text-[2.65rem] xl:whitespace-nowrap 2xl:text-[2.75rem]"
+                className="w-full min-w-0 text-[2rem] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[2.25rem] lg:text-[2.45rem] lg:leading-[1.12] xl:text-[2.65rem] 2xl:text-[2.75rem]"
                 initial={motionOn ? { opacity: 0, y: 12 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.02 }}
@@ -197,11 +168,10 @@ export default function Home() {
                 guessing, just your real numbers made simple.
               </motion.p>
               <motion.div
-                className="mt-7 w-full max-w-2xl sm:mt-8 lg:mt-9"
+                className="mt-9 w-full max-w-2xl sm:mt-10 lg:mt-12"
                 initial={motionOn ? { opacity: 0, y: 8 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.11 }}
-                whileHover={motionOn ? { y: -2 } : undefined}
               >
                 <LandingEmailCapture compact heroWideForm ctaOnly />
               </motion.div>
