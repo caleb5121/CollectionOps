@@ -184,92 +184,87 @@ export default function Home() {
       </section>
 
       <section
-        className="relative z-[1] border-t border-teal-900/15 bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
-        aria-labelledby="what-this-is-not-heading"
+        className="relative z-[1] overflow-hidden border-t border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white"
+        aria-labelledby="landing-value-prop-heading"
       >
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_0%,rgba(45,212,191,0.12),transparent_55%)]"
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
           <motion.div
-            className="mx-auto max-w-3xl rounded-2xl border border-teal-900/10 bg-white/70 px-6 py-8 text-center shadow-[0_8px_28px_-18px_rgba(15,23,42,0.18)] sm:px-10 sm:py-10"
+            className="mx-auto flex max-w-3xl flex-col items-center text-center"
             initial={motionOn ? { opacity: 0, y: 14 } : false}
             whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
             viewport={{ once: true, margin: "-32px" }}
             transition={{ duration: 0.45, ease: easeOut }}
           >
             <h2
-              id="what-this-is-not-heading"
-              className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-800/80"
+              id="landing-value-prop-heading"
+              className="max-w-[36rem] text-[1.75rem] font-medium leading-snug tracking-tight text-white sm:text-[2rem]"
             >
-              What this is not
+              Built for individual TCGplayer sellers who want to know if their store is actually working.
             </h2>
-            <p className="mt-6 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-7 sm:text-[0.95rem]">
-              CollectionOps is not inventory management. It will not tell you to buy that Charizard, flip that collection,
-              or which card is trending right now.
+            <p className="mt-6 max-w-[600px] text-base leading-relaxed text-white/65 sm:mt-8">
+              Not inventory advice. Not a pro tool. Not telling you what to buy or what card is trending. Just your real
+              numbers, clearly laid out, so you know if all that buying and selling is actually paying off.
             </p>
-            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
-              It is the one thing missing from every TCG seller tool. A clear look at whether your store is actually
-              making money.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section
-        className="relative z-[1] bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
-        aria-labelledby="buying-to-build-heading"
-      >
-        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-          <motion.div
-            className="mx-auto max-w-[700px] text-left"
-            initial={motionOn ? { opacity: 0, y: 14 } : false}
-            whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
-            viewport={{ once: true, margin: "-32px" }}
-            transition={{ duration: 0.45, ease: easeOut }}
-          >
-            <h2
-              id="buying-to-build-heading"
-              className="text-xl font-bold leading-snug tracking-tight text-slate-900 sm:text-2xl"
+            <ul
+              className="mx-auto mt-8 w-full max-w-md space-y-1 text-left sm:mt-9"
+              role="list"
             >
-              Are you buying to build your store?
-            </h2>
-            <p className="mt-5 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-6 sm:text-[0.95rem]">
-              Picking up collections, buying bulk, grabbing singles to resell. It adds up fast.
-            </p>
-            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
-              CollectionOps will not tell you what to buy. But it will tell you if all that buying is actually paying off.
-            </p>
-            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
-              Not &quot;should I buy this Pikachu card.&quot; The question CollectionOps answers is: is my store actually
-              growing or am I just spending money?
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section
-        className="relative z-[1] bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
-        aria-labelledby="level-4-heading"
-      >
-        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-          <motion.div
-            className="mx-auto max-w-[700px] text-left"
-            initial={motionOn ? { opacity: 0, y: 14 } : false}
-            whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
-            viewport={{ once: true, margin: "-32px" }}
-            transition={{ duration: 0.45, ease: easeOut }}
-          >
-            <h2
-              id="level-4-heading"
-              className="text-xl font-bold leading-snug tracking-tight text-slate-900 sm:text-2xl"
-            >
-              Trying to reach Level 4?
-            </h2>
-            <p className="mt-5 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-6 sm:text-[0.95rem]">
-              Stop guessing if you are on track. See exactly what your store is doing week by week so you are building
-              toward something, not just hoping.
-            </p>
-            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
-              CollectionOps is built for individual TCGplayer sellers, not stores, not pros. Just you and your cards.
-            </p>
+              <li className="flex items-start gap-2.5">
+                <svg
+                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.25}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                <span className="text-sm leading-snug text-white/90">
+                  Your profit after TCGplayer fees, stamps, and supplies
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <svg
+                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.25}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                <span className="text-sm leading-snug text-white/90">
+                  Whether your store is growing week by week
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <svg
+                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.25}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                <span className="text-sm leading-snug text-white/90">
+                  If you are on track to reach the next seller level
+                </span>
+              </li>
+            </ul>
           </motion.div>
         </div>
       </section>
@@ -278,7 +273,7 @@ export default function Home() {
         className="relative z-[1] bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
         aria-label="Benefits"
       >
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:px-8 lg:pb-24 lg:pt-8">
           <LandingBenefits animate={motionOn} tone="band" />
           <TradingCardStrip
             animate={motionOn}
