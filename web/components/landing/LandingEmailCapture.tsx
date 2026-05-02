@@ -91,16 +91,23 @@ export default function LandingEmailCapture({
       : "gap-3 sm:gap-3.5";
 
   if (ctaOnly) {
+    const heroCtaLarge = "self-start px-10 py-4 sm:px-11 sm:py-4 sm:text-lg";
+    const heroCtaLargeCentered = "self-center px-10 py-4 sm:px-11 sm:py-4 sm:text-lg";
+    const linkAlignClass = heroWideForm
+      ? framed
+        ? heroCtaLargeCentered
+        : heroCtaLarge
+      : "self-start px-6 py-3 sm:px-8 sm:py-3.5 sm:text-base";
     const ctaBlock = (
       <div className="flex w-full flex-col items-stretch gap-0">
         <Link
           href="/data?demo=1"
-          className={`inline-flex w-auto shrink-0 items-center justify-center rounded-xl bg-orange-500 text-base font-extrabold text-white shadow-[0_18px_38px_-14px_rgba(249,115,22,0.8)] transition hover:bg-orange-600 hover:shadow-[0_22px_44px_-16px_rgba(249,115,22,0.84)] active:scale-[0.99] ${heroWideForm ? "self-center px-10 py-4 sm:px-11 sm:py-4 sm:text-lg" : "self-start px-6 py-3 sm:px-8 sm:py-3.5 sm:text-base"}`}
+          className={`inline-flex w-auto shrink-0 items-center justify-center rounded-xl bg-orange-500 text-base font-extrabold text-white shadow-[0_18px_38px_-14px_rgba(249,115,22,0.8)] transition hover:bg-orange-600 hover:shadow-[0_22px_44px_-16px_rgba(249,115,22,0.84)] active:scale-[0.99] ${linkAlignClass}`}
         >
           Try Demo
         </Link>
         <p
-          className={`mt-2.5 text-[14px] font-semibold leading-snug tracking-tight text-slate-200 ${heroWideForm ? "text-center" : ""}`}
+          className={`mt-2.5 text-[14px] font-semibold leading-snug tracking-tight text-slate-200 ${heroWideForm && framed ? "text-center" : "text-left"}`}
         >
           No signup required
         </p>

@@ -143,23 +143,23 @@ export default function Home() {
           </nav>
         </motion.header>
 
-        <div className="relative z-[1] mx-auto grid w-full max-w-[1920px] grid-cols-1 gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-0 lg:min-h-[min(90svh,56rem)]">
+        <div className="relative z-[1] mx-auto grid w-full max-w-[1920px] grid-cols-1 gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-0">
             <motion.div
-              className={`flex min-w-0 flex-col items-start justify-center px-4 pb-12 text-left sm:px-6 sm:pb-14 lg:min-h-0 lg:justify-center lg:px-8 lg:pb-20 lg:pr-10 xl:pl-12 xl:pr-12 ${contentPad}`}
+              className={`flex min-w-0 flex-col items-start justify-center px-4 pb-6 text-left sm:px-6 sm:pb-8 lg:min-h-0 lg:justify-center lg:px-8 lg:pb-10 lg:pr-10 xl:pl-12 xl:pr-12 ${contentPad}`}
               initial={motionOn ? { opacity: 0 } : false}
               animate={motionOn ? { opacity: 1 } : undefined}
               transition={{ duration: 0.35 }}
             >
               <motion.h1
-                className="text-[1.8rem] font-extrabold leading-[1.18] tracking-tight text-white sm:text-4xl sm:leading-[1.15] lg:text-[2.35rem] lg:leading-[1.12]"
+                className="min-w-0 text-[2rem] font-extrabold leading-[1.12] tracking-tight text-white sm:text-[2.25rem] lg:text-[2.45rem] lg:leading-[1.1] xl:text-[2.65rem] xl:whitespace-nowrap 2xl:text-[2.75rem]"
                 initial={motionOn ? { opacity: 0, y: 12 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.02 }}
               >
-                Finally see if your TCGplayer store is actually profitable.
+                Know if your TCGplayer store is actually profitable.
               </motion.h1>
               <motion.p
-                className="mt-7 max-w-[34rem] text-[0.92rem] leading-[1.65] text-slate-200/95 sm:mt-8 sm:text-[0.975rem] sm:leading-[1.62]"
+                className="mt-6 w-full max-w-[34rem] text-left text-[0.92rem] leading-[1.65] text-slate-200/95 sm:mt-7 sm:text-[0.975rem] sm:leading-[1.62]"
                 initial={motionOn ? { opacity: 0, y: 8 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.08 }}
@@ -168,12 +168,12 @@ export default function Home() {
                 guessing, just your real numbers made simple.
               </motion.p>
               <motion.div
-                className="mt-9 w-full max-w-2xl sm:mt-10 lg:mt-12"
+                className="mt-7 w-full max-w-2xl sm:mt-8 lg:mt-9"
                 initial={motionOn ? { opacity: 0, y: 8 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.11 }}
               >
-                <LandingEmailCapture compact framed heroWideForm ctaOnly />
+                <LandingEmailCapture compact heroWideForm ctaOnly />
               </motion.div>
             </motion.div>
 
@@ -191,9 +191,9 @@ export default function Home() {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_0%,rgba(45,212,191,0.12),transparent_55%)]"
           aria-hidden
         />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
+        <div className="relative mx-auto w-full max-w-7xl px-4 py-[80px] sm:px-6 lg:px-8">
           <motion.div
-            className="mx-auto flex max-w-3xl flex-col items-center text-center"
+            className="mx-auto flex w-full flex-col items-center text-center"
             initial={motionOn ? { opacity: 0, y: 14 } : false}
             whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
             viewport={{ once: true, margin: "-32px" }}
@@ -201,21 +201,18 @@ export default function Home() {
           >
             <h2
               id="landing-value-prop-heading"
-              className="max-w-[36rem] text-[1.75rem] font-medium leading-snug tracking-tight text-white sm:text-[2rem]"
+              className="max-w-4xl text-[28px] font-semibold leading-snug tracking-tight text-white sm:text-[30px] lg:text-[32px]"
             >
-              Built for individual TCGplayer sellers who want to know if their store is actually working.
+              Know if your store is actually working.
             </h2>
-            <p className="mt-6 max-w-[600px] text-base leading-relaxed text-white/65 sm:mt-8">
-              Not inventory advice. Not a pro tool. Not telling you what to buy or what card is trending. Just your real
-              numbers, clearly laid out, so you know if all that buying and selling is actually paying off.
+            <p className="mt-6 max-w-[580px] text-base leading-relaxed text-slate-300 sm:mt-7">
+              Not inventory advice. Not a pro tool. Just your real numbers, clearly laid out, so you know if all that
+              buying and selling is actually paying off.
             </p>
-            <ul
-              className="mx-auto mt-8 w-full max-w-md space-y-1 text-left sm:mt-9"
-              role="list"
-            >
+            <ul className="mx-auto mt-8 flex w-max max-w-full flex-col items-stretch gap-1.5 text-left sm:mt-9" role="list">
               <li className="flex items-start gap-2.5">
                 <svg
-                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-400"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-teal-400"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -226,13 +223,13 @@ export default function Home() {
                 >
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
-                <span className="text-sm leading-snug text-white/90">
+                <span className="text-base leading-snug text-white">
                   Your profit after TCGplayer fees, stamps, and supplies
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <svg
-                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-400"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-teal-400"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -243,13 +240,13 @@ export default function Home() {
                 >
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
-                <span className="text-sm leading-snug text-white/90">
+                <span className="text-base leading-snug text-white">
                   Whether your store is growing week by week
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <svg
-                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-400"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-teal-400"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -260,7 +257,7 @@ export default function Home() {
                 >
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
-                <span className="text-sm leading-snug text-white/90">
+                <span className="text-base leading-snug text-white">
                   If you are on track to reach the next seller level
                 </span>
               </li>
