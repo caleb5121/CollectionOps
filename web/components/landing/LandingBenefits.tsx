@@ -95,16 +95,24 @@ export default function LandingBenefits({ animate, tone = "hero" }: Props) {
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, ease: easeOut }}
     >
-      <p className={titleClass}>Why it helps</p>
+      <motion.p
+        className={titleClass}
+        initial={animate ? { opacity: 0, y: 8 } : false}
+        whileInView={animate ? { opacity: 1, y: 0 } : undefined}
+        viewport={{ once: true, margin: "-32px" }}
+        transition={{ duration: 0.4, ease: easeOut }}
+      >
+        Why it helps
+      </motion.p>
       <ul className="mt-10 grid grid-cols-1 gap-10 sm:mt-12 sm:gap-12 md:grid-cols-3 md:gap-8 lg:gap-10" role="list">
         {benefits.map(({ key, Icon, title, description }, i) => (
           <motion.li
             key={key}
             className="flex flex-col items-center text-center"
-            initial={animate ? { opacity: 0, y: 12 } : false}
-            whileInView={animate ? { opacity: 1, y: 0 } : undefined}
+            initial={animate ? { opacity: 0, y: 18, scale: 0.98 } : false}
+            whileInView={animate ? { opacity: 1, y: 0, scale: 1 } : undefined}
             viewport={{ once: true, margin: "-24px" }}
-            transition={{ duration: 0.4, delay: i * 0.06, ease: easeOut }}
+            transition={{ duration: 0.45, delay: 0.08 + i * 0.09, ease: easeOut }}
           >
             <div className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-teal-900/10 bg-white/75 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.3)] md:mb-4">
               <Icon tone={tone} />

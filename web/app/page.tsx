@@ -34,15 +34,26 @@ function HeroVisual({ animate }: { animate: boolean }) {
       animate={animate ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.55, delay: 0.1, ease: easeOut }}
     >
-      <Image
-        src="/landing-hero-dashboard.png"
-        alt="Seller using CollectionOps on a tablet — dashboard with profit, fees, and insights"
-        fill
-        className="h-full w-full object-cover object-[56%_35%] lg:object-right"
-        sizes="(max-width: 1023px) 100vw, 50vw"
-        priority
-        quality={92}
-      />
+      <motion.div
+        className="relative h-full w-full"
+        animate={animate ? { y: [0, -7, 0] } : undefined}
+        transition={{
+          duration: 6,
+          repeat: animate ? Infinity : 0,
+          ease: "easeInOut",
+          delay: 0.85,
+        }}
+      >
+        <Image
+          src="/landing-hero-dashboard.png"
+          alt="Seller using CollectionOps on a tablet — dashboard with profit, fees, and insights"
+          fill
+          className="h-full w-full object-cover object-[56%_35%] lg:object-right"
+          sizes="(max-width: 1023px) 100vw, 50vw"
+          priority
+          quality={92}
+        />
+      </motion.div>
     </motion.div>
   );
 }
@@ -56,10 +67,10 @@ function TradingCardStrip({ animate, className }: { animate: boolean; className?
           <motion.div
             key={card.alt}
             className={cardW}
-            initial={animate ? { opacity: 0, y: 20 } : false}
-            whileInView={animate ? { opacity: 1, y: 0 } : undefined}
+            initial={animate ? { opacity: 0, y: 24, scale: 0.96 } : false}
+            whileInView={animate ? { opacity: 1, y: 0, scale: 1 } : undefined}
             viewport={{ once: true, margin: "-32px" }}
-            transition={{ duration: 0.4, delay: i * 0.04, ease: easeOut }}
+            transition={{ duration: 0.45, delay: i * 0.05, ease: easeOut }}
           >
             <div className="overflow-hidden rounded-xl border border-white/90 bg-white shadow-[0_14px_32px_-8px_rgba(0,0,0,0.42)] ring-1 ring-slate-900/[0.06] transition duration-200 ease-out will-change-transform hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] dark:border-slate-400/55 dark:bg-slate-800 dark:ring-white/10">
               <Image
@@ -127,20 +138,38 @@ export default function Home() {
               CollectionOps
             </span>
           </motion.div>
-          <nav className="flex shrink-0 items-center gap-2" aria-label="Landing actions">
-            <Link
-              href="/login"
-              className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/25 bg-white/10 px-[0.95rem] text-sm font-semibold text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-white/15 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-3.5 max-[380px]:text-[0.82rem] sm:h-11 sm:px-5 sm:text-[0.94rem]"
+          <motion.nav
+            className="flex shrink-0 items-center gap-2"
+            aria-label="Landing actions"
+            initial={motionOn ? { opacity: 0 } : false}
+            animate={motionOn ? { opacity: 1 } : undefined}
+            transition={{ duration: 0.4, delay: 0.12, ease: easeOut }}
+          >
+            <motion.div
+              initial={motionOn ? { opacity: 0, x: 10 } : false}
+              animate={motionOn ? { opacity: 1, x: 0 } : undefined}
+              transition={{ duration: 0.38, delay: 0.18, ease: easeOut }}
             >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-white px-[1.05rem] text-sm font-semibold text-slate-900 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] ring-1 ring-white/25 transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-4 max-[380px]:text-[0.82rem] sm:h-11 sm:px-6 sm:text-[0.94rem]"
+              <Link
+                href="/login"
+                className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-white/25 bg-white/10 px-[0.95rem] text-sm font-semibold text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-white/15 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-3.5 max-[380px]:text-[0.82rem] sm:h-11 sm:px-5 sm:text-[0.94rem]"
+              >
+                Log in
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={motionOn ? { opacity: 0, x: 10 } : false}
+              animate={motionOn ? { opacity: 1, x: 0 } : undefined}
+              transition={{ duration: 0.38, delay: 0.26, ease: easeOut }}
             >
-              Sign up
-            </Link>
-          </nav>
+              <Link
+                href="/signup"
+                className="inline-flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-white px-[1.05rem] text-sm font-semibold text-slate-900 shadow-[0_10px_24px_-14px_rgba(15,23,42,0.55)] ring-1 ring-white/25 transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-[0_14px_26px_-14px_rgba(15,23,42,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 max-[380px]:h-[2.375rem] max-[380px]:px-4 max-[380px]:text-[0.82rem] sm:h-11 sm:px-6 sm:text-[0.94rem]"
+              >
+                Sign up
+              </Link>
+            </motion.div>
+          </motion.nav>
         </motion.header>
 
         <div className="relative z-[1] mx-auto grid w-full max-w-[1920px] grid-cols-1 gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-0">
@@ -156,7 +185,7 @@ export default function Home() {
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.02 }}
               >
-                Know if your TCGplayer store is actually profitable.
+                Know if your TCGplayer store is actually working.
               </motion.h1>
               <motion.p
                 className="mt-6 w-full max-w-[34rem] text-left text-[0.92rem] leading-[1.65] text-slate-200/95 sm:mt-7 sm:text-[0.975rem] sm:leading-[1.62]"
@@ -172,6 +201,7 @@ export default function Home() {
                 initial={motionOn ? { opacity: 0, y: 8 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.11 }}
+                whileHover={motionOn ? { y: -2 } : undefined}
               >
                 <LandingEmailCapture compact heroWideForm ctaOnly />
               </motion.div>
@@ -192,77 +222,58 @@ export default function Home() {
           aria-hidden
         />
         <div className="relative mx-auto w-full max-w-7xl px-4 py-[80px] sm:px-6 lg:px-8">
-          <motion.div
-            className="mx-auto flex w-full flex-col items-center text-center"
-            initial={motionOn ? { opacity: 0, y: 14 } : false}
-            whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
-            viewport={{ once: true, margin: "-32px" }}
-            transition={{ duration: 0.45, ease: easeOut }}
-          >
-            <h2
+          <div className="mx-auto flex w-full flex-col items-center text-center">
+            <motion.h2
               id="landing-value-prop-heading"
               className="max-w-4xl text-[28px] font-semibold leading-snug tracking-tight text-white sm:text-[30px] lg:text-[32px]"
+              initial={motionOn ? { opacity: 0, y: 18 } : false}
+              whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, ease: easeOut }}
             >
               Know if your store is actually working.
-            </h2>
-            <p className="mt-6 max-w-[580px] text-base leading-relaxed text-slate-300 sm:mt-7">
+            </motion.h2>
+            <motion.p
+              className="mt-6 max-w-[580px] text-base leading-relaxed text-slate-300 sm:mt-7"
+              initial={motionOn ? { opacity: 0, y: 14 } : false}
+              whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.48, delay: 0.06, ease: easeOut }}
+            >
               Not inventory advice. Not a pro tool. Just your real numbers, clearly laid out, so you know if all that
               buying and selling is actually paying off.
-            </p>
+            </motion.p>
             <ul className="mx-auto mt-8 flex w-max max-w-full flex-col items-stretch gap-1.5 text-left sm:mt-9" role="list">
-              <li className="flex items-start gap-2.5">
-                <svg
-                  className="mt-0.5 h-5 w-5 shrink-0 text-teal-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2.25}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
+              {[
+                "Your profit after TCGplayer fees, stamps, and supplies",
+                "Whether your store is growing week by week",
+                "If you are on track to reach the next seller level",
+              ].map((line, i) => (
+                <motion.li
+                  key={line}
+                  className="flex items-start gap-2.5"
+                  initial={motionOn ? { opacity: 0, x: -12 } : false}
+                  whileInView={motionOn ? { opacity: 1, x: 0 } : undefined}
+                  viewport={{ once: true, margin: "-24px" }}
+                  transition={{ duration: 0.4, delay: 0.12 + i * 0.08, ease: easeOut }}
                 >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <span className="text-base leading-snug text-white">
-                  Your profit after TCGplayer fees, stamps, and supplies
-                </span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <svg
-                  className="mt-0.5 h-5 w-5 shrink-0 text-teal-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2.25}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <span className="text-base leading-snug text-white">
-                  Whether your store is growing week by week
-                </span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <svg
-                  className="mt-0.5 h-5 w-5 shrink-0 text-teal-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2.25}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                <span className="text-base leading-snug text-white">
-                  If you are on track to reach the next seller level
-                </span>
-              </li>
+                  <svg
+                    className="mt-0.5 h-5 w-5 shrink-0 text-teal-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.25}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  <span className="text-base leading-snug text-white">{line}</span>
+                </motion.li>
+              ))}
             </ul>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -276,20 +287,32 @@ export default function Home() {
             animate={motionOn}
             className="mt-16 w-full border-t border-teal-900/12 pb-1 pt-12 sm:mt-18 sm:pt-14 lg:mt-24 lg:pt-16"
           />
-          <p className="mx-auto mt-6 max-w-3xl text-center text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-7 sm:max-w-4xl sm:text-[0.95rem]">
+          <motion.p
+            className="mx-auto mt-6 max-w-3xl text-center text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-7 sm:max-w-4xl sm:text-[0.95rem]"
+            initial={motionOn ? { opacity: 0, y: 12 } : false}
+            whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
+            viewport={{ once: true, margin: "-32px" }}
+            transition={{ duration: 0.45, ease: easeOut }}
+          >
             Built for individual sellers across Pokemon, MTG, Lorcana, One Piece, Star Wars Unlimited, and more. If you
             sell on TCGplayer, this is for you.
-          </p>
+          </motion.p>
         </div>
       </section>
 
       <section className="relative z-[1] bg-white text-slate-900" aria-label="Questions and next step">
-        <div className="mx-auto max-w-7xl px-4 py-18 sm:px-6 sm:py-22 lg:px-10 lg:py-26">
+        <div className="mx-auto max-w-7xl px-4 pb-18 pt-8 sm:px-6 sm:pb-22 sm:pt-10 lg:px-10 lg:pb-26 lg:pt-12">
           <LandingFAQ animate={motionOn} tone="light" />
           <div className="mt-16 sm:mt-20 lg:mt-24">
             <LandingFinalCTA animate={motionOn} tone="light" />
           </div>
-          <footer className="mt-14 border-t border-slate-200/85 pt-7 text-slate-600 sm:mt-16 sm:pt-8">
+          <motion.footer
+            className="mt-14 border-t border-slate-200/85 pt-7 text-slate-600 sm:mt-16 sm:pt-8"
+            initial={motionOn ? { opacity: 0 } : false}
+            whileInView={motionOn ? { opacity: 1 } : undefined}
+            viewport={{ once: true, margin: "-20px" }}
+            transition={{ duration: 0.45, ease: easeOut }}
+          >
             <div className="flex flex-col items-center justify-between gap-4 text-center sm:gap-5 md:flex-row md:text-left">
               <p className="text-xs font-medium tracking-tight text-slate-500 sm:text-sm">
                 © 2026 BrickThread. All rights reserved.
@@ -306,7 +329,7 @@ export default function Home() {
                 </Link>
               </nav>
             </div>
-          </footer>
+          </motion.footer>
         </div>
       </section>
     </main>

@@ -56,22 +56,29 @@ export default function LandingFAQ({ animate, tone = "dark" }: Props) {
   const rowBorder = light ? "border-b border-slate-200/90 first:border-t first:border-slate-200/90" : "border-b border-white/[0.08] first:border-t first:border-white/[0.08]";
 
   return (
-    <motion.div
-      className="mx-auto w-full max-w-2xl px-0 sm:px-2"
-      initial={animate ? { opacity: 0, y: 16 } : false}
-      whileInView={animate ? { opacity: 1, y: 0 } : undefined}
-      viewport={{ once: true, margin: "-48px" }}
-      transition={{ duration: 0.45, ease: easeOut }}
-    >
-      <h2 className={`text-center text-2xl font-bold tracking-tight sm:text-3xl ${heading}`}>
+    <div className="mx-auto w-full max-w-2xl px-0 sm:px-2">
+      <motion.h2
+        className={`text-center text-2xl font-bold tracking-tight sm:text-3xl ${heading}`}
+        initial={animate ? { opacity: 0, y: 14 } : false}
+        whileInView={animate ? { opacity: 1, y: 0 } : undefined}
+        viewport={{ once: true, margin: "-48px" }}
+        transition={{ duration: 0.45, ease: easeOut }}
+      >
         Things you&apos;re probably wondering
-      </h2>
+      </motion.h2>
 
       <ul className="mt-10 space-y-0 rounded-2xl border border-slate-200/90 bg-white/75 px-3 shadow-[0_16px_36px_-24px_rgba(15,23,42,0.28)] backdrop-blur-sm sm:mt-12 sm:px-5" role="list">
         {faqItems.map((item, i) => {
           const isOpen = open.has(i);
           return (
-            <li key={item.q} className={rowBorder}>
+            <motion.li
+              key={item.q}
+              className={rowBorder}
+              initial={animate ? { opacity: 0, x: -10 } : false}
+              whileInView={animate ? { opacity: 1, x: 0 } : undefined}
+              viewport={{ once: true, margin: "-20px" }}
+              transition={{ duration: 0.4, delay: animate ? 0.06 + i * 0.07 : 0, ease: easeOut }}
+            >
               <button
                 type="button"
                 onClick={() => toggle(i)}
@@ -99,10 +106,10 @@ export default function LandingFAQ({ animate, tone = "dark" }: Props) {
                   <p className={`pb-4 pr-10 text-sm leading-relaxed sm:pb-5 sm:text-[0.9375rem] sm:leading-relaxed ${answer}`}>{item.a}</p>
                 </div>
               </div>
-            </li>
+            </motion.li>
           );
         })}
       </ul>
-    </motion.div>
+    </div>
   );
 }
