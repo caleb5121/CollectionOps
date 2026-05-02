@@ -78,42 +78,53 @@ export default function PageShell({
   );
 }
 
-/** Blue gradient intro card - same visual language as Settings / synced banners. */
+/** Page intro card — default blue, or dark navy to match the dashboard hero. */
 export function PageIntroGradient({
   title: heading,
   children,
   className = "",
   size = "default",
+  tone = "blue",
 }: {
   title: string;
   children?: ReactNode;
   className?: string;
   /** `strip` = low-height label bar; `compact` = denser card; `default` = standard. */
   size?: "default" | "compact" | "strip";
+  tone?: "blue" | "dark";
 }) {
   const shell =
     size === "strip"
-      ? "rounded-lg px-4 py-2.5 shadow-sm sm:rounded-xl sm:px-4 sm:py-3"
+      ? "rounded-lg border border-slate-200/80 px-4 py-2.5 shadow-sm dark:border-slate-700/70 sm:rounded-xl sm:px-4 sm:py-3"
       : size === "compact"
-        ? "rounded-xl p-4 shadow-sm sm:rounded-xl sm:p-5"
-        : "rounded-xl p-6 shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_2px_8px_-2px_rgba(0,0,0,0.12),0_12px_32px_-8px_rgba(30,58,138,0.35)] sm:rounded-2xl sm:p-8";
+        ? "rounded-xl border border-slate-200/80 p-4 shadow-sm dark:border-slate-700/70 sm:rounded-xl sm:p-5"
+        : "rounded-xl border border-slate-200/80 p-6 shadow-[0_1px_0_rgba(255,255,255,0.2)_inset,0_2px_8px_-2px_rgba(0,0,0,0.12),0_12px_32px_-8px_rgba(30,58,138,0.35)] dark:border-slate-700/70 sm:rounded-2xl sm:p-8";
   const titleClass =
     size === "strip"
       ? "text-base font-bold tracking-tight text-white sm:text-lg"
       : size === "compact"
         ? "text-base font-bold tracking-tight text-white sm:text-lg"
         : "text-lg font-bold tracking-tight text-white sm:text-xl";
+  const bg =
+    tone === "dark"
+      ? "bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950"
+      : "bg-gradient-to-br from-blue-600 via-blue-600 to-blue-800";
   return (
-    <div
-      className={`relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-600 to-blue-800 ${shell} ${className}`}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(255,255,255,0.06) 8px, rgba(255,255,255,0.06) 9px)",
-        }}
-      />
+    <div className={`relative overflow-hidden ${bg} ${shell} ${className}`}>
+      {tone === "dark" ? (
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_0%,rgba(45,212,191,0.12),transparent_55%)]"
+          aria-hidden
+        />
+      ) : (
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(255,255,255,0.06) 8px, rgba(255,255,255,0.06) 9px)",
+          }}
+        />
+      )}
       <div className="relative">
         <h2 className={titleClass}>{heading}</h2>
         {children != null ? (

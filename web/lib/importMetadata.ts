@@ -94,6 +94,11 @@ export function formatDashboardViewingDateRangeLabel(from: Date, to: Date): stri
   return `Viewing data from ${startStr} to ${endStr}`;
 }
 
+/** Month and year for “Showing your last import: …” when only a single anchor date is known. */
+export function formatImportMonthYear(d: Date): string {
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(d);
+}
+
 export function rangesOverlap(a0: Date, a1: Date, b0: Date, b1: Date): boolean {
   return a0.getTime() <= b1.getTime() && b0.getTime() <= a1.getTime();
 }

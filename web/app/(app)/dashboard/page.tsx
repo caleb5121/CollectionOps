@@ -11,8 +11,11 @@ import { toNumberLooseCell } from "../../../lib/orderListColumnMap";
 import {
   aggregateWorkspaceDateRange,
   formatDashboardViewingDateRangeLabel,
+  formatImportMonthYear,
 } from "../../../lib/importMetadata";
+import { buildDailyTrendPointsFromTrendsSegments } from "../../../lib/trendsSeriesFromImports";
 import { DashboardEmptyState } from "../../../components/dashboard/DashboardEmptyState";
+import DashboardRevenueChart from "../../../components/dashboard/DashboardRevenueChart";
 import AiInsightsHeaderButton from "../../../components/dashboard/AiInsightsHeaderButton";
 import { useAuth } from "../../../components/AuthProvider";
 import { fetchCurrentUserStoreData, type UserStoreDataRow } from "../../../lib/supabase/userStoreData";
@@ -79,6 +82,8 @@ export default function DashboardPage() {
     costsForNetDisplay,
     effectiveOrderImports,
     effectiveSummaryImports,
+    lastImportDate,
+    lastImportBatch,
   } = useData();
   const [savedStoreData, setSavedStoreData] = useState<UserStoreDataRow | null>(null);
 
@@ -115,6 +120,26 @@ export default function DashboardPage() {
   const dashboardDateRangeLabel = workspaceDateRange
     ? formatDashboardViewingDateRangeLabel(workspaceDateRange.from, workspaceDateRange.to)
     : "No import date range available";
+
+  const dashboardDailyRevenue = useMemo(
+    () =>
+      buildDailyTrendPointsFromTrendsSegments([
+        { orderImports: effectiveOrderImports, summaryImports: effectiveSummaryImports },
+      ]),
+    [effectiveOrderImports, effectiveSummaryImports],
+  );
+
+  const heroImportPeriodLabel = useMemo(() => {
+    if (workspaceDateRange) return dashboardDateRangeLabel;
+    if (savedStoreData) {
+      const anchor = lastImportDate ?? lastImportBatch?.at ?? null;
+      if (anchor) {
+        return `Showing your last import: ${formatImportMonthYear(anchor)}`;
+      }
+      return "Showing your saved dashboard";
+    }
+    return dashboardDateRangeLabel;
+  }, [workspaceDateRange, savedStoreData, lastImportDate, lastImportBatch, dashboardDateRangeLabel]);
 
   const grossSalesValue = savedStoreData?.total_revenue ?? derived.grossSales;
   const ordersValue = savedStoreData?.total_orders ?? derived.orders;
@@ -184,11 +209,7 @@ export default function DashboardPage() {
                       workspaceDateRange || savedStoreData ? "text-teal-100/90" : "text-white/45"
                     }`}
                   >
-                    {workspaceDateRange
-                      ? dashboardDateRangeLabel
-                      : savedStoreData
-                        ? "Saved dashboard snapshot"
-                        : dashboardDateRangeLabel}
+                    {heroImportPeriodLabel}
                   </p>
                   <p
                     data-testid="dashboard-total-earned"
@@ -242,6 +263,9 @@ export default function DashboardPage() {
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Fees + shipping</p>
               </div>
             </div>
+            {dashboardDailyRevenue.length > 0 ? (
+              <DashboardRevenueChart points={dashboardDailyRevenue} />
+            ) : null}
           </div>
         </div>
 

@@ -1300,7 +1300,7 @@ export default function DataPage() {
             </p>
           ) : null}
           {!uploadsEnabled && !isDemoMode ? (
-            <p className="mt-1.5 text-[11px] font-medium text-amber-800 dark:text-amber-300">
+            <p className="mt-1.5 text-[11px] font-medium text-slate-500 dark:text-teal-200/55">
               {importGame === "Other" ? "Type your label to upload." : "Pick a label to upload."}
             </p>
           ) : null}

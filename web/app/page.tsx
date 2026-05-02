@@ -156,9 +156,7 @@ export default function Home() {
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.02 }}
               >
-                Spend less time tracking your store.
-                <br />
-                Spend more time enjoying it.
+                Finally see if your TCGplayer store is actually profitable.
               </motion.h1>
               <motion.p
                 className="mt-7 max-w-[34rem] text-[0.92rem] leading-[1.65] text-slate-200/95 sm:mt-8 sm:text-[0.975rem] sm:leading-[1.62]"
@@ -166,8 +164,8 @@ export default function Home() {
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.08 }}
               >
-                CollectionOps turns your TCGplayer exports into clear, trackable progress so you can skip the tedious
-                sorting, calculating, and figuring it out.
+                Upload your exports and see exactly what you kept after fees, stamps, and supplies. No spreadsheets, no
+                guessing, just your real numbers made simple.
               </motion.p>
               <motion.div
                 className="mt-9 w-full max-w-2xl sm:mt-10 lg:mt-12"
@@ -175,7 +173,7 @@ export default function Home() {
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
                 transition={{ ...lineTransition, delay: 0.11 }}
               >
-                <LandingEmailCapture compact framed heroWideForm />
+                <LandingEmailCapture compact framed heroWideForm ctaOnly />
               </motion.div>
             </motion.div>
 
@@ -187,6 +185,97 @@ export default function Home() {
 
       <section
         className="relative z-[1] border-t border-teal-900/15 bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
+        aria-labelledby="what-this-is-not-heading"
+      >
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+          <motion.div
+            className="mx-auto max-w-3xl rounded-2xl border border-teal-900/10 bg-white/70 px-6 py-8 text-center shadow-[0_8px_28px_-18px_rgba(15,23,42,0.18)] sm:px-10 sm:py-10"
+            initial={motionOn ? { opacity: 0, y: 14 } : false}
+            whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
+            viewport={{ once: true, margin: "-32px" }}
+            transition={{ duration: 0.45, ease: easeOut }}
+          >
+            <h2
+              id="what-this-is-not-heading"
+              className="text-xs font-semibold uppercase tracking-[0.14em] text-teal-800/80"
+            >
+              What this is not
+            </h2>
+            <p className="mt-6 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-7 sm:text-[0.95rem]">
+              CollectionOps is not inventory management. It will not tell you to buy that Charizard, flip that collection,
+              or which card is trending right now.
+            </p>
+            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
+              It is the one thing missing from every TCG seller tool. A clear look at whether your store is actually
+              making money.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      <section
+        className="relative z-[1] bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
+        aria-labelledby="buying-to-build-heading"
+      >
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+          <motion.div
+            className="mx-auto max-w-[700px] text-left"
+            initial={motionOn ? { opacity: 0, y: 14 } : false}
+            whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
+            viewport={{ once: true, margin: "-32px" }}
+            transition={{ duration: 0.45, ease: easeOut }}
+          >
+            <h2
+              id="buying-to-build-heading"
+              className="text-xl font-bold leading-snug tracking-tight text-slate-900 sm:text-2xl"
+            >
+              Are you buying to build your store?
+            </h2>
+            <p className="mt-5 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-6 sm:text-[0.95rem]">
+              Picking up collections, buying bulk, grabbing singles to resell. It adds up fast.
+            </p>
+            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
+              CollectionOps will not tell you what to buy. But it will tell you if all that buying is actually paying off.
+            </p>
+            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
+              Not &quot;should I buy this Pikachu card.&quot; The question CollectionOps answers is: is my store actually
+              growing or am I just spending money?
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      <section
+        className="relative z-[1] bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
+        aria-labelledby="level-4-heading"
+      >
+        <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+          <motion.div
+            className="mx-auto max-w-[700px] text-left"
+            initial={motionOn ? { opacity: 0, y: 14 } : false}
+            whileInView={motionOn ? { opacity: 1, y: 0 } : undefined}
+            viewport={{ once: true, margin: "-32px" }}
+            transition={{ duration: 0.45, ease: easeOut }}
+          >
+            <h2
+              id="level-4-heading"
+              className="text-xl font-bold leading-snug tracking-tight text-slate-900 sm:text-2xl"
+            >
+              Trying to reach Level 4?
+            </h2>
+            <p className="mt-5 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-6 sm:text-[0.95rem]">
+              Stop guessing if you are on track. See exactly what your store is doing week by week so you are building
+              toward something, not just hoping.
+            </p>
+            <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-5 sm:text-[0.95rem]">
+              CollectionOps is built for individual TCGplayer sellers, not stores, not pros. Just you and your cards.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      <section
+        className="relative z-[1] bg-gradient-to-b from-teal-50/95 via-cyan-50/88 to-slate-100/95 text-slate-900"
         aria-label="Benefits"
       >
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
@@ -195,8 +284,9 @@ export default function Home() {
             animate={motionOn}
             className="mt-16 w-full border-t border-teal-900/12 pb-1 pt-12 sm:mt-18 sm:pt-14 lg:mt-24 lg:pt-16"
           />
-          <p className="mx-auto mt-6 max-w-3xl text-center text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-7 sm:text-[0.95rem]">
-            Built for Pokémon, MTG, Lorcana, One Piece, Star Wars Unlimited, and more.
+          <p className="mx-auto mt-6 max-w-3xl text-center text-sm font-medium leading-relaxed text-slate-700/95 sm:mt-7 sm:max-w-4xl sm:text-[0.95rem]">
+            Built for individual sellers across Pokemon, MTG, Lorcana, One Piece, Star Wars Unlimited, and more. If you
+            sell on TCGplayer, this is for you.
           </p>
         </div>
       </section>

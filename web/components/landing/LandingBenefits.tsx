@@ -52,23 +52,24 @@ function IconSearch({ tone }: { tone: Tone }) {
 
 const benefits = [
   {
-    key: "spreadsheet",
-    title: "Stop digging through spreadsheets",
+    key: "profit",
+    title: "See your real profit",
     description:
-      "See your store clearly without sorting, filtering, or piecing things together.",
-    Icon: IconSpreadsheet,
+      "Not just what sold. What you actually kept after TCGplayer fees, stamps, envelopes, and toploaders.",
+    Icon: IconSearch,
   },
   {
-    key: "clock",
-    title: "Track real progress over time",
-    description: "Know how your store is actually performing week to week without guessing.",
+    key: "track",
+    title: "Track what is working",
+    description:
+      "Know which weeks were strong, which were slow, and what your average order is actually worth.",
     Icon: IconClock,
   },
   {
-    key: "search",
-    title: "Understand what's working",
-    description: "Spot trends, fees, and patterns so you can make better decisions without overthinking it.",
-    Icon: IconSearch,
+    key: "spreadsheet",
+    title: "Skip the spreadsheet",
+    description: "Upload two CSVs from TCGplayer. Done. Your numbers are ready in seconds.",
+    Icon: IconSpreadsheet,
   },
 ] as const;
 

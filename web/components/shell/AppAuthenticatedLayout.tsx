@@ -10,6 +10,7 @@ import { DataProvider } from "../DataProvider";
 import { MotionProvider } from "../motion/MotionProvider";
 import { SettingsProvider, useSettings } from "../SettingsProvider";
 import AppSidebar from "./AppSidebar";
+import FeedbackFloatingButton from "./FeedbackFloatingButton";
 import MainToolbar from "./MainToolbar";
 
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
@@ -70,7 +71,10 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
             <div className="ml-28 flex min-h-screen min-w-0 flex-col">
               <MainToolbar />
               <main className="app-canvas-texture min-h-0 flex-1 overflow-auto">
-                <div className="relative z-[1] min-h-full">{children}</div>
+                <div className="relative z-[1] min-h-full">
+                  {children}
+                  <FeedbackFloatingButton />
+                </div>
               </main>
             </div>
           </div>

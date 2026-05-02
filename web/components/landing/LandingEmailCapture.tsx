@@ -15,6 +15,8 @@ type LandingEmailCaptureProps = {
   heroWideForm?: boolean;
   /** Optional lead attribution source (e.g. reddit, tiktok, demo, landing_footer) */
   source?: string;
+  /** Hero-only: Try Demo + copy, no email form */
+  ctaOnly?: boolean;
 };
 
 export default function LandingEmailCapture({
@@ -23,6 +25,7 @@ export default function LandingEmailCapture({
   framed,
   heroWideForm,
   source,
+  ctaOnly,
 }: LandingEmailCaptureProps) {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
@@ -86,6 +89,38 @@ export default function LandingEmailCapture({
     : compact
       ? "gap-2.5 sm:gap-3"
       : "gap-3 sm:gap-3.5";
+
+  if (ctaOnly) {
+    const ctaBlock = (
+      <div className="flex w-full flex-col items-stretch gap-0">
+        <Link
+          href="/data?demo=1"
+          className={`inline-flex w-auto shrink-0 items-center justify-center rounded-xl bg-orange-500 text-base font-extrabold text-white shadow-[0_18px_38px_-14px_rgba(249,115,22,0.8)] transition hover:bg-orange-600 hover:shadow-[0_22px_44px_-16px_rgba(249,115,22,0.84)] active:scale-[0.99] ${heroWideForm ? "self-center px-10 py-4 sm:px-11 sm:py-4 sm:text-lg" : "self-start px-6 py-3 sm:px-8 sm:py-3.5 sm:text-base"}`}
+        >
+          Try Demo
+        </Link>
+        <p
+          className={`mt-2.5 text-[14px] font-semibold leading-snug tracking-tight text-slate-200 ${heroWideForm ? "text-center" : ""}`}
+        >
+          No signup required
+        </p>
+      </div>
+    );
+    const root = ["w-full", heroWideForm ? "" : "max-w-xl", className].filter(Boolean).join(" ");
+    if (framed) {
+      const framePad = heroWideForm ? "p-4 sm:p-5 lg:p-6" : "p-4 sm:p-5";
+      return (
+        <div className={root}>
+          <div
+            className={`rounded-2xl border border-white/15 bg-slate-950/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md sm:rounded-[1.125rem] ${framePad}`}
+          >
+            {ctaBlock}
+          </div>
+        </div>
+      );
+    }
+    return <div className={root}>{ctaBlock}</div>;
+  }
 
   const primaryBlock = (
     <div className={`flex w-full flex-col items-stretch ${stackGap}`}>

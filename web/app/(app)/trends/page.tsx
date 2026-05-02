@@ -48,6 +48,39 @@ function orderDataDateRange(orderData: CsvData | null, orderDateKey: string | nu
   return { start: min, end: max };
 }
 
+const trendsBackBtnClass =
+  "inline-flex items-center justify-center rounded-lg border border-slate-200/90 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 dark:border-slate-600/80 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:bg-slate-800/90";
+
+function TrendsEmptyChartPreview() {
+  return (
+    <div
+      className="relative mx-auto mt-8 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-100/80 dark:border-slate-700/60 dark:bg-slate-800/40"
+      aria-hidden
+    >
+      <div className="pointer-events-none select-none px-4 pb-6 pt-5 opacity-50 blur-[1px] dark:opacity-45">
+        <div className="mb-3 flex gap-2">
+          <div className="h-2 w-24 rounded bg-slate-300/90 dark:bg-slate-600/80" />
+          <div className="h-2 w-14 rounded bg-slate-300/80 dark:bg-slate-600/70" />
+        </div>
+        <div className="flex h-40 items-end gap-1 px-1 sm:h-44">
+          {[38, 62, 34, 78, 48, 72, 44, 88, 52, 74, 58, 82, 46, 68].map((h, i) => (
+            <div
+              key={i}
+              className="min-w-0 flex-1 rounded-t-sm bg-gradient-to-t from-slate-300/90 to-slate-200/80 dark:from-slate-600/85 dark:to-slate-500/70"
+              style={{ height: `${h}%` }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center bg-white/50 px-4 backdrop-blur-[2px] dark:bg-slate-950/50">
+        <p className="max-w-[18rem] text-center text-sm font-semibold leading-snug text-slate-800 dark:text-slate-100">
+          Upload your first import to unlock Trends.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function formatDataRangeLabel(start: Date, end: Date): string {
   const sameYear = start.getFullYear() === end.getFullYear();
   const base: Intl.DateTimeFormatOptions = { month: "long", day: "numeric" };
@@ -224,7 +257,7 @@ export default function TrendsPage() {
   return (
     <PageShell maxWidth="wide-xl" contentClassName="px-6 pt-5 pb-5 sm:px-8 sm:pt-6 sm:pb-6 lg:px-10">
       {showFullTrendsUi ? (
-        <PageIntroGradient title="Trends" size="strip">
+        <PageIntroGradient title="Trends" size="strip" tone="dark">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <div className="min-w-0 flex-1 space-y-1">
               {dataRangeLabel ? (
@@ -242,10 +275,7 @@ export default function TrendsPage() {
                 <p className="text-[11px] text-white/65">Add another period to unlock period-over-period KPIs.</p>
               ) : null}
             </div>
-            <Link
-              href="/dashboard"
-              className="shrink-0 self-start rounded-md border border-white/35 bg-white/10 px-2.5 py-1 text-center text-[11px] font-semibold text-white transition hover:bg-white/20 sm:self-center"
-            >
+            <Link href="/dashboard" className={`${trendsBackBtnClass} shrink-0 self-start text-[11px] sm:self-center`}>
               Back to Dashboard
             </Link>
           </div>
@@ -283,11 +313,9 @@ export default function TrendsPage() {
               Go to Imports
             </Link>
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">Start with one CSV pair</p>
-            <p className="mt-4">
-              <Link
-                href="/dashboard"
-                className="text-xs font-medium text-slate-500 underline-offset-2 hover:underline dark:text-slate-500"
-              >
+            <TrendsEmptyChartPreview />
+            <p className="mt-6">
+              <Link href="/dashboard" className={trendsBackBtnClass}>
                 Back to Dashboard
               </Link>
             </p>
@@ -384,17 +412,14 @@ export default function TrendsPage() {
                   <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
                     From your {chartGranularity} chart
                   </p>
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-4 divide-y divide-slate-200/90 overflow-hidden rounded-xl border border-slate-200/75 bg-white/70 dark:divide-slate-700/65 dark:border-slate-700/55 dark:bg-slate-900/50">
                     {[insightsStructured.best, insightsStructured.weakest, insightsStructured.trend].map((block) => (
-                      <div
-                        key={block.label}
-                        className="rounded-lg border border-slate-200/70 bg-white/60 px-3 py-2.5 dark:border-slate-700/55 dark:bg-slate-900/40"
-                      >
-                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <div key={block.label} className="px-3.5 py-3.5 first:pt-3.5 last:pb-3.5 sm:px-4 sm:py-4">
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                           {block.label}
                         </p>
                         <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{block.period}</p>
-                        <p className="mt-1 text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">{block.value}</p>
+                        <p className="mt-1.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">{block.value}</p>
                       </div>
                     ))}
                   </div>
@@ -453,10 +478,7 @@ export default function TrendsPage() {
             </Reveal>
 
             <div className="flex justify-center pb-1">
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-slate-500 underline-offset-2 hover:text-slate-800 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
-              >
+              <Link href="/dashboard" className={trendsBackBtnClass}>
                 Back to Dashboard
               </Link>
             </div>
