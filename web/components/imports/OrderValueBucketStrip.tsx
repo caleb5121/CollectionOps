@@ -3,10 +3,10 @@
 import type { OrderBuckets } from "../../lib/importsInsights";
 
 const BAR_COLORS = [
-  "bg-slate-300/90 dark:bg-slate-600/90",
-  "bg-slate-400/90 dark:bg-slate-500/85",
-  "bg-slate-500/85 dark:bg-slate-400/70",
-  "bg-slate-600/90 dark:bg-slate-300/50",
+  "bg-zinc-300 dark:bg-zinc-600",
+  "bg-zinc-400 dark:bg-zinc-500",
+  "bg-zinc-500 dark:bg-zinc-400",
+  "bg-[color:var(--accent)]/80 dark:bg-[color:var(--accent)]/70",
 ];
 
 export function OrderValueBucketStrip({ buckets, total }: { buckets: OrderBuckets; total: number }) {
@@ -22,7 +22,7 @@ export function OrderValueBucketStrip({ buckets, total }: { buckets: OrderBucket
   return (
     <>
       <div
-        className="mt-3 flex h-2.5 w-full overflow-hidden rounded-full bg-slate-200/90 dark:bg-slate-800/90"
+        className="mt-3 flex h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
         role="img"
         aria-label="Order value distribution"
       >
@@ -33,7 +33,7 @@ export function OrderValueBucketStrip({ buckets, total }: { buckets: OrderBucket
           return (
             <div
               key={key}
-              className={`h-full min-w-px ${BAR_COLORS[i] ?? "bg-slate-400"}`}
+              className={`h-full min-w-px ${BAR_COLORS[i] ?? "bg-zinc-400"}`}
               style={{ width: `${pct}%` }}
               title={`${label}: ${Math.round(pct)}%`}
             />
@@ -41,23 +41,25 @@ export function OrderValueBucketStrip({ buckets, total }: { buckets: OrderBucket
         })}
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-      {bands.map(({ key, label }) => {
-        const c = buckets[key];
-        const pct = total > 0 ? Math.round((c / total) * 100) : 0;
-        return (
-          <div
-            key={key}
-            className="rounded-xl border border-slate-200/80 bg-white/90 px-3 py-2.5 text-center dark:border-slate-700/60 dark:bg-slate-900/50"
-          >
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div>
-            <div className="mt-1 text-sm font-bold tabular-nums text-slate-900 dark:text-slate-50">{pct}%</div>
-            <div className="text-[11px] tabular-nums text-slate-500 dark:text-slate-500">
-              {c} order{c !== 1 ? "s" : ""}
+        {bands.map(({ key, label }) => {
+          const c = buckets[key];
+          const pct = total > 0 ? Math.round((c / total) * 100) : 0;
+          return (
+            <div
+              key={key}
+              className="rounded-lg border border-zinc-200/90 bg-white px-3 py-2.5 text-center shadow-sm dark:border-zinc-800/75 dark:bg-zinc-900/50"
+            >
+              <div className="text-[0.625rem] font-medium uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400">
+                {label}
+              </div>
+              <div className="mt-1 text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">{pct}%</div>
+              <div className="text-[0.6875rem] tabular-nums text-zinc-500 dark:text-zinc-500">
+                {c} order{c !== 1 ? "s" : ""}
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
     </>
   );
 }

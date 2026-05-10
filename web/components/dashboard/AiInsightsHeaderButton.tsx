@@ -9,7 +9,7 @@ const toolbarBtn =
   "inline-flex items-center justify-center rounded-lg border text-xs font-semibold shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900";
 
 const heroBtn =
-  "inline-flex shrink-0 items-center justify-center rounded-lg border border-orange-300/75 bg-gradient-to-r from-orange-500 to-rose-500 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_10px_24px_-12px_rgba(249,115,22,0.75)] transition hover:from-orange-400 hover:to-rose-400 hover:shadow-[0_14px_28px_-12px_rgba(244,63,94,0.75)] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-200/80";
+  "inline-flex shrink-0 items-center justify-center rounded-lg border border-[color:color-mix(in_oklab,var(--cta-orange)_55%,transparent)] bg-[color:var(--cta-orange)] px-3 py-1.5 text-xs font-semibold text-white shadow-[0_2px_8px_-2px_rgba(234,88,12,0.45)] transition-[transform,background-color,box-shadow] duration-200 hover:bg-[color:var(--cta-orange-hover)] hover:shadow-[0_4px_14px_-4px_rgba(234,88,12,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--cta-orange)]/35 active:scale-[0.97]";
 
 type Props = {
   /** `hero` = light button on dark dashboard card; `toolbar` = previous shell placement. */

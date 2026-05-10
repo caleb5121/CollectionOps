@@ -113,7 +113,7 @@ export async function appendOrderImportsFromFiles(
         phase: "parsing",
         fileName: file.name,
         detail: large
-          ? `Large file (${rowCount.toLocaleString()} rows) — parsing complete`
+          ? `Large file (${rowCount.toLocaleString()} rows) - parsing complete`
           : `Parsed ${rowCount.toLocaleString()} rows`,
         totalRows: rowCount,
         largeImport: large,
@@ -392,7 +392,7 @@ export async function appendSummaryImportsFromFiles(
         phase: "parsing",
         fileName: file.name,
         detail: large
-          ? `Large file (${rowCount.toLocaleString()} rows) — parsing complete`
+          ? `Large file (${rowCount.toLocaleString()} rows) - parsing complete`
           : `Parsed ${rowCount.toLocaleString()} rows`,
         totalRows: rowCount,
         largeImport: large,

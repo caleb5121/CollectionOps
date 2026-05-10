@@ -49,28 +49,30 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
     >
       <MotionProvider>
         <div className="min-h-screen">
-          <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-100 via-white to-slate-100 px-4 py-10 sm:hidden">
-            <div className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white/95 p-6 text-center shadow-[0_22px_44px_-30px_rgba(15,23,42,0.28)]">
-              <p className="text-lg font-bold tracking-tight text-slate-900">CollectionOps</p>
-              <p className="mt-4 text-sm leading-relaxed text-slate-700">
+          <div className="flex min-h-screen items-center justify-center bg-[var(--surface-muted)] px-4 py-10 sm:hidden">
+            <div className="w-full max-w-md rounded-xl border border-[color-mix(in_oklab,var(--border-warm)_88%,transparent)] bg-[var(--surface-raised)] p-6 text-center shadow-[0_4px_24px_-8px_rgba(28,25,23,0.1)]">
+              <p className="text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-50">CollectionOps</p>
+              <p className="mt-4 text-sm leading-relaxed text-stone-700 dark:text-stone-300">
                 CollectionOps works best on a desktop or laptop.
                 <br />
                 Please open this page on a larger screen to import files and review your dashboard.
               </p>
               <Link
                 href="/"
-                className="mt-6 inline-flex items-center justify-center rounded-xl bg-[color:var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
+                className="mt-6 inline-flex items-center justify-center rounded-xl bg-[color:var(--accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_2px_6px_rgba(13,148,136,0.35),0_6px_18px_-6px_rgba(13,148,136,0.25)] transition-[transform,filter] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:brightness-[1.06] active:scale-[0.97]"
               >
                 Back to home
               </Link>
             </div>
           </div>
 
-          <div className="hidden min-h-screen sm:block">
-            <AppSidebar />
-            <div className="ml-28 flex min-h-screen min-w-0 flex-col">
-              <MainToolbar />
-              <main className="app-canvas-texture min-h-0 flex-1 overflow-auto">
+          <div className="hidden min-h-screen flex-col sm:flex">
+            <MainToolbar />
+            <div className="flex min-h-0 min-w-0 flex-1 pt-4">
+              <div className="flex min-h-0 w-[10.25rem] shrink-0 flex-col border-r border-[color:var(--divider-accent)] bg-[color-mix(in_oklab,var(--surface-muted)_42%,var(--background))] px-3 pb-5 pl-4 pr-2 pt-3 dark:border-stone-800/60 dark:bg-[color-mix(in_oklab,var(--surface-muted)_40%,var(--background))]">
+                <AppSidebar />
+              </div>
+              <main className="app-canvas-texture min-h-0 min-w-0 flex-1 overflow-auto pl-4 pr-5 pb-6 pt-3 lg:pl-5 lg:pr-6">
                 <div className="relative z-[1] min-h-full">
                   {children}
                   <FeedbackFloatingButton />

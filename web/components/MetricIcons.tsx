@@ -1,6 +1,6 @@
 /** Minimal inline icons for KPI rows - 20×20, currentColor. */
 
-/** Sales / “You sold” — small trend line + arrow up. */
+/** Sales / “You sold” - small trend line + arrow up. */
 export function IconRevenue({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden>
@@ -20,7 +20,7 @@ export function IconRevenue({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
-/** Orders — envelope. */
+/** Orders - envelope. */
 export function IconOrders({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden>
@@ -34,7 +34,7 @@ export function IconOrders({ className = "h-5 w-5" }: { className?: string }) {
   );
 }
 
-/** Costs / fees — dollar bill. */
+/** Costs / fees - dollar bill. */
 export function IconCost({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden>
@@ -44,11 +44,11 @@ export function IconCost({ className = "h-5 w-5" }: { className?: string }) {
         strokeLinejoin="round"
         d="M5 6.5h10a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1v-5a1 1 0 011-1z"
       />
-      {/* simple $ */}
+      {/* simple $ - vertical bar + two symmetric curves (valid SVG number boundaries) */}
       <path
         strokeWidth={1.85}
         strokeLinecap="round"
-        d="M10 7.5v5M8.35 9.2c.35-.45 1-.7 1.65-.7s1.3.25 1.65.7.35 1-.05 1.45-.75.75-1.6.75-1.35.25-1.35.75.35.55 1.05.8 1.65.8s1.3-.25 1.65-.7"
+        d="M10 7.5v5M7.75 10c0 -1.15 4.5 -1.15 4.5 0M7.75 10c0 1.15 4.5 1.15 4.5 0"
       />
     </svg>
   );

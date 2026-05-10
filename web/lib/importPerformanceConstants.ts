@@ -1,8 +1,8 @@
 /**
  * Intended scale (browser session, local processing):
- * - Small: under 1k rows — fast path, sync filter
- * - Medium: 1k–10k — worker parse + chunked validation as needed
- * - Super sellers: 10k–50k+ — same pipeline; progress UI; preview capped
+ * - Small: under 1k rows - fast path, sync filter
+ * - Medium: 1k–10k - worker parse + chunked validation as needed
+ * - Super sellers: 10k–50k+ - same pipeline; progress UI; preview capped
  */
 
 /** Rows: above this, row filtering yields to the event loop in chunks (keeps UI responsive). */

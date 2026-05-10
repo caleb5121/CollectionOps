@@ -34,7 +34,7 @@ test.describe("Navigation", () => {
     { path: "/dashboard", title: "Dashboard" },
     { path: "/data", title: "Imports" },
     { path: "/trends", title: "Trends" },
-    { path: "/settings", title: "Settings" },
+    { path: "/settings/shipping", title: "Shipping Settings" },
     { path: "/account", title: "Account" },
     { path: "/help", title: "Help & FAQs" },
   ];
@@ -62,12 +62,14 @@ test.describe("Navigation", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
   });
 
-  test("sidebar settings and FAQs", async ({ page }) => {
+  test("toolbar help and settings", async ({ page }) => {
+    await page.goto("/data?demo=1");
     await page.goto("/dashboard");
-    await page.getByRole("complementary", { name: "Sidebar" }).getByRole("link", { name: "Settings" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Settings" })).toBeVisible();
-    await page.getByRole("complementary", { name: "Sidebar" }).getByRole("link", { name: "FAQs" }).click();
+    await page.getByRole("banner").getByRole("link", { name: "Help and FAQs" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Help & FAQs" })).toBeVisible();
+    await page.goto("/dashboard");
+    await page.getByRole("banner").getByRole("link", { name: "Shipping Settings" }).click();
+    await expect(page.getByRole("banner").getByRole("heading", { name: "Shipping Settings" })).toBeVisible();
   });
 });
 
@@ -95,7 +97,7 @@ test.describe("Empty states", () => {
   test("Imports asks for label before upload", async ({ page }) => {
     await page.goto("/data");
     await expect(page.getByText(/Pick a label to upload/i)).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Import your data" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Import your store data" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Order List upload" }).getByRole("heading", { name: "1. Order List" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Sales Summary upload" }).getByRole("heading", { name: "2. Sales Summary" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Order List upload" }).getByText("Add your Order List to begin")).toBeVisible();
@@ -245,7 +247,7 @@ async function summaryCoverage(page: import("@playwright/test").Page) {
 
 test.describe("Settings persistence", () => {
   test("shipping cost persists across reload (autosave)", async ({ page }) => {
-    await page.goto("/settings");
+    await page.goto("/settings/shipping");
     const firstCost = page.locator('input[type="number"]').first();
     await firstCost.fill("2.05");
     await firstCost.blur();

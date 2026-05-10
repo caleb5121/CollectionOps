@@ -18,11 +18,11 @@ export type AppUser = {
 };
 
 export const USER_PROFILE_STORAGE_KEY = "cardops-user-profile-v1";
-/** Legacy local session key — cleared when Supabase session is active. */
+/** Legacy local session key - cleared when Supabase session is active. */
 export const AUTH_SESSION_STORAGE_KEY = "cardops-auth-session-v1";
 const LEGACY_LOCAL_PROFILE_KEY = "cardops-local-profile-v1";
 
-/** Former `DEFAULT_APP_USER` seed — remove so it is not treated as a real profile. */
+/** Former `DEFAULT_APP_USER` seed - remove so it is not treated as a real profile. */
 const LEGACY_DEMO_STORE = "Sophia Card Shop";
 const LEGACY_DEMO_EMAIL = "sophia.martinez@northridgecards.example";
 

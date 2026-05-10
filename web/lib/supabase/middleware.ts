@@ -7,7 +7,8 @@ import { isSupabaseConfigured } from "./client";
 const PUBLIC_EXACT_PATHS = new Set(["/", "/login", "/signup", "/privacy", "/terms", "/contact"]);
 const PUBLIC_PREFIX_PATHS = ["/auth/callback"];
 const DEMO_COOKIE = "cardops_public_demo";
-const DEMO_ALLOWED_PATHS = new Set(["/data", "/dashboard"]);
+/** Routes reachable in public demo mode (cookie from /data?demo=1). */
+const DEMO_ALLOWED_PATHS = new Set(["/data", "/dashboard", "/help", "/settings", "/settings/shipping"]);
 
 function isMissingSessionError(error: unknown): boolean {
   const maybe = error as { name?: string; message?: string; code?: string } | null;

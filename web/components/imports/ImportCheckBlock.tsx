@@ -39,7 +39,7 @@ export function ImportCheckBlock({
   check: ImportCheck;
   integrityWarning?: string;
   kind: "order" | "summary";
-  /** When true, only show rejection copy — never “No issues detected”. */
+  /** When true, only show rejection copy - never “No issues detected”. */
   rejected?: boolean;
   rejectionReason?: string | null;
 }) {
@@ -47,8 +47,8 @@ export function ImportCheckBlock({
     const raw = formatImportFileRejectionMessage(rejectionReason ?? "");
     const line = raw.length > 480 ? `${raw.slice(0, 480)}…` : raw;
     return (
-      <div className="mt-2 space-y-1 text-[10px] leading-relaxed">
-        <p className="font-semibold text-red-800 dark:text-red-200">{line}</p>
+      <div className="mt-2 space-y-1 text-[0.625rem] leading-relaxed">
+        <p className="font-semibold text-rose-800 dark:text-rose-200">{line}</p>
       </div>
     );
   }
@@ -57,17 +57,17 @@ export function ImportCheckBlock({
   const { text: issuesLine, tone: issuesTone } = issuesSummary(check, integrityWarning);
   const issuesClass =
     issuesTone === "ok"
-      ? "text-emerald-700/80 dark:text-emerald-400/75"
+      ? "text-emerald-800/90 dark:text-emerald-300/90"
       : "text-amber-900 dark:text-amber-200/95";
 
   if (isOrder) {
     const dateLine = check.dateRangeLabel ? `Date range: ${check.dateRangeLabel}` : "Date range: not available from this file";
     return (
-      <div className="mt-2 space-y-1 text-[10px] leading-relaxed">
-        <p className="font-medium text-slate-800 dark:text-slate-200">
+      <div className="mt-2 space-y-1 text-[0.625rem] leading-relaxed">
+        <p className="font-medium text-zinc-800 dark:text-zinc-200">
           {check.rowsAccepted.toLocaleString()} orders processed
         </p>
-        <p className="text-slate-600 dark:text-slate-400">{dateLine}</p>
+        <p className="text-zinc-600 dark:text-zinc-400">{dateLine}</p>
         <p className={`${issuesClass} ${issuesTone === "ok" ? "font-medium" : ""}`}>{issuesLine}</p>
       </div>
     );
@@ -75,9 +75,9 @@ export function ImportCheckBlock({
 
   const rowLabel = `${check.rowsAccepted.toLocaleString()} row${check.rowsAccepted === 1 ? "" : "s"} processed`;
   return (
-    <div className="mt-2 space-y-1 text-[10px] leading-relaxed">
-      <p className="font-medium text-slate-800 dark:text-slate-200">Summary totals loaded</p>
-      <p className="text-slate-600 dark:text-slate-400">{rowLabel}</p>
+    <div className="mt-2 space-y-1 text-[0.625rem] leading-relaxed">
+      <p className="font-medium text-zinc-800 dark:text-zinc-200">Summary totals loaded</p>
+      <p className="text-zinc-600 dark:text-zinc-400">{rowLabel}</p>
       <p className={`${issuesClass} ${issuesTone === "ok" ? "font-medium" : ""}`}>{issuesLine}</p>
     </div>
   );

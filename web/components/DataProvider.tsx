@@ -214,7 +214,7 @@ function orderDateToLocalMidnightMs(orderDateRaw: string): number | null {
 
 /**
  * Build daily trend buckets from merged order CSV (shared by workspace + Trends-only paths).
- * `blocked` batches are filtered before merge for Trends; `ready` + `review` are included — see importTrendsEligibility.
+ * `blocked` batches are filtered before merge for Trends; `ready` + `review` are included - see importTrendsEligibility.
  */
 function buildTrendDataFromWorkspaceOrder(
   orderData: CsvData | null,
@@ -348,7 +348,7 @@ export type DataContextValue = {
   /** Order List vs Sales Summary calendar alignment (month overlap). */
   importTimeAlignment: ImportTimeAlignment | null;
   importHasRejectedFiles: boolean;
-  /** Active import row only — validation, mapping, and the Imports workspace card use this, not merged session data. */
+  /** Active import row only - validation, mapping, and the Imports workspace card use this, not merged session data. */
   draftImportEvaluation: ReturnType<typeof evaluateImportBatch>;
   /** Saved labeled batches this session (persisted with imports). */
   savedImportBatches: ImportSessionBatch[];
@@ -395,7 +395,7 @@ export type DataContextValue = {
   trendsOrderMetrics: { orders: number; productSales: number; shipping: number; total: number } | null;
   /** Saved batches that can feed Trends (`ready`/`review`); used for empty-state copy when no draft fallback. */
   trendsValidBatchCount: number;
-  /** Eligible saved batches, oldest → newest (`ready` + `review`) — source for batch-vs-batch comparison. */
+  /** Eligible saved batches, oldest → newest (`ready` + `review`) - source for batch-vs-batch comparison. */
   trendsReadyBatchesAsc: ImportSessionBatch[];
   /** True when the batch currently shown on Trends is in `review`. */
   trendsHasReviewBatch: boolean;

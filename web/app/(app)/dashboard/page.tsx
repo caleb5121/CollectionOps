@@ -16,7 +16,8 @@ import {
 import { buildDailyTrendPointsFromTrendsSegments } from "../../../lib/trendsSeriesFromImports";
 import { DashboardEmptyState } from "../../../components/dashboard/DashboardEmptyState";
 import DashboardRevenueChart from "../../../components/dashboard/DashboardRevenueChart";
-import AiInsightsHeaderButton from "../../../components/dashboard/AiInsightsHeaderButton";
+import AiInsightsModal from "../../../components/dashboard/AiInsightsModal";
+import { canRequestAiInsights } from "../../../lib/aiInsightsSummary";
 import { useAuth } from "../../../components/AuthProvider";
 import { fetchCurrentUserStoreData, type UserStoreDataRow } from "../../../lib/supabase/userStoreData";
 
@@ -45,6 +46,14 @@ function buildHeroComparisonLine(params: {
   return "Snapshot from your current import. Add another period later to compare.";
 }
 
+/** Same band as hero comparison line - when present, show a dedicated profitability card. */
+function keepRateFromGrossNet(gross: number, net: number | null): number | null {
+  if (gross <= 0 || net == null || !Number.isFinite(net)) return null;
+  const keep = (net / gross) * 100;
+  if (keep < -5 || keep > 100) return null;
+  return Math.round(keep);
+}
+
 function buildQuickTake(params: {
   gross: number;
   costsForNet: number | null;
@@ -67,7 +76,7 @@ function buildQuickTake(params: {
       return "Cost structure looks efficient for this import window.";
     }
   }
-  return "Numbers are in. Open View insights for a deeper read on fees, baskets, and net.";
+  return "Numbers are in - check Store insights below for fees, baskets, and net.";
 }
 
 export default function DashboardPage() {
@@ -167,9 +176,19 @@ export default function DashboardPage() {
     [grossSalesValue, costsValue, derived.aov, ordersValue],
   );
 
+  const insightsEligible = useMemo(
+    () => canRequestAiInsights({ hasOrderImport, hasDashboardImport, derived }),
+    [hasOrderImport, hasDashboardImport, derived],
+  );
+
+  const keepRatePct = useMemo(
+    () => keepRateFromGrossNet(grossSalesValue, netValue),
+    [grossSalesValue, netValue],
+  );
+
   if (workspaceEmpty) {
     return (
-      <PageShell maxWidth="wide-xl" contentClassName="px-6 pt-4 pb-5 sm:px-8 sm:pt-5 sm:pb-6 lg:px-10">
+      <PageShell maxWidth="wide-xl" contentClassName="px-6 pt-5 pb-6 sm:px-10 sm:pt-6 sm:pb-8 lg:px-12">
         <DashboardEmptyState />
       </PageShell>
     );
@@ -180,98 +199,127 @@ export default function DashboardPage() {
   return (
     <PageShell
       maxWidth="wide-xl"
-      contentClassName="px-6 pt-4 pb-6 sm:px-8 sm:pt-5 sm:pb-8 lg:px-10"
+      contentClassName="px-6 pt-5 pb-8 sm:px-10 sm:pt-6 sm:pb-10 lg:px-12"
     >
-      <section className="flex flex-col gap-6 sm:gap-8" aria-labelledby="dashboard-hero-heading">
+      <section className="flex flex-col" style={{ gap: "var(--section-gap)" }} aria-labelledby="dashboard-hero-heading">
         <h1 id="dashboard-hero-heading" className="sr-only">
           Dashboard summary
         </h1>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/40 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/35 dark:shadow-[0_1px_0_rgba(255,255,255,0.04)_inset]">
+        <div className="overflow-hidden rounded-[var(--radius-card)] border border-[color:color-mix(in_oklab,var(--border-warm)_80%,transparent)] bg-[var(--surface-muted)] shadow-[var(--shadow-card-lift),0_20px_50px_-28px_rgba(26,155,127,0.09)] ring-1 ring-[color:color-mix(in_oklab,var(--metric-positive)_12%,transparent)] dark:border-stone-700/65 dark:bg-stone-900/35 dark:shadow-[0_12px_48px_-20px_rgba(0,0,0,0.5)] dark:ring-stone-800/45">
           <Reveal>
             <motion.div
-              className="relative overflow-visible border-b border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 px-5 py-5 text-white sm:px-7 sm:py-6"
-              initial={reduceMotion ? false : { opacity: 0.92, scale: 0.985 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              className="relative overflow-visible border-b border-[color:color-mix(in_oklab,var(--metric-positive)_18%,var(--border-warm))] bg-[color:color-mix(in_oklab,var(--metric-positive)_09%,var(--surface-raised))] px-6 py-8 sm:px-10 sm:py-10 dark:border-stone-700/50 dark:bg-[color:color-mix(in_oklab,var(--metric-positive)_12%,var(--surface-raised))]"
+              initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             >
-              <div
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_0%,rgba(45,212,191,0.12),transparent_55%)]"
-                aria-hidden
-              />
-              <div className="relative flex flex-col gap-3">
+              <div className="relative flex flex-col gap-1">
                 <div className="min-w-0">
-                  <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl">Total Earned</h2>
-                  <p className="mt-1 text-xs text-white/60 sm:text-sm">After fees and estimated shipping · from imported sales</p>
+                  <p className="text-xs font-medium uppercase tracking-[0.14em] text-[color:var(--foreground-muted)]">
+                    Total earned
+                  </p>
+                  <p
+                    data-testid="dashboard-total-earned"
+                    className="mt-3 text-4xl font-bold tabular-nums tracking-[-0.04em] text-[color:var(--metric-positive)] sm:text-5xl lg:text-[3rem] lg:leading-none"
+                  >
+                    {totalEarned != null ? <AnimatedCurrency value={totalEarned} /> : formatCurrency(null)}
+                  </p>
+                  <p className="mt-2 max-w-xl text-[0.9375rem] leading-relaxed text-[color:var(--foreground-muted)]">
+                    After fees and estimated shipping · from your imported sales
+                  </p>
                   <p
                     data-testid="dashboard-date-range-label"
-                    className={`mt-1.5 text-xs font-medium leading-snug sm:text-sm ${
-                      workspaceDateRange || savedStoreData ? "text-teal-100/90" : "text-white/45"
+                    className={`font-display mt-4 text-base font-semibold leading-snug tracking-tight ${
+                      workspaceDateRange || savedStoreData ? "text-[color:var(--foreground)]" : "text-stone-400 dark:text-stone-500"
                     }`}
                   >
                     {heroImportPeriodLabel}
                   </p>
-                  <p
-                    data-testid="dashboard-total-earned"
-                    className="mt-2.5 text-3xl font-bold tabular-nums tracking-tight sm:mt-3 sm:text-4xl"
-                  >
-                    {totalEarned != null ? <AnimatedCurrency value={totalEarned} /> : formatCurrency(null)}
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[color:var(--foreground-muted)]">
+                    {heroComparison}
                   </p>
-                  <p className="mt-1.5 max-w-md text-xs leading-snug text-white/55 sm:mt-2 sm:text-sm">{heroComparison}</p>
-                  <div className="mt-4 flex w-full min-w-0 flex-col items-stretch gap-3">
-                    <AiInsightsHeaderButton variant="hero" presentation="inline" />
-                  </div>
                 </div>
               </div>
             </motion.div>
           </Reveal>
 
-          <div className="bg-slate-50/95 px-2.5 py-2 dark:bg-slate-950/55 sm:px-3 sm:py-2.5">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-2.5">
-              <div className="app-panel-3d rounded-lg border border-slate-200/90 bg-white/98 p-3.5 dark:border-slate-700/70 dark:bg-slate-900/88 sm:p-4">
-                <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                  <IconRevenue className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden />
-                  You sold
-                </p>
-                <p className="mt-1.5 text-xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl">
-                  {itemsSold != null ? `${itemsSold.toLocaleString()} items` : formatCurrency(grossSalesValue)}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {itemsSold != null ? "Items sold" : "Gross sales"}
-                </p>
-              </div>
-              <div className="app-panel-3d rounded-lg border border-slate-200/90 bg-white/98 p-3.5 dark:border-slate-700/70 dark:bg-slate-900/88 sm:p-4">
-                <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                  <IconOrders className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden />
-                  Orders
-                </p>
-                <p
-                  data-testid="dashboard-orders-count"
-                  className="mt-1.5 text-xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl"
+          <div className="bg-[color:color-mix(in_oklab,var(--surface-muted)_48%,var(--surface-raised))] px-5 py-6 dark:bg-stone-950/40 sm:px-8 sm:py-8">
+            <p className="font-display mb-5 px-0.5 text-sm font-semibold tracking-tight text-[color:var(--foreground)]">
+              Profitability <span className="font-normal text-[color:var(--foreground-muted)]">&amp; drivers</span>
+            </p>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+              {keepRatePct != null ? (
+                <div
+                  className="app-premium-card w-full shrink-0 border-[color:color-mix(in_oklab,var(--warm-gold)_40%,var(--border-warm))] bg-[color:color-mix(in_oklab,var(--warm-gold-soft)_50%,var(--surface-raised))] p-6 dark:border-stone-700/60 dark:bg-[color:color-mix(in_oklab,var(--warm-gold-soft)_25%,var(--surface-raised))] lg:max-w-md lg:flex-1"
+                  data-testid="dashboard-keep-rate-card"
                 >
-                  {ordersValue.toLocaleString()}
-                </p>
-              </div>
-              <div className="app-panel-3d rounded-lg border border-slate-200/90 bg-white/98 p-3.5 dark:border-slate-700/70 dark:bg-slate-900/88 sm:p-4">
-                <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                  <IconCost className="h-4 w-4 shrink-0 text-[color:var(--accent)]" aria-hidden />
-                  Costs
-                </p>
-                <p className="mt-1.5 text-xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-slate-50 sm:text-2xl">
-                  {formatCurrency(costsValue)}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Fees + shipping</p>
+                  <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-[color:var(--warm-brown)]">
+                    <IconRevenue className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                    Estimated keep rate
+                  </p>
+                  <p className="mt-3 text-3xl font-bold tabular-nums tracking-[-0.03em] text-[color:var(--warm-brown)] sm:text-4xl lg:text-[2.75rem]">
+                    {keepRatePct}%
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-[color:var(--foreground-muted)]">
+                    Of {formatCurrency(grossSalesValue)} gross becomes your Total earned after estimated fees and shipping in
+                    this range.
+                  </p>
+                </div>
+              ) : null}
+              <div className="min-w-0 flex-1 space-y-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+                  <div className="app-premium-card p-6 dark:border-stone-700/60 dark:bg-stone-900/50">
+                    <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-[color:var(--foreground-muted)]">
+                      <IconRevenue className="h-3.5 w-3.5 shrink-0 text-[color:var(--metric-positive)]" aria-hidden />
+                      {itemsSold != null ? "You sold" : "Gross sales"}
+                    </p>
+                    <p className="mt-3 text-2xl font-bold tabular-nums tracking-[-0.03em] text-[color:var(--foreground)] sm:text-3xl">
+                      {itemsSold != null ? `${itemsSold.toLocaleString()} items` : formatCurrency(grossSalesValue)}
+                    </p>
+                    <p className="mt-2 text-xs leading-snug text-[color:var(--foreground-muted)]">
+                      {itemsSold != null ? "Line-item volume" : "Buyer revenue before costs"}
+                    </p>
+                  </div>
+                  <div className="app-premium-card p-6 dark:border-stone-700/55 dark:bg-stone-900/40">
+                    <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-[color:var(--foreground-muted)]">
+                      <IconOrders className="h-3.5 w-3.5 shrink-0 text-[color:var(--metric-neutral)]" aria-hidden />
+                      Orders
+                    </p>
+                    <p
+                      data-testid="dashboard-orders-count"
+                      className="mt-3 text-2xl font-bold tabular-nums tracking-[-0.03em] text-[color:var(--metric-neutral)] sm:text-3xl"
+                    >
+                      {ordersValue.toLocaleString()}
+                    </p>
+                    <p className="mt-2 text-xs text-[color:var(--foreground-muted)]">Checkouts</p>
+                  </div>
+                  <div className="app-premium-card p-6 dark:border-stone-700/55 dark:bg-stone-900/40">
+                    <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-[color:var(--foreground-muted)]">
+                      <IconCost className="h-3.5 w-3.5 shrink-0 text-[color:var(--metric-negative)]" aria-hidden />
+                      Costs
+                    </p>
+                    <p className="mt-3 text-2xl font-bold tabular-nums tracking-[-0.03em] text-[color:var(--metric-negative)] sm:text-3xl">
+                      {formatCurrency(costsValue)}
+                    </p>
+                    <p className="mt-2 text-xs text-[color:var(--foreground-muted)]">Fees + shipping</p>
+                  </div>
+                </div>
+                {dashboardDailyRevenue.length > 0 ? (
+                  <DashboardRevenueChart points={dashboardDailyRevenue} lineStroke="var(--metric-positive)" />
+                ) : null}
               </div>
             </div>
-            {dashboardDailyRevenue.length > 0 ? (
-              <DashboardRevenueChart points={dashboardDailyRevenue} />
-            ) : null}
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 dark:border-slate-700/60 dark:bg-slate-900/50 sm:px-5 sm:py-3.5">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Quick take</p>
-          <p className="mt-1 text-sm leading-relaxed text-slate-700 dark:text-slate-200">{quickTake}</p>
+        {insightsEligible ? (
+          <AiInsightsModal embedded open={true} presentation="inline" onClose={() => {}} />
+        ) : null}
+
+        <div className="app-premium-card px-6 py-6 dark:border-stone-700/65 dark:bg-stone-900/50 sm:px-8 sm:py-7">
+          <p className="font-display text-sm font-semibold tracking-tight text-[color:var(--foreground)]">Quick take</p>
+          <p className="mt-3 text-[0.9375rem] leading-relaxed text-[color:var(--foreground-muted)]">{quickTake}</p>
         </div>
       </section>
     </PageShell>

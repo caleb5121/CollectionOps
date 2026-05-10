@@ -6,7 +6,8 @@ export function getPageTitle(pathname: string): string {
     "/signup": "Create account",
     "/data": "Imports",
     "/trends": "Trends",
-    "/settings": "Settings",
+    "/settings": "Shipping Settings",
+    "/settings/shipping": "Shipping Settings",
     "/help": "Help & FAQs",
     "/account": "Account",
   };

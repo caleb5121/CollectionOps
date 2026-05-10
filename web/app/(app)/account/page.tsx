@@ -497,7 +497,7 @@ export default function AccountPage() {
                     className="truncate text-sm text-slate-600 dark:text-slate-400"
                     title={user.email.trim() ? user.email : undefined}
                   >
-                    {user.email.trim() || "—"}
+                    {user.email.trim() || "-"}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-500">
                     Member since <span className="tabular-nums text-slate-600 dark:text-slate-400">{joinedDisplay}</span>

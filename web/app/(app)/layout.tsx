@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import AppAuthenticatedLayout from "../../components/shell/AppAuthenticatedLayout";
 import { DEV_ACCESS_COOKIE, isLocalDevelopmentRequestHost } from "../../lib/devAccess";
 import { createSupabaseServerClient } from "../../lib/supabase/server";
+import { scheduleRecordUserSessionVisit } from "../../lib/supabase/userSessions";
 
 function isMissingSessionError(error: unknown): boolean {
   const maybe = error as { name?: string; message?: string; code?: string } | null;
@@ -48,6 +49,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) {
     redirect("/login");
   }
+
+  // Authenticated shell only: track visit without blocking render (Supabase RPC is atomic in DB).
+  scheduleRecordUserSessionVisit(supabase);
 
   return <AppAuthenticatedLayout>{children}</AppAuthenticatedLayout>;
 }

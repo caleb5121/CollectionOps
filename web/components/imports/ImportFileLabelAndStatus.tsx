@@ -3,18 +3,19 @@
 import type { ImportFileStatus, ImportValidationStatus } from "../../lib/importMerge";
 
 const chipBase =
-  "inline-flex max-w-[11rem] cursor-default truncate rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
+  "inline-flex max-w-[11rem] cursor-default truncate rounded-md border px-1.5 py-0.5 text-[0.625rem] font-semibold uppercase tracking-[0.06em]";
 
 const tones = {
   label:
-    "border-slate-200/90 bg-slate-50/95 text-slate-700 dark:border-slate-600/70 dark:bg-slate-800/80 dark:text-slate-200",
+    "border-zinc-200/90 bg-zinc-50 text-zinc-700 dark:border-zinc-600/75 dark:bg-zinc-800/80 dark:text-zinc-200",
   accepted:
-    "border-emerald-200/90 bg-emerald-50/95 text-emerald-900 dark:border-emerald-800/50 dark:bg-emerald-950/45 dark:text-emerald-100",
+    "border-emerald-200/90 bg-emerald-50 text-emerald-900 dark:border-emerald-800/45 dark:bg-emerald-950/35 dark:text-emerald-100",
   warn:
-    "border-amber-200/90 bg-amber-50/95 text-amber-950 dark:border-amber-800/50 dark:bg-amber-950/40 dark:text-amber-100",
+    "border-amber-200/90 bg-amber-50 text-amber-950 dark:border-amber-800/45 dark:bg-amber-950/28 dark:text-amber-100",
   partial:
-    "border-violet-200/90 bg-violet-50/95 text-violet-950 dark:border-violet-800/50 dark:bg-violet-950/40 dark:text-violet-100",
-  rejected: "border-red-200/90 bg-red-50/95 text-red-950 dark:border-red-900/50 dark:bg-red-950/45 dark:text-red-100",
+    "border-violet-200/90 bg-violet-50 text-violet-950 dark:border-violet-800/45 dark:bg-violet-950/28 dark:text-violet-100",
+  rejected:
+    "border-rose-200/90 bg-rose-50 text-rose-950 dark:border-rose-900/45 dark:bg-rose-950/30 dark:text-rose-100",
 };
 
 type Props = {
@@ -98,7 +99,7 @@ export function ImportFileLabelAndStatus({
         </span>
       </div>
       {validationReasonLine ? (
-        <p className="max-w-[18rem] text-right text-[9px] leading-snug text-slate-600 dark:text-slate-400" title={validationReasonLine}>
+        <p className="max-w-[18rem] text-right text-[0.625rem] leading-snug text-zinc-600 dark:text-zinc-400" title={validationReasonLine}>
           {validationReasonLine}
         </p>
       ) : null}

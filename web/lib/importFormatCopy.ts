@@ -24,18 +24,18 @@ export function formatImportFileRejectionMessage(reasonLine: string): string {
   const r = reasonLine.trim();
   if (!r) return "File rejected";
   const low = r.toLowerCase();
-  if (low.includes("no data rows")) return "File rejected — no data rows";
-  if (low.startsWith("wrong slot")) return "File rejected — wrong file type for this slot";
-  if (low.includes("unrecognized headers")) return "File rejected — invalid format";
-  if (low.includes("no valid rows")) return "File rejected — invalid data in rows";
+  if (low.includes("no data rows")) return "File rejected - no data rows";
+  if (low.startsWith("wrong slot")) return "File rejected - wrong file type for this slot";
+  if (low.includes("unrecognized headers")) return "File rejected - invalid format";
+  if (low.includes("no valid rows")) return "File rejected - invalid data in rows";
   if (low.startsWith("missing required column")) {
     const detail = r.replace(/^missing required column:?\s*/i, "").trim();
     return detail
-      ? `File rejected — missing required column: ${detail}`
-      : "File rejected — missing required column";
+      ? `File rejected - missing required column: ${detail}`
+      : "File rejected - missing required column";
   }
-  if (r.length > 120) return `File rejected — ${r.slice(0, 117)}…`;
-  return `File rejected — ${r}`;
+  if (r.length > 120) return `File rejected - ${r.slice(0, 117)}…`;
+  return `File rejected - ${r}`;
 }
 
 /** Tooltip: what to upload (no auto-remap promise). */

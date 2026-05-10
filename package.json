@@ -2,7 +2,7 @@
   "name": "rork-cardops-performance-tracker",
   "version": "1.0.0",
   "private": true,
-  "description": "Monorepo root — the Next.js app lives in /web. Scripts delegate there.",
+  "description": "Monorepo root - the Next.js app lives in /web. Scripts delegate there.",
   "scripts": {
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",

@@ -392,10 +392,10 @@ export function computeWorkspaceGate(input: {
     }
   }
   if (!input.orderListCalculationReady && input.orderContributing.length > 0) {
-    reasons.push("Order List is invalid — check each file below");
+    reasons.push("Order List is invalid - check each file below");
   }
   if (!input.summaryCalculationReady && input.summaryContributing.length > 0) {
-    reasons.push("Sales Summary is invalid — check each file below");
+    reasons.push("Sales Summary is invalid - check each file below");
   }
   if (reasons.length > 0) return { ready: false, reasons, labelMismatch: null, timeAlignment: null };
 

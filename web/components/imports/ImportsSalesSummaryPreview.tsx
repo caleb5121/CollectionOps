@@ -10,6 +10,9 @@ function formatCurrency(n: number | null | undefined) {
   return n.toLocaleString(undefined, { style: "currency", currency: "USD" });
 }
 
+const metricCard =
+  "rounded-lg border border-zinc-200/90 bg-white px-4 py-3 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-900/55";
+
 export function ImportsSalesSummaryPreview({
   summaryData,
   summaryFileName,
@@ -26,9 +29,9 @@ export function ImportsSalesSummaryPreview({
 
   if (!summaryData || !rollup) {
     return (
-      <div className="app-panel-3d flex min-h-[220px] flex-col justify-center rounded-2xl border border-dashed border-slate-300/90 bg-white/90 p-8 text-center dark:border-slate-600/72 dark:bg-slate-900/55 sm:p-10">
-        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Sales Summary preview</p>
-        <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+      <div className="flex min-h-[220px] flex-col justify-center rounded-xl border border-dashed border-zinc-300/90 bg-zinc-50/50 p-8 text-center dark:border-zinc-700/70 dark:bg-zinc-950/35 sm:p-10">
+        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Sales Summary preview</p>
+        <p className="mt-2 text-[0.8125rem] leading-relaxed text-zinc-600 dark:text-zinc-400">
           Add a Sales Summary CSV to see gross sales, net after fees, fees paid, shipping collected, and refunds in one
           place.
         </p>
@@ -43,11 +46,11 @@ export function ImportsSalesSummaryPreview({
   ];
 
   return (
-    <div className="app-panel-3d rounded-2xl border border-slate-200/85 bg-white/96 p-6 dark:border-slate-700/75 dark:bg-slate-900/82 sm:p-8">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800/80">
+    <div className="rounded-xl border border-zinc-200/90 bg-white p-6 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/45 sm:p-8">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3 border-b border-zinc-200/80 pb-4 dark:border-zinc-800/80">
         <div>
-          <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">Sales Summary preview</h2>
-          {summaryFileName ? <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{summaryFileName}</p> : null}
+          <h2 className="text-base font-semibold tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">Sales Summary preview</h2>
+          {summaryFileName ? <p className="mt-1 text-[0.8125rem] text-zinc-500 dark:text-zinc-400">{summaryFileName}</p> : null}
         </div>
         {rowCountLabel ? (
           <StatusPill variant="neutral">{rowCountLabel}</StatusPill>
@@ -59,27 +62,27 @@ export function ImportsSalesSummaryPreview({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-50/95 to-white px-4 py-4 dark:border-blue-900/50 dark:from-blue-950/40 dark:to-slate-950/80">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-blue-800/90 dark:text-blue-200/90">
+        <div className={metricCard}>
+          <div className="text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
             Gross sales
           </div>
-          <div className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white">
+          <div className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.03em] text-zinc-900 dark:text-white">
             {formatCurrency(rollup.grossSales)}
           </div>
         </div>
-        <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/95 to-white px-4 py-4 dark:border-emerald-900/45 dark:from-emerald-950/35 dark:to-slate-950/80">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-800/90 dark:text-emerald-200/85">
+        <div className={metricCard}>
+          <div className="text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
             Net sales
           </div>
-          <div className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white">
+          <div className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.03em] text-zinc-900 dark:text-white">
             {formatCurrency(rollup.netAfterFees)}
           </div>
         </div>
-        <div className="rounded-2xl border border-amber-200/85 bg-gradient-to-br from-amber-50/95 to-white px-4 py-4 dark:border-amber-900/45 dark:from-amber-950/35 dark:to-slate-950/80">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-900/85 dark:text-amber-100/90">
+        <div className={metricCard}>
+          <div className="text-[0.6875rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
             Fees paid
           </div>
-          <div className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-slate-900 dark:text-white">
+          <div className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.03em] text-zinc-900 dark:text-white">
             {formatCurrency(rollup.fees)}
           </div>
         </div>
@@ -89,10 +92,10 @@ export function ImportsSalesSummaryPreview({
         {secondary.map(({ label, value }) => (
           <div
             key={label}
-            className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 dark:border-slate-700/60 dark:bg-slate-900/50"
+            className="rounded-lg border border-zinc-200/85 bg-zinc-50/80 px-3 py-2.5 dark:border-zinc-800/70 dark:bg-zinc-900/45"
           >
-            <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{label}</div>
-            <div className="mt-0.5 text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">{value}</div>
+            <div className="text-[0.6875rem] font-medium text-zinc-500 dark:text-zinc-400">{label}</div>
+            <div className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">{value}</div>
           </div>
         ))}
       </div>

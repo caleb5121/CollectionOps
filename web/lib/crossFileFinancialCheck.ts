@@ -1,5 +1,5 @@
 /**
- * Compare Order List rollups to Sales Summary totals (informational only — does not block workspace).
+ * Compare Order List rollups to Sales Summary totals (informational only - does not block workspace).
  */
 
 export type FinancialConsistencyLevel = "ok" | "warn" | "severe";
@@ -44,7 +44,7 @@ function maxLevel(a: FinancialConsistencyLevel, b: FinancialConsistencyLevel): F
 type ComparedMetric = "gross" | "net" | "shipping";
 
 /**
- * @param compareShipping — Only when Sales Summary includes a shipping column; avoids false gaps when summary omits shipping.
+ * @param compareShipping - Only when Sales Summary includes a shipping column; avoids false gaps when summary omits shipping.
  */
 export function computeCrossFileFinancialConsistency(input: {
   orderGross: number;

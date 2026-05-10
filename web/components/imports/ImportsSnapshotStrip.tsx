@@ -80,10 +80,10 @@ function formatOrders(n: number, emptyWorkspace: boolean) {
 }
 
 const cell =
-  "flex min-w-0 flex-col gap-0.5 rounded-lg border border-slate-200/80 bg-white/90 px-2.5 py-2 shadow-[0_1px_0_rgba(15,23,42,0.04)] dark:border-slate-700/60 dark:bg-slate-900/55";
+  "flex min-w-0 flex-col gap-0.5 rounded-lg border border-zinc-200/90 bg-white px-2.5 py-2 shadow-sm dark:border-zinc-800/75 dark:bg-zinc-900/55";
 
 function Subhint({ children }: { children: ReactNode }) {
-  return <p className="truncate text-[9px] font-normal leading-tight text-slate-500 dark:text-slate-400">{children}</p>;
+  return <p className="truncate text-[0.625rem] font-normal leading-tight text-zinc-500 dark:text-zinc-400">{children}</p>;
 }
 
 /**
@@ -102,54 +102,54 @@ export function ImportsSnapshotStrip({
     <section
       data-testid="imports-snapshot-strip"
       aria-label="Import snapshot"
-      className={`rounded-xl border border-slate-200/85 bg-slate-50/90 p-2.5 dark:border-slate-700/65 dark:bg-slate-950/45 sm:p-3 ${className}`}
+      className={`rounded-lg border border-zinc-200/90 bg-zinc-50/80 p-2.5 dark:border-zinc-800/80 dark:bg-zinc-950/40 sm:p-3 ${className}`}
     >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-2.5">
         <div className={cell}>
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <IconGross className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+          <div className="flex items-center gap-1.5 text-[0.625rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
+            <IconGross className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
             <span className="truncate">Gross sales</span>
           </div>
-          <p className="truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
-            {emptyWorkspace ? "-": formatSnapshotCurrency(gross)}
+          <p className="truncate text-sm font-semibold tabular-nums tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+            {emptyWorkspace ? "-" : formatSnapshotCurrency(gross)}
           </p>
         </div>
         <div className={cell}>
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <IconNet className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+          <div className="flex items-center gap-1.5 text-[0.625rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
+            <IconNet className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
             <span className="truncate">Net sales</span>
           </div>
-          <p className="truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
-            {emptyWorkspace ? "-": formatSnapshotCurrency(net)}
+          <p className="truncate text-sm font-semibold tabular-nums tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+            {emptyWorkspace ? "-" : formatSnapshotCurrency(net)}
           </p>
           {!emptyWorkspace ? <Subhint>after fees</Subhint> : null}
         </div>
         <div className={cell}>
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <IconFees className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+          <div className="flex items-center gap-1.5 text-[0.625rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
+            <IconFees className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
             <span className="truncate">Fees paid</span>
           </div>
-          <p className="truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
-            {emptyWorkspace ? "-": formatSnapshotCurrency(fees)}
+          <p className="truncate text-sm font-semibold tabular-nums tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+            {emptyWorkspace ? "-" : formatSnapshotCurrency(fees)}
           </p>
           {!emptyWorkspace ? <Subhint>TCG fees</Subhint> : null}
         </div>
         <div className={cell}>
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <IconOrders className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+          <div className="flex items-center gap-1.5 text-[0.625rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
+            <IconOrders className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
             <span className="truncate">Orders</span>
           </div>
-          <p className="truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
+          <p className="truncate text-sm font-semibold tabular-nums tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
             {formatOrders(orders, emptyWorkspace)}
           </p>
         </div>
         <div className={`${cell} col-span-2 sm:col-span-1`}>
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            <IconShipping className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" />
+          <div className="flex items-center gap-1.5 text-[0.625rem] font-medium uppercase tracking-[0.1em] text-zinc-500 dark:text-zinc-400">
+            <IconShipping className="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500" />
             <span className="truncate">Shipping collected</span>
           </div>
-          <p className="truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50">
-            {emptyWorkspace ? "-": formatSnapshotCurrency(shipping)}
+          <p className="truncate text-sm font-semibold tabular-nums tracking-[-0.02em] text-zinc-900 dark:text-zinc-50">
+            {emptyWorkspace ? "-" : formatSnapshotCurrency(shipping)}
           </p>
           {!emptyWorkspace ? <Subhint>from buyers</Subhint> : null}
         </div>

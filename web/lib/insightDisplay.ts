@@ -15,7 +15,7 @@ export function splitInsightLine(text: string): { takeaway: string; detail: stri
     }
   }
 
-  const mdash = t.match(/^(.+?)\s[—–-]\s(.+)$/);
+  const mdash = t.match(/^(.+?)\s[\u2013-]\s(.+)$/);
   if (mdash && mdash[1].length >= 8 && mdash[2].length >= 8) {
     return { takeaway: mdash[1].trim(), detail: mdash[2].trim() };
   }

@@ -7,7 +7,7 @@ export default function Card({
 }: React.ComponentPropsWithoutRef<"div">) {
   return (
     <div
-      className={`app-card-3d rounded-2xl border border-slate-200/80 bg-white/92 p-6 shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06),0_12px_40px_-16px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-app hover:-translate-y-1 hover:shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] active:translate-y-0 active:scale-[0.998] dark:border-slate-700/75 dark:bg-slate-900/78 dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.35)] dark:hover:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.5)] ${className}`}
+      className={`rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--border-warm)_88%,transparent)] bg-[var(--surface-raised)] shadow-[var(--shadow-card-lift)] transition-[border-color,box-shadow,transform] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] dark:border-[color-mix(in_oklab,var(--border-warm)_78%,transparent)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_6px_20px_-8px_rgba(0,0,0,0.38)] [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-0.5 [@media(hover:hover)_and_(pointer:fine)]:hover:border-[color:color-mix(in_oklab,var(--accent)_22%,var(--border-warm))] [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,var(--shadow-card-hover),0_12px_36px_-14px_rgba(26,155,127,0.08)] dark:[@media(hover:hover)_and_(pointer:fine)]:hover:border-[color:color-mix(in_oklab,var(--accent)_25%,var(--border-warm))] ${className}`}
       {...props}
     >
       {children}

@@ -18,9 +18,11 @@ type Props = {
   onClose: () => void;
   /** `inline` = expand in page flow below the trigger (no dim/blur overlay). `modal` = centered overlay. */
   presentation?: "modal" | "inline";
+  /** When true (with `presentation="inline"`), loads on mount and stays in flow - no dimming, minimal chrome. */
+  embedded?: boolean;
 };
 
-export default function AiInsightsModal({ open, onClose, presentation = "modal" }: Props) {
+export default function AiInsightsModal({ open, onClose, presentation = "modal", embedded = false }: Props) {
   const titleId = useId();
   const {
     hasDashboardImport,
@@ -51,8 +53,10 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
     setShowFullAnalysis(false);
   }, []);
 
+  const shouldRun = open || embedded;
+
   useEffect(() => {
-    if (!open) {
+    if (!shouldRun) {
       resetForClose();
       return;
     }
@@ -152,6 +156,7 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
     };
   }, [
     open,
+    embedded,
     hasOrderImport,
     hasDashboardImport,
     derived,
@@ -169,15 +174,15 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
   ]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || embedded) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, embedded]);
 
-  if (!open) return null;
+  if (!shouldRun) return null;
 
   const gross = derived.grossSales;
   const net = estimatedNet ?? 0;
@@ -197,29 +202,34 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
 
   const bodyScrollClass =
     presentation === "inline"
-      ? "overflow-visible px-4 py-3 sm:px-5 sm:py-3.5"
+      ? "overflow-visible bg-[var(--surface-raised)]/60 px-4 py-3 sm:px-5 sm:py-3.5 dark:bg-stone-950/20"
       : "min-h-0 flex-1 overflow-y-auto px-4 py-3 sm:px-5 sm:py-3.5";
 
   const panelHeader = (
-    <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-4 py-3 sm:px-5 dark:border-slate-700/60">
-      <h2 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-        Insights
+    <div className="flex items-center justify-between gap-3 border-b border-stone-200/85 bg-[var(--surface-muted)]/50 px-4 py-3 sm:px-5 dark:border-stone-700/60 dark:bg-stone-900/30">
+      <h2 id={titleId} className="text-sm font-semibold text-stone-900 dark:text-stone-50">
+        <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[color:var(--accent)]" aria-hidden />
+        Store insights
       </h2>
-      <button
-        type="button"
-        onClick={onClose}
-        className="rounded-lg px-2 py-1 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-        aria-label="Close"
-      >
-        Hide Insights
-      </button>
+      {!embedded ? (
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-lg px-2 py-1 text-sm font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-800 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
+          aria-label="Close"
+        >
+          Hide Insights
+        </button>
+      ) : (
+        <span className="text-[0.6875rem] font-medium text-stone-500 dark:text-stone-400">From your current import</span>
+      )}
     </div>
   );
 
   const panelBody = (
     <div className={bodyScrollClass}>
           {phase === "no_data" ? (
-            <p className="text-sm text-slate-600 dark:text-slate-300">Import data to open insights.</p>
+            <p className="text-sm text-stone-600 dark:text-stone-300">Import data to open insights.</p>
           ) : null}
 
           {phase === "loading" ? (
@@ -247,9 +257,9 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
 
           {phase === "done" && insights.length > 0 ? (
             <div className="space-y-3.5">
-              <section className="rounded-xl border border-slate-200/85 bg-white px-3.5 py-3 dark:border-slate-700/70 dark:bg-slate-900/70">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Total Earned</p>
-                <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{totalEarned}</p>
+              <section className="rounded-xl border border-stone-200/85 bg-[var(--surface-raised)] px-3.5 py-3 dark:border-stone-700/70 dark:bg-stone-900/55">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Total Earned</p>
+                <p className="mt-1 text-2xl font-bold tracking-tight text-[color:var(--metric-positive)]">{totalEarned}</p>
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
                   {orderCount.toLocaleString()} orders • AOV {aovLabel}
                 </p>
@@ -260,14 +270,14 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
                 ) : null}
               </section>
 
-              <section className="rounded-xl border border-slate-200/85 bg-slate-50/70 px-3.5 py-3 dark:border-slate-700/70 dark:bg-slate-800/45">
+              <section className="rounded-xl border border-stone-200/85 bg-[var(--surface-muted)]/80 px-3.5 py-3 dark:border-stone-700/70 dark:bg-stone-900/40">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Smart Takeaways</h3>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Top 3</span>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-400">Smart takeaways</h3>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400">Top 3</span>
                 </div>
                 <ul className="mt-2.5 space-y-2">
                   {compactTakeaways.map((tip, i) => (
-                    <li key={`${i}-${tip}`} className="text-sm font-medium leading-snug text-slate-800 dark:text-slate-100">
+                    <li key={`${i}-${tip}`} className="text-sm font-medium leading-snug text-stone-800 dark:text-stone-100">
                       {tip}
                     </li>
                   ))}
@@ -286,21 +296,23 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
                 ) : null}
               </section>
 
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => setShowFullAnalysis((prev) => !prev)}
-                  className="rounded-lg border border-slate-300/90 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className="rounded-lg border border-[color:var(--cta-orange)]/35 bg-[color:var(--cta-orange-soft)] px-3 py-1.5 text-xs font-semibold text-[color:var(--cta-orange)] transition hover:bg-[color:color-mix(in_oklab,var(--cta-orange-soft)_70%,white)] dark:text-orange-200 dark:hover:bg-orange-950/40"
                 >
-                  {showFullAnalysis ? "Hide Full Analysis" : "Expand Full Analysis"}
+                  {showFullAnalysis ? "Hide full analysis" : "Expand full analysis"}
                 </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-lg border border-slate-300/90 bg-transparent px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800/80"
-                >
-                  Hide Insights
-                </button>
+                {!embedded ? (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-lg border border-stone-300/90 bg-transparent px-3 py-1.5 text-xs font-semibold text-stone-600 transition hover:bg-stone-100 dark:border-stone-600 dark:text-stone-300 dark:hover:bg-stone-800/80"
+                  >
+                    Hide Insights
+                  </button>
+                ) : null}
               </div>
 
               {showFullAnalysis ? (
@@ -315,7 +327,7 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
                     </div>
                     <div className="rounded-lg border border-slate-200/80 bg-white px-2.5 py-2 dark:border-slate-700/70 dark:bg-slate-900/70">
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">Fees + Shipping</p>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      <p className="text-sm font-semibold text-[color:var(--metric-negative)]">
                         {fees.toLocaleString(undefined, { style: "currency", currency: "USD" })}
                       </p>
                     </div>
@@ -334,9 +346,10 @@ export default function AiInsightsModal({ open, onClose, presentation = "modal" 
   if (presentation === "inline") {
     return (
       <div
-        className="w-full max-w-none overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-lg dark:border-slate-700/80 dark:bg-slate-900/95"
+        className={`w-full max-w-none overflow-hidden rounded-2xl border border-stone-200/85 bg-[var(--surface-raised)] shadow-[0_8px_32px_-16px_rgba(28,25,23,0.12)] dark:border-stone-700/75 dark:bg-stone-900/80 dark:shadow-[0_12px_40px_-16px_rgba(0,0,0,0.45)] ${embedded ? "ring-1 ring-stone-200/55 dark:ring-stone-700/50" : ""}`}
         role="region"
         aria-labelledby={titleId}
+        data-testid={embedded ? "dashboard-insights-embedded" : undefined}
       >
         {panelHeader}
         {panelBody}

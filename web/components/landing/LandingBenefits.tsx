@@ -2,20 +2,12 @@
 
 import { motion } from "framer-motion";
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
+const easeOut = [0.23, 1, 0.32, 1] as const;
 
-type Tone = "hero" | "band";
-
-const iconTone: Record<Tone, string> = {
-  hero: "h-11 w-11 shrink-0 text-cyan-200/95",
-  band: "h-11 w-11 shrink-0 text-teal-700/90",
-};
-
-/** Document with folded corner and grid — spreadsheet-style. */
-function IconSpreadsheet({ tone }: { tone: Tone }) {
-  const iconClass = iconTone[tone];
+/** Teal - profit / primary */
+function IconSpreadsheet() {
   return (
-    <svg className={iconClass} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg className="h-10 w-10 shrink-0 text-[color:var(--accent)]" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
         d="M7 3h7l4 4v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
         stroke="currentColor"
@@ -30,20 +22,19 @@ function IconSpreadsheet({ tone }: { tone: Tone }) {
   );
 }
 
-function IconClock({ tone }: { tone: Tone }) {
-  const iconClass = iconTone[tone];
+/** Blue - trends / neutral insight */
+function IconClock() {
   return (
-    <svg className={iconClass} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg className="h-10 w-10 shrink-0 text-[color:var(--metric-neutral)]" viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={2} />
       <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function IconSearch({ tone }: { tone: Tone }) {
-  const iconClass = iconTone[tone];
+function IconSearch() {
   return (
-    <svg className={iconClass} viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg className="h-10 w-10 shrink-0 text-[color:var(--accent)]" viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth={2} />
       <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
@@ -57,6 +48,7 @@ const benefits = [
     description:
       "Not just what sold. What you actually kept after TCGplayer fees, stamps, envelopes, and toploaders.",
     Icon: IconSearch,
+    iconWell: "bg-[color:var(--accent-soft)]",
   },
   {
     key: "track",
@@ -64,61 +56,58 @@ const benefits = [
     description:
       "Know which weeks were strong, which were slow, and what your average order is actually worth.",
     Icon: IconClock,
+    iconWell: "bg-[color:var(--metric-neutral-soft)]",
   },
   {
     key: "spreadsheet",
     title: "Skip the spreadsheet",
     description: "Upload two CSVs from TCGplayer. Done. Your numbers are ready in seconds.",
     Icon: IconSpreadsheet,
+    iconWell: "bg-[color:var(--metric-positive-soft)]",
   },
 ] as const;
 
-type Props = { animate: boolean; tone?: Tone };
+type Props = { animate: boolean };
 
-export default function LandingBenefits({ animate, tone = "hero" }: Props) {
-  const isBand = tone === "band";
-  const titleClass = isBand
-    ? "text-center text-xs font-semibold uppercase tracking-[0.14em] text-teal-800/80"
-    : "text-center text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200/85";
-  const h3Class = isBand
-    ? "text-base font-semibold leading-snug tracking-tight text-slate-900 sm:text-[1.05rem]"
-    : "text-base font-semibold leading-snug tracking-tight text-white sm:text-[1.05rem]";
-  const descClass = isBand
-    ? "mt-2.5 max-w-[22rem] text-sm leading-relaxed text-slate-600 md:max-w-none"
-    : "mt-2.5 max-w-[22rem] text-sm leading-relaxed text-slate-400/95 md:max-w-none";
-
+export default function LandingBenefits({ animate }: Props) {
   return (
     <motion.div
       className="mx-auto w-full max-w-5xl"
-      initial={animate ? { opacity: 0, y: 16 } : false}
+      initial={animate ? { opacity: 0, y: 14 } : false}
       whileInView={animate ? { opacity: 1, y: 0 } : undefined}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, ease: easeOut }}
+      transition={{ duration: 0.48, ease: easeOut }}
     >
       <motion.p
-        className={titleClass}
+        className="landing-body-muted text-center text-[0.8125rem] font-medium uppercase tracking-[0.08em]"
         initial={animate ? { opacity: 0, y: 8 } : false}
         whileInView={animate ? { opacity: 1, y: 0 } : undefined}
         viewport={{ once: true, margin: "-32px" }}
         transition={{ duration: 0.4, ease: easeOut }}
       >
-        Why it helps
+        What you get
       </motion.p>
-      <ul className="mt-10 grid grid-cols-1 gap-10 sm:mt-12 sm:gap-12 md:grid-cols-3 md:gap-8 lg:gap-10" role="list">
-        {benefits.map(({ key, Icon, title, description }, i) => (
+      <ul className="mt-10 grid grid-cols-1 gap-8 sm:mt-12 md:grid-cols-3 md:gap-6 lg:gap-8" role="list">
+        {benefits.map(({ key, Icon, title, description, iconWell }, i) => (
           <motion.li
             key={key}
-            className="flex flex-col items-center text-center"
-            initial={animate ? { opacity: 0, y: 18, scale: 0.98 } : false}
-            whileInView={animate ? { opacity: 1, y: 0, scale: 1 } : undefined}
+            className="flex flex-col rounded-[12px] border border-[color:color-mix(in_oklab,var(--border-warm)_65%,transparent)] bg-[var(--surface-raised)] p-8 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-[transform,box-shadow] duration-200 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-1 [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)]"
+            initial={animate ? { opacity: 0, y: 14 } : false}
+            whileInView={animate ? { opacity: 1, y: 0 } : undefined}
             viewport={{ once: true, margin: "-24px" }}
-            transition={{ duration: 0.45, delay: 0.08 + i * 0.09, ease: easeOut }}
+            transition={{ duration: 0.42, delay: 0.06 + i * 0.07, ease: easeOut }}
           >
-            <div className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-teal-900/10 bg-white/75 shadow-[0_8px_20px_-12px_rgba(15,23,42,0.3)] md:mb-4">
-              <Icon tone={tone} />
+            <div
+              className={`flex size-14 items-center justify-center rounded-xl border border-[color:color-mix(in_oklab,var(--border-warm)_50%,transparent)] ${iconWell}`}
+            >
+              <Icon />
             </div>
-            <h3 className={h3Class}>{title}</h3>
-            <p className={descClass}>{description}</p>
+            <h3 className="mt-6 text-[1.125rem] font-semibold leading-snug tracking-[-0.01em] text-[color:var(--landing-fg)]">
+              {title}
+            </h3>
+            <p className="landing-body-muted mt-3 max-w-[22rem] text-[0.9375rem] leading-[1.6] md:max-w-none">
+              {description}
+            </p>
           </motion.li>
         ))}
       </ul>

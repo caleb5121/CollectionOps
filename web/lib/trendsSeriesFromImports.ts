@@ -113,7 +113,7 @@ export function buildTrendPointsFromTrendsSegments(segments: TrendsImportSegment
   return aggregateTrendPointsToCalendarWeeks(daily);
 }
 
-/** Period totals — sum of weekly buckets equals full-segment totals. */
+/** Period totals - sum of weekly buckets equals full-segment totals. */
 export function rollupTrendsSegmentTotals(segment: TrendsImportSegment): {
   revenue: number;
   orders: number;

@@ -2,21 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconDashboard, IconHelp, IconImports, IconSettings, IconTrends } from "./NavIcons";
+import { IconDashboard, IconImports, IconShipping, IconTrends } from "./NavIcons";
 
 const primaryNav: { href: string; caption: string; Icon: typeof IconDashboard }[] = [
   { href: "/dashboard", caption: "Dashboard", Icon: IconDashboard },
   { href: "/data", caption: "Imports", Icon: IconImports },
   { href: "/trends", caption: "Trends", Icon: IconTrends },
+  { href: "/settings/shipping", caption: "Shipping Settings", Icon: IconShipping },
 ];
 
-function navItemClass(active: boolean) {
-  const base =
-    "flex size-14 shrink-0 items-center justify-center rounded-full transition-[color,background-color,box-shadow,transform]";
-  if (active) {
-    return `${base} bg-white text-neutral-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_4px_12px_-2px_rgba(15,23,42,0.12),0_8px_20px_-6px_rgba(15,23,42,0.1)] ring-1 ring-inset ring-slate-200/90 ring-[color:var(--accent)]/20 dark:bg-slate-800 dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_6px_20px_-4px_rgba(0,0,0,0.45)] dark:ring-slate-600/85 dark:ring-[color:var(--accent)]/25`;
+function isPrimaryNavActive(href: string, pathname: string): boolean {
+  if (href === "/settings/shipping") {
+    return pathname === "/settings/shipping" || pathname === "/settings";
   }
-  return `${base} text-neutral-900/70 shadow-[0_2px_8px_-2px_rgba(15,23,42,0.06)] ring-1 ring-inset ring-transparent hover:bg-slate-100/90 hover:text-neutral-900 hover:shadow-[0_4px_14px_-4px_rgba(15,23,42,0.12)] dark:text-slate-300/85 dark:shadow-[0_2px_10px_-2px_rgba(0,0,0,0.35)] dark:hover:bg-slate-800/75 dark:hover:text-slate-50 dark:hover:shadow-[0_6px_18px_-4px_rgba(0,0,0,0.5)]`;
+  return pathname === href;
+}
+
+const navEase =
+  "[transition:transform_200ms_cubic-bezier(0.23,1,0.32,1),box-shadow_200ms_cubic-bezier(0.23,1,0.32,1),background-color_200ms_cubic-bezier(0.23,1,0.32,1),color_200ms_cubic-bezier(0.23,1,0.32,1)]";
+
+function navItemClass(active: boolean) {
+  const base = `relative flex size-[3.35rem] shrink-0 items-center justify-center rounded-[var(--radius-card)] ${navEase}`;
+  if (active) {
+    return `${base} bg-[var(--surface-raised)] text-[color:var(--accent)] shadow-[var(--shadow-card),0_4px_20px_-8px_var(--accent-glow)] ring-2 ring-[color:var(--accent)]/35 ring-offset-2 ring-offset-[color-mix(in_oklab,var(--surface-muted)_75%,transparent)] dark:bg-stone-900 dark:text-[color:var(--accent)] dark:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)] dark:ring-[color:var(--accent)]/40 dark:ring-offset-stone-900/90`;
+  }
+  return `${base} text-[color:var(--foreground-muted)] hover:scale-[1.03] hover:bg-[color:color-mix(in_oklab,var(--surface-muted)_88%,var(--accent-soft))] hover:text-[color:var(--foreground)] hover:shadow-[var(--shadow-card)] active:scale-[0.98] dark:hover:bg-stone-800/90 dark:hover:text-stone-100 dark:hover:shadow-[0_8px_22px_-10px_rgba(0,0,0,0.45)]`;
 }
 
 function RailLink({
@@ -36,18 +46,18 @@ function RailLink({
       title={caption}
       aria-label={caption}
       aria-current={active ? "page" : undefined}
-      className="group flex flex-col items-center gap-1.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40"
+      className="group flex flex-col items-center gap-2 rounded-2xl py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
     >
       <span className={navItemClass(active)}>
-        <span className="flex size-8 shrink-0 items-center justify-center [&>svg]:block [&>svg]:size-full">
-          <Icon className="size-8" strokeWidth={2.25} aria-hidden />
+        <span className="flex size-[1.65rem] shrink-0 items-center justify-center [&>svg]:block [&>svg]:size-full">
+          <Icon className="size-[1.65rem]" strokeWidth={2.125} aria-hidden />
         </span>
       </span>
       <span
-        className={`max-w-[5.5rem] px-0.5 text-center text-[10px] font-semibold leading-tight tracking-tight ${
+        className={`max-w-[5.75rem] px-0.5 text-center text-[11px] font-semibold leading-tight tracking-wide ${navEase} ${
           active
-            ? "text-slate-900 dark:text-white"
-            : "text-slate-500 group-hover:text-slate-800 dark:text-slate-400 dark:group-hover:text-slate-100"
+            ? "text-[color:var(--foreground)]"
+            : "text-[color:var(--foreground-muted)] group-hover:text-[color:var(--foreground)] dark:group-hover:text-stone-100"
         }`}
       >
         {caption}
@@ -61,26 +71,18 @@ export default function AppSidebar() {
 
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-40 flex w-28 shrink-0 flex-col border-r border-sky-300/80 bg-gradient-to-b from-cyan-100 via-sky-50 to-indigo-100/90 shadow-[inset_1px_0_0_rgba(255,255,255,0.96),inset_-1px_0_0_rgba(2,132,199,0.2),10px_0_36px_-6px_rgba(14,116,144,0.22),18px_0_54px_-10px_rgba(99,102,241,0.22)] dark:border-slate-700/85 dark:from-cyan-950/45 dark:via-slate-900 dark:to-indigo-950/55 dark:shadow-[inset_1px_0_0_rgba(255,255,255,0.06),inset_-1px_0_0_rgba(6,182,212,0.26),12px_0_40px_-6px_rgba(6,182,212,0.22),22px_0_60px_-14px_rgba(99,102,241,0.34)]"
+      className="flex h-full min-h-0 w-full flex-col"
       aria-label="Sidebar"
     >
-      <nav
-        className="flex min-h-0 flex-1 flex-col items-center justify-start gap-6 pt-6"
-        aria-label="Primary"
-      >
-        {primaryNav.map(({ href, caption, Icon }) => (
-          <RailLink key={href} href={href} caption={caption} Icon={Icon} active={pathname === href} />
-        ))}
-      </nav>
-
-      <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-5 border-t border-slate-200/70 bg-white/50 px-1 pb-6 pt-5 dark:border-slate-800/70 dark:bg-slate-950/50">
-        <RailLink
-          href="/settings"
-          caption="Settings"
-          Icon={IconSettings}
-          active={pathname === "/settings"}
-        />
-        <RailLink href="/help" caption="FAQs" Icon={IconHelp} active={pathname === "/help"} />
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[var(--radius-card)] border border-[color-mix(in_oklab,var(--border-warm)_72%,transparent)] bg-[color-mix(in_oklab,var(--surface-raised)_97%,var(--surface-muted))] shadow-[var(--shadow-card-lift),0_16px_40px_-20px_rgba(26,155,127,0.06)] backdrop-blur-[8px] dark:border-stone-700/55 dark:bg-[color-mix(in_oklab,var(--surface-muted)_88%,transparent)] dark:shadow-[0_10px_36px_-14px_rgba(0,0,0,0.5),0_3px_12px_-6px_rgba(0,0,0,0.32)]">
+        <nav
+          className="flex min-h-0 flex-1 flex-col items-center justify-start gap-7 px-2 pb-6 pt-6 sm:gap-8 sm:pt-7"
+          aria-label="Primary"
+        >
+          {primaryNav.map(({ href, caption, Icon }) => (
+            <RailLink key={href} href={href} caption={caption} Icon={Icon} active={isPrimaryNavActive(href, pathname)} />
+          ))}
+        </nav>
       </div>
     </aside>
   );

@@ -9,8 +9,8 @@ export const PAGE_SHELL_MAX_WIDTH_WIDE = "max-w-7xl";
  * Centered content width + horizontal padding (matches Dashboard).
  * Vertical rhythm: py-8 / sm:py-10 with 20–32px horizontal padding.
  */
-/** 24px / 32px horizontal - aligns to 8px spacing scale */
-export const PAGE_SHELL_CONTENT_PADDING = "px-6 py-8 sm:px-8 lg:px-10 sm:py-10";
+/** Horizontal + vertical rhythm - generous for 2025-era app density */
+export const PAGE_SHELL_CONTENT_PADDING = "px-6 py-9 sm:px-10 sm:py-10 lg:px-12 lg:py-11";
 
 const MAX_WIDTH: Record<PageShellMaxWidth, string> = {
   narrow: "max-w-2xl",
@@ -63,7 +63,7 @@ export default function PageShell({
             <div>
               {description ? (
                 <p
-                  className={`max-w-3xl font-normal ${descriptionClassName ?? "text-sm leading-relaxed text-slate-500 dark:text-slate-400"}`}
+                  className={`max-w-3xl font-normal ${descriptionClassName ?? "text-sm leading-relaxed text-stone-600 dark:text-stone-400"}`}
                 >
                   {description}
                 </p>
@@ -78,7 +78,7 @@ export default function PageShell({
   );
 }
 
-/** Page intro card — default blue, or dark navy to match the dashboard hero. */
+/** Page intro card - default blue, or dark navy to match the dashboard hero. */
 export function PageIntroGradient({
   title: heading,
   children,
@@ -105,15 +105,12 @@ export function PageIntroGradient({
       : size === "compact"
         ? "text-base font-bold tracking-tight text-white sm:text-lg"
         : "text-lg font-bold tracking-tight text-white sm:text-xl";
-  const bg =
-    tone === "dark"
-      ? "bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950"
-      : "bg-gradient-to-br from-blue-600 via-blue-600 to-blue-800";
+  const bg = tone === "dark" ? "bg-[#12151a]" : "bg-[#1d4ed8]";
   return (
     <div className={`relative overflow-hidden ${bg} ${shell} ${className}`}>
       {tone === "dark" ? (
         <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_0%,rgba(45,212,191,0.12),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_100%_0%,rgba(45,212,191,0.06),transparent_50%)]"
           aria-hidden
         />
       ) : (

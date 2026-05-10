@@ -7,9 +7,17 @@ import { usePathname } from "next/navigation";
 import { accountDisplayName, useAuth } from "../AuthProvider";
 import { useData } from "../DataProvider";
 import { formatToolbarDate, getPageTitle } from "../../lib/pageTitles";
+import { IconDiscord, IconHelp, IconSettings } from "./NavIcons";
 import ThemeToggle from "./ThemeToggle";
 
-/** Transparent PNG in web/public — replace the file to update artwork. */
+const toolbarIconLinkClass =
+  "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-button)] border border-[color:color-mix(in_oklab,var(--border-warm)_90%,transparent)] bg-[var(--surface-raised)] text-[color:var(--foreground-muted)] shadow-[var(--shadow-card)] transition-app hover:border-[color:color-mix(in_oklab,var(--accent)_22%,var(--border-warm))] hover:bg-[var(--surface-muted)] hover:text-[color:var(--foreground)] active:scale-[0.98] dark:border-slate-700/90 dark:bg-slate-900/75 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800/90 dark:hover:text-slate-100 sm:h-10 sm:w-10";
+
+function menuRowClass() {
+  return "flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90";
+}
+
+/** Transparent PNG in web/public - replace the file to update artwork. */
 const HEADER_LOGO_SRC = "/logo.png";
 
 export default function MainToolbar() {
@@ -76,7 +84,7 @@ export default function MainToolbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex min-h-0 shrink-0 items-center justify-between gap-2 border-b border-sky-300/80 bg-gradient-to-r from-cyan-100 via-sky-50 to-indigo-100 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),0_3px_14px_-4px_rgba(14,116,144,0.24),0_20px_42px_-20px_rgba(99,102,241,0.35)] dark:border-slate-700/90 dark:from-cyan-950/45 dark:via-slate-900 dark:to-indigo-950/55 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_-10px_rgba(6,182,212,0.28),0_24px_44px_-22px_rgba(99,102,241,0.38)] sm:gap-3 sm:px-5 sm:py-2 lg:px-8">
+    <header className="sticky top-0 z-50 flex w-full min-h-0 shrink-0 items-center justify-between gap-2 border-b border-[color:color-mix(in_oklab,var(--border-warm)_78%,transparent)] bg-[color:color-mix(in_oklab,var(--surface-raised)_96%,var(--background))] px-3 py-2 shadow-[0_1px_0_rgba(255,255,255,0.65)_inset,var(--shadow-card)] backdrop-blur-xl dark:border-[color-mix(in_oklab,var(--border-warm)_60%,transparent)] dark:bg-[color-mix(in_oklab,var(--surface-raised)_90%,transparent)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_10px_36px_-18px_rgba(0,0,0,0.48)] sm:gap-3 sm:px-6 sm:py-2.5 lg:px-10">
       <span className="sr-only">{dateLabel}</span>
       <div className="flex min-h-0 min-w-0 flex-1 items-center">
         <div className="flex min-h-0 min-w-0 items-center gap-1 sm:gap-2">
@@ -97,7 +105,7 @@ export default function MainToolbar() {
           />
         </Link>
         <div className="flex min-h-0 min-w-0 flex-1 flex-nowrap items-center gap-x-2 sm:gap-x-3">
-          <h1 className="min-w-0 truncate text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+          <h1 className="font-display min-w-0 truncate text-xl font-semibold leading-tight tracking-[-0.02em] text-[color:var(--foreground)] sm:text-[1.65rem]">
             {title}
           </h1>
         </div>
@@ -126,9 +134,32 @@ export default function MainToolbar() {
         {dashboardCta ? (
           <Link
             href={dashboardCta.href}
-            className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] hover:bg-orange-600 active:scale-[0.99]"
+            className="inline-flex items-center justify-center rounded-[var(--radius-button)] bg-[color:var(--accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_2px_6px_rgba(26,155,127,0.28),0_8px_20px_-6px_var(--accent-glow)] transition-[transform,background-color,box-shadow] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-[color:var(--accent-hover)] hover:shadow-[0_4px_12px_rgba(26,155,127,0.22),0_12px_28px_-8px_var(--accent-glow)] active:scale-[0.98] dark:text-stone-950 dark:shadow-[0_2px_8px_rgba(0,0,0,0.35)] dark:hover:shadow-[0_4px_14px_rgba(0,0,0,0.4)]"
           >
             {dashboardCta.label}
+          </Link>
+        ) : null}
+        <a
+          href="https://discord.gg/ZJrehxKRH"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={toolbarIconLinkClass}
+          aria-label="Join our Discord community"
+          title="Discord"
+        >
+          <IconDiscord className="h-[1.125rem] w-[1.125rem] shrink-0" />
+        </a>
+        <Link href="/help" className={toolbarIconLinkClass} aria-label="Help and FAQs" title="Help & FAQs">
+          <IconHelp className="h-[1.125rem] w-[1.125rem] shrink-0" strokeWidth={2} aria-hidden />
+        </Link>
+        {!user ? (
+          <Link
+            href="/settings/shipping"
+            className={toolbarIconLinkClass}
+            aria-label="Shipping Settings"
+            title="Shipping Settings"
+          >
+            <IconSettings className="h-[1.125rem] w-[1.125rem] shrink-0" strokeWidth={2} aria-hidden />
           </Link>
         ) : null}
         <ThemeToggle />
@@ -163,7 +194,7 @@ export default function MainToolbar() {
                   className="truncate overflow-hidden text-ellipsis whitespace-nowrap text-xs text-slate-500 dark:text-slate-400"
                   title={user.email.trim() ? user.email : undefined}
                 >
-                  {user.email.trim() || "—"}
+                  {user.email.trim() || "-"}
                 </span>
               </span>
               <svg
@@ -177,37 +208,33 @@ export default function MainToolbar() {
               </svg>
             </button>
             {dropdownOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 min-w-[200px] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1.5 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_18px_48px_-8px_rgba(15,23,42,0.2),0_8px_24px_-6px_rgba(15,23,42,0.12)] ring-1 ring-slate-900/5 dark:border-slate-700/90 dark:bg-slate-900/95 dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.65)]">
-                <Link
-                  href="/dashboard"
-                  className="block px-4 py-2.5 text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
-                  onClick={() => setDropdownOpen(false)}
-                >
-                  Dashboard
+              <div className="absolute right-0 top-full z-50 mt-2 min-w-[13.5rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1.5 shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_18px_48px_-8px_rgba(15,23,42,0.2),0_8px_24px_-6px_rgba(15,23,42,0.12)] ring-1 ring-slate-900/5 dark:border-slate-700/90 dark:bg-slate-900/95 dark:shadow-[0_24px_64px_-12px_rgba(0,0,0,0.65)]">
+                <Link href="/settings/shipping" className={menuRowClass()} onClick={() => setDropdownOpen(false)}>
+                  <IconSettings className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" strokeWidth={2} aria-hidden />
+                  Shipping Settings
                 </Link>
-                <Link
-                  href="/account"
-                  className="block px-4 py-2.5 text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
-                  onClick={() => setDropdownOpen(false)}
-                >
+                <Link href="/help" className={menuRowClass()} onClick={() => setDropdownOpen(false)}>
+                  <IconHelp className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" strokeWidth={2} aria-hidden />
+                  Help &amp; FAQs
+                </Link>
+                <Link href="/account" className={menuRowClass()} onClick={() => setDropdownOpen(false)}>
+                  <span className="w-4 shrink-0" aria-hidden />
                   Account
                 </Link>
-                <Link
-                  href="/account#logo-editor"
-                  className="block px-4 py-2.5 text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
-                  onClick={() => setDropdownOpen(false)}
-                >
+                <Link href="/account#logo-editor" className={menuRowClass()} onClick={() => setDropdownOpen(false)}>
+                  <span className="w-4 shrink-0" aria-hidden />
                   Logo editor
                 </Link>
+                <div className="my-1 border-t border-slate-200/80 dark:border-slate-700/80" role="separator" />
                 <button
                   type="button"
                   onClick={() => {
                     void setUser(null);
                     setDropdownOpen(false);
                   }}
-                  className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 transition-app hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/90"
+                  className={`${menuRowClass()} text-slate-800 dark:text-slate-100`}
                 >
-                  Sign Out
+                  Sign out
                 </button>
               </div>
             )}

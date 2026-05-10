@@ -77,7 +77,7 @@ function monthBounds(year: number, monthIndex: number): { from: Date; to: Date }
  * Infer a month (or month span) from the upload filename, e.g. may_2026, Sales-May-2025.csv, 2024_06_report.
  */
 export function inferDateRangeFromImportFileName(fileName: string): { from: Date; to: Date } | null {
-  /** Keep hyphens — collapsing to `_` breaks `\b` before month names (underscore is a word char in JS). */
+  /** Keep hyphens - collapsing to `_` breaks `\b` before month names (underscore is a word char in JS). */
   const lower = fileName.replace(/\.[^.]+$/i, "").toLowerCase();
 
   const monthYear = lower.match(
@@ -138,7 +138,7 @@ function formatSummaryHumanLabel(
 /**
  * Compare Order List dates (order date column) to Sales Summary period from CSV columns or filename.
  * When the summary has no dates (common TCGplayer exports) but the Order List has a range,
- * we align using that range — no false "unknown period" / review state.
+ * we align using that range - no false "unknown period" / review state.
  * True unknown (e.g. no order dates) → warning. Non-overlapping months → block.
  */
 export function computeImportTimeAlignment(

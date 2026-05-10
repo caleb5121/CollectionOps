@@ -16,7 +16,14 @@ function formatMoney(n: number) {
   return n.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 }
 
-export default function DashboardRevenueChart({ points }: { points: TrendPoint[] }) {
+export default function DashboardRevenueChart({
+  points,
+  lineStroke = "var(--accent)",
+}: {
+  points: TrendPoint[];
+  /** Defaults to brand teal; dashboard often uses `var(--metric-positive)`. */
+  lineStroke?: string;
+}) {
   const data = useMemo(() => [...points].sort((a, b) => a.dateMs - b.dateMs), [points]);
 
   const xAxisTicks = useMemo(() => {
@@ -41,50 +48,59 @@ export default function DashboardRevenueChart({ points }: { points: TrendPoint[]
 
   return (
     <div
-      className="app-panel-3d mt-2 rounded-lg border border-slate-200/90 bg-white/98 p-3.5 dark:border-slate-700/70 dark:bg-slate-900/88 sm:mt-2.5 sm:p-4"
+      className="app-premium-card p-6 sm:p-7 dark:border-stone-700/65 dark:bg-stone-900/50"
       data-testid="dashboard-revenue-chart"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+      <p className="text-xs font-medium uppercase tracking-[0.12em] text-[color:var(--foreground-muted)]">
         Revenue by day
       </p>
-      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Current import period</p>
-      <div className="mt-3 h-[168px] w-full sm:h-[188px]">
+      <p className="mt-1 text-sm text-[color:var(--foreground-muted)]">Current import period</p>
+      <div className="mt-5 h-[188px] w-full sm:h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 6, right: 6, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+          <LineChart data={data} margin={{ top: 10, right: 6, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 6" stroke="#e3ddd4" vertical={false} strokeOpacity={0.95} />
             <XAxis
               dataKey="day"
               ticks={xAxisTicks}
-              tick={{ fontSize: 10, fill: "currentColor" }}
-              className="text-slate-500 dark:text-slate-400"
+              tick={{ fontSize: 11, fill: "var(--foreground-muted)" }}
               tickMargin={8}
               interval={0}
               angle={dense ? -32 : 0}
               textAnchor={dense ? "end" : "middle"}
               height={xBottom}
+              axisLine={false}
+              tickLine={false}
             />
             <YAxis
               tickFormatter={(v) => formatMoney(Number(v))}
-              width={52}
-              tick={{ fontSize: 10, fill: "currentColor" }}
-              className="text-slate-500 dark:text-slate-400"
+              width={56}
+              tick={{ fontSize: 11, fill: "var(--foreground-muted)" }}
+              axisLine={false}
+              tickLine={false}
             />
             <Tooltip
+              animationDuration={200}
               formatter={(value) => [formatMoney(Number(value ?? 0)), "Revenue"]}
               labelFormatter={(label) => String(label)}
               contentStyle={{
-                borderRadius: 10,
-                border: "1px solid rgba(148, 163, 184, 0.35)",
+                borderRadius: "var(--radius-button)",
+                border: "1px solid color-mix(in oklab, var(--border-warm) 80%, transparent)",
                 fontSize: 12,
+                boxShadow: "var(--shadow-card-hover)",
+                background: "var(--surface-raised)",
               }}
+              labelStyle={{ color: "var(--foreground-muted)", fontWeight: 600 }}
             />
             <Line
-              type="monotone"
+              type="natural"
               dataKey="revenue"
-              stroke="var(--accent)"
-              strokeWidth={2}
+              stroke={lineStroke}
+              strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 4, fill: "var(--accent)" }}
+              activeDot={{ r: 5, fill: lineStroke, stroke: "#fff", strokeWidth: 2 }}
+              isAnimationActive
+              animationDuration={900}
+              animationEasing="ease-out"
             />
           </LineChart>
         </ResponsiveContainer>

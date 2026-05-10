@@ -157,11 +157,11 @@ function Section({
       id={id}
       className={`app-section-surface scroll-mt-24 space-y-4 rounded-2xl p-6 transition-[box-shadow,ring] duration-500 sm:p-8 ${
         isHighlighted
-          ? "ring-2 ring-teal-500/55 shadow-[0_0_0_1px_rgba(20,184,166,0.2),0_12px_40px_-12px_rgba(20,184,166,0.25)] dark:ring-teal-400/45 dark:shadow-[0_0_0_1px_rgba(45,212,191,0.15),0_12px_40px_-12px_rgba(45,212,191,0.12)]"
+          ? "ring-2 ring-[color:color-mix(in_srgb,var(--accent)50%,transparent)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--accent)22%,transparent),0_12px_40px_-12px_color-mix(in_srgb,var(--accent)20%,transparent)]"
           : ""
       }`}
     >
-      <h2 className="text-xl font-bold tracking-tight text-slate-950 dark:text-slate-50">{title}</h2>
+      <h2 className="text-xl font-bold tracking-tight text-[color:var(--foreground)]">{title}</h2>
       <div className="flex flex-col gap-4">{children}</div>
     </section>
   );
@@ -233,7 +233,7 @@ export default function HelpPage() {
         <ol className="mt-5 list-inside list-decimal space-y-3 text-sm leading-relaxed text-slate-700 marker:font-semibold dark:text-slate-300">
           <li>
             <span className="font-medium text-slate-900 dark:text-slate-100">Import.</span> On{" "}
-            <Link href="/data" className="font-semibold text-teal-700 underline-offset-2 hover:underline dark:text-teal-400">
+            <Link href="/data" className="font-semibold text-[color:var(--accent)] underline-offset-2 hover:underline">
               Imports
             </Link>
             , pick a label, add Order List + Sales Summary.
@@ -242,7 +242,7 @@ export default function HelpPage() {
             <span className="font-medium text-slate-900 dark:text-slate-100">Review.</span> Open the{" "}
             <Link
               href="/dashboard"
-              className="font-semibold text-teal-700 underline-offset-2 hover:underline dark:text-teal-400"
+              className="font-semibold text-[color:var(--accent)] underline-offset-2 hover:underline"
             >
               Dashboard
             </Link>{" "}
@@ -251,10 +251,10 @@ export default function HelpPage() {
           <li>
             <span className="font-medium text-slate-900 dark:text-slate-100">Tune.</span>{" "}
             <Link
-              href="/settings"
-              className="font-semibold text-teal-700 underline-offset-2 hover:underline dark:text-teal-400"
+              href="/settings/shipping"
+              className="font-semibold text-[color:var(--accent)] underline-offset-2 hover:underline"
             >
-              Settings
+              Shipping Settings
             </Link>{" "}
             for shipping assumptions.
           </li>
@@ -339,7 +339,7 @@ export default function HelpPage() {
                 Turn shipping off in{" "}
                 <Link
                   href="/account"
-                  className="font-semibold text-teal-700 underline-offset-2 hover:underline dark:text-teal-400"
+                  className="font-semibold text-[color:var(--accent)] underline-offset-2 hover:underline"
                 >
                   Account
                 </Link>{" "}
@@ -359,12 +359,12 @@ export default function HelpPage() {
                 <>
                   Check{" "}
                   <Link
-                    href="/settings"
-                    className="font-semibold text-teal-700 underline-offset-2 hover:underline dark:text-teal-400"
+                    href="/settings/shipping"
+                    className="font-semibold text-[color:var(--accent)] underline-offset-2 hover:underline"
                   >
-                    Settings
+                    Shipping Settings
                   </Link>{" "}
-                  shipping. Higher assumptions pull net down.
+                  - higher assumptions pull net down.
                 </>
               }
             >
@@ -436,7 +436,7 @@ export default function HelpPage() {
                 Trends: daily rhythm from Order List and checkout clusters, not card-level profit. Open{" "}
                 <Link
                   href="/trends"
-                  className="font-semibold text-teal-700 underline-offset-2 hover:underline dark:text-teal-400"
+                  className="font-semibold text-[color:var(--accent)] underline-offset-2 hover:underline"
                 >
                   Trends
                 </Link>

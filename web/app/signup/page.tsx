@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import LocalEmailAuthCard from "@/components/auth/LocalEmailAuthCard";
 
 export const metadata: Metadata = {
-  title: "Create account — CollectionOps",
+  title: "Create account - CollectionOps",
   description: "Create a CollectionOps account with your email.",
 };
 

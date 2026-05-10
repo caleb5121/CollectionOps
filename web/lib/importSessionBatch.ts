@@ -16,7 +16,7 @@ import { importPerfEnabled, logImportPerf } from "./importPerfLog";
 
 export type ImportBatchStatus = "ready" | "review" | "blocked";
 
-/** Serializable evaluation for a saved batch — avoids re-merging tens of thousands of rows each render. */
+/** Serializable evaluation for a saved batch - avoids re-merging tens of thousands of rows each render. */
 export type ImportBatchEvaluationSnapshot = {
   v: 1;
   label: string;
@@ -230,7 +230,7 @@ export function evaluateImportBatch(
   const coverageRange = aggregateOrderDateRangeFromChunks(orderContributing);
   const coverageLabel = coverageRange
     ? formatImportRangeLabel(coverageRange.from, coverageRange.to)
-    : "—";
+    : "-";
 
   let status: ImportBatchStatus = "blocked";
   if (workspaceReady) {

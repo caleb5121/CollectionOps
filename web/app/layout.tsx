@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Libre_Baskerville } from "next/font/google";
 import { AuthProvider } from "../components/AuthProvider";
 import { THEME_STORAGE_KEY } from "../lib/theme";
 import "./globals.css";
@@ -12,6 +12,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const libreDisplay = Libre_Baskerville({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
 });
 
 const themeInitScript = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};if(localStorage.getItem(k)==="dark")document.documentElement.classList.add("dark");}catch(e){}})();`;
@@ -32,7 +39,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--background)] text-[var(--foreground)] antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${libreDisplay.variable} min-h-screen bg-[var(--background)] text-[var(--foreground)] antialiased`}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>
