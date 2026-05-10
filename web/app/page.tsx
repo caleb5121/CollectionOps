@@ -10,6 +10,7 @@ import { useAuth } from "@/components/AuthProvider";
 import LandingBenefits from "@/components/landing/LandingBenefits";
 import LandingFAQ from "@/components/landing/LandingFAQ";
 import LandingFinalCTA from "@/components/landing/LandingFinalCTA";
+import FeedbackFloatingButton from "@/components/shell/FeedbackFloatingButton";
 
 const trackedCards = [
   { src: "/landing-cards/magic.png", alt: "Magic sample card" },
@@ -38,21 +39,21 @@ function HeroVisual({
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const imageY = useTransform(scrollYProgress, [0, 1], reduce || !animate ? [0, 0] : [0, -36]);
+  const imageY = useTransform(scrollYProgress, [0, 1], reduce || !animate ? [0, 0] : [0, -14]);
 
   return (
     <motion.div
-      className="absolute inset-0 h-full w-full min-h-[min(52vw,22rem)] overflow-hidden lg:min-h-0"
-      initial={animate ? { opacity: 0, y: 10 } : false}
+      className="absolute inset-0 flex h-full w-full min-h-[min(52vw,20rem)] items-center justify-center overflow-hidden lg:min-h-0"
+      initial={animate ? { opacity: 0, y: 12 } : false}
       animate={animate ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.48, delay: 0.08, ease: easeOut }}
+      transition={{ duration: 0.55, delay: 0.06, ease: easeOut }}
     >
       <motion.div className="absolute inset-0 will-change-transform" style={{ y: imageY }}>
         <Image
           src="/landing-hero-dashboard.png"
           alt="Seller using CollectionOps on a tablet - dashboard with profit, fees, and insights"
           fill
-          className="h-full w-full scale-[1.05] object-cover object-[56%_35%] lg:object-right"
+          className="h-full w-full object-cover object-center sm:object-[50%_42%]"
           sizes="(max-width: 1023px) 100vw, 50vw"
           priority
           quality={92}
@@ -118,7 +119,7 @@ export default function Home() {
     <main className="landing-page min-h-dvh bg-[var(--background)] font-sans leading-[1.6]">
       <section
         ref={heroRef}
-        className="landing-hero-surface relative z-[1] overflow-x-clip border-b border-[color:color-mix(in_oklab,var(--border-warm)_65%,transparent)]"
+        className="landing-hero-surface relative z-[1] overflow-x-hidden border-b border-[color:color-mix(in_oklab,var(--border-warm)_65%,transparent)]"
       >
         <motion.header
           className="absolute left-0 right-0 top-0 z-50 flex items-center justify-between gap-2.5 border-b border-[color:color-mix(in_oklab,var(--border-warm)_70%,transparent)] bg-[color:color-mix(in_oklab,var(--surface-raised)_92%,var(--background))]/95 px-3.5 pb-3 pt-4 backdrop-blur-md max-[380px]:gap-2 max-[380px]:px-3 sm:left-0 sm:right-0 sm:gap-4 sm:px-6 sm:pb-3.5 sm:pt-5 lg:px-10"
@@ -162,41 +163,45 @@ export default function Home() {
           </nav>
         </motion.header>
 
-        <div className="relative z-[1] mx-auto grid w-full max-w-[1920px] grid-cols-1 gap-12 lg:grid-cols-2 lg:items-stretch lg:gap-4 xl:gap-8">
+        <div className="relative z-[1] mx-auto grid w-full max-w-[min(100%,88rem)] grid-cols-1 gap-10 px-4 pb-4 sm:px-6 sm:pb-6 lg:grid-cols-2 lg:items-center lg:gap-12 lg:px-8 lg:pb-8 xl:gap-14 xl:px-10">
             <motion.div
-              className={`relative z-[1] flex min-w-0 flex-col items-start justify-start px-5 pb-14 text-left sm:px-8 sm:pb-16 lg:min-h-0 lg:justify-center lg:px-12 lg:pb-20 lg:pr-14 xl:pl-16 xl:pr-16 ${contentPad}`}
-              initial={motionOn ? { opacity: 0 } : false}
-              animate={motionOn ? { opacity: 1 } : undefined}
-              transition={{ duration: 0.38, ease: easeOut }}
+              className={`relative z-[1] flex min-w-0 flex-col items-center justify-center pb-10 text-center sm:pb-12 lg:items-start lg:justify-center lg:pb-20 lg:pr-4 lg:text-left xl:pr-6 ${contentPad}`}
+              initial={motionOn ? { opacity: 0, y: 16 } : false}
+              animate={motionOn ? { opacity: 1, y: 0 } : undefined}
+              transition={{ duration: 0.5, ease: easeOut }}
             >
-              <div className="relative w-full pl-4 sm:pl-5">
+              <span
+                className="mb-5 block h-1 w-11 rounded-full bg-[color:color-mix(in_oklab,var(--accent)_55%,var(--warm-gold))] lg:hidden"
+                aria-hidden
+              />
+              <div className="relative w-full max-w-xl lg:max-w-none lg:pl-5">
                 <span
-                  className="absolute left-0 top-[0.28em] h-[clamp(2.75rem,8vw,3.75rem)] w-1 rounded-full bg-[color:color-mix(in_oklab,var(--accent)_55%,var(--warm-gold))]"
+                  className="absolute left-0 top-[0.28em] hidden h-[clamp(2.75rem,8vw,3.75rem)] w-1 rounded-full bg-[color:color-mix(in_oklab,var(--accent)_55%,var(--warm-gold))] lg:block"
                   aria-hidden
                 />
                 <motion.h1
                   className="font-display w-full min-w-0 text-[clamp(2.75rem,5.5vw,4rem)] font-bold leading-[1.08] tracking-[-0.03em] text-[color:var(--landing-fg)]"
-                  initial={motionOn ? { opacity: 0, y: 14 } : false}
+                  initial={motionOn ? { opacity: 0, y: 18 } : false}
                   animate={motionOn ? { opacity: 1, y: 0 } : undefined}
-                  transition={{ ...lineTransition, delay: 0.02 }}
+                  transition={{ ...lineTransition, delay: 0.04 }}
                 >
                   Whether you have 10 listings or 10,000, you deserve to see what your store is actually doing.
                 </motion.h1>
               </div>
               <motion.p
-                className="landing-body-muted mt-8 w-full max-w-[34rem] text-left text-[1.0625rem] leading-[1.6] sm:mt-10"
-                initial={motionOn ? { opacity: 0, y: 10 } : false}
+                className="landing-body-muted mt-8 w-full max-w-[34rem] text-[1.0625rem] leading-[1.6] sm:mt-10"
+                initial={motionOn ? { opacity: 0, y: 12 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
-                transition={{ ...lineTransition, delay: 0.08 }}
+                transition={{ ...lineTransition, delay: 0.1 }}
               >
                 Upload your exports and see your real numbers clearly laid out. Orders, fees, shipping costs, trends
                 over time. No spreadsheets, no guessing.
               </motion.p>
               <motion.div
-                className="mt-10 flex w-full flex-col items-start gap-0 sm:mt-11 lg:mt-12"
-                initial={motionOn ? { opacity: 0, y: 10 } : false}
+                className="mt-10 flex w-full flex-col items-center gap-0 sm:mt-11 lg:items-start lg:mt-12"
+                initial={motionOn ? { opacity: 0, y: 12 } : false}
                 animate={motionOn ? { opacity: 1, y: 0 } : undefined}
-                transition={{ ...lineTransition, delay: 0.12 }}
+                transition={{ ...lineTransition, delay: 0.14 }}
               >
                 <Link
                   href="/data?demo=1"
@@ -210,13 +215,20 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
-            <div className="relative flex w-full flex-col justify-center px-5 pb-14 pt-4 sm:px-8 sm:pb-16 lg:min-h-[min(100vh,52rem)] lg:self-stretch lg:px-10 lg:pb-20 lg:pt-8 xl:pr-14">
-              <div className="relative w-full rounded-2xl border border-[color:color-mix(in_oklab,var(--border-warm)_80%,transparent)] bg-[var(--surface-raised)] p-2 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_24px_48px_-24px_rgba(0,0,0,0.12)] ring-1 ring-[color:color-mix(in_oklab,var(--accent)_8%,transparent)]">
-                <div className="relative min-h-[min(52vw,22rem)] w-full overflow-hidden rounded-xl lg:min-h-[min(72vh,40rem)]">
-                  <HeroVisual animate={motionOn} heroRef={heroRef} />
+            <motion.div
+              className="relative flex w-full flex-col items-center justify-center pb-16 pt-2 sm:pb-20 lg:min-h-0 lg:items-center lg:pb-20 lg:pt-6"
+              initial={motionOn ? { opacity: 0, y: 20 } : false}
+              animate={motionOn ? { opacity: 1, y: 0 } : undefined}
+              transition={{ duration: 0.55, delay: 0.08, ease: easeOut }}
+            >
+              <div className="relative w-full max-w-[min(100%,28rem)] sm:max-w-xl lg:mx-auto lg:max-w-[min(100%,36rem)]">
+                <div className="relative w-full rounded-2xl border border-[color:color-mix(in_oklab,var(--border-warm)_80%,transparent)] bg-[var(--surface-raised)] p-2 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_24px_48px_-24px_rgba(0,0,0,0.12)] ring-1 ring-[color:color-mix(in_oklab,var(--accent)_8%,transparent)]">
+                  <div className="relative aspect-[4/3] w-full max-h-[min(88vw,420px)] overflow-hidden rounded-xl sm:aspect-[5/4] sm:max-h-[480px] lg:aspect-[16/11] lg:max-h-[min(52vh,500px)]">
+                    <HeroVisual animate={motionOn} heroRef={heroRef} />
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
         </div>
       </section>
 
@@ -367,6 +379,7 @@ export default function Home() {
           </motion.footer>
         </div>
       </section>
+      <FeedbackFloatingButton />
     </main>
   );
 }

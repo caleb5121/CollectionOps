@@ -7,7 +7,6 @@ import { DEV_ACCESS_STORAGE_KEY, isLocalDevelopmentClient } from "@/lib/devAcces
 
 import { AccountPreferencesProvider, useAccountPreferences } from "../AccountPreferencesProvider";
 import { DataProvider } from "../DataProvider";
-import { MotionProvider } from "../motion/MotionProvider";
 import { SettingsProvider, useSettings } from "../SettingsProvider";
 import AppSidebar from "./AppSidebar";
 import FeedbackFloatingButton from "./FeedbackFloatingButton";
@@ -47,8 +46,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       estimatedShippingCostPerOrder={estimatedShippingCostPerOrder}
       includeShippingInProfit={prefs.includeShippingInProfit}
     >
-      <MotionProvider>
-        <div className="min-h-screen">
+      <div className="min-h-screen">
           <div className="flex min-h-screen items-center justify-center bg-[var(--surface-muted)] px-4 py-10 sm:hidden">
             <div className="w-full max-w-md rounded-xl border border-[color-mix(in_oklab,var(--border-warm)_88%,transparent)] bg-[var(--surface-raised)] p-6 text-center shadow-[0_4px_24px_-8px_rgba(28,25,23,0.1)]">
               <p className="text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-50">CollectionOps</p>
@@ -81,7 +79,6 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-      </MotionProvider>
     </DataProvider>
   );
 }

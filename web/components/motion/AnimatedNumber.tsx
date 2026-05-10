@@ -8,7 +8,13 @@ function formatUsd(n: number) {
 }
 
 /** Smooth count-up for currency; respects reduced motion. */
-export function AnimatedCurrency({ value }: { value: number | null | undefined }) {
+export function AnimatedCurrency({
+  value,
+  className = "",
+}: {
+  value: number | null | undefined;
+  className?: string;
+}) {
   const reduce = useReducedMotion();
   const [display, setDisplay] = useState(0);
   const fromRef = useRef(0);
@@ -35,10 +41,10 @@ export function AnimatedCurrency({ value }: { value: number | null | undefined }
   }, [value, reduce]);
 
   if (value == null || Number.isNaN(value)) {
-    return <span className="tabular-nums">-</span>;
+    return <span className={`tabular-nums ${className}`.trim()}>-</span>;
   }
 
-  return <span className="tabular-nums">{formatUsd(display)}</span>;
+  return <span className={`tabular-nums ${className}`.trim()}>{formatUsd(display)}</span>;
 }
 
 /** Integer / decimal count-up for non-currency metrics. */

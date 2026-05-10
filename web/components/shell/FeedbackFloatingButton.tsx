@@ -59,8 +59,8 @@ export default function FeedbackFloatingButton() {
           setFeedbackError("");
         }}
         className="fixed bottom-5 right-5 z-[60] flex h-12 w-12 items-center justify-center rounded-full border border-slate-200/90 bg-white text-[color:var(--accent)] shadow-[0_8px_28px_-6px_rgba(15,23,42,0.25)] transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)]/40 dark:border-slate-600/80 dark:bg-slate-900 dark:text-teal-300 dark:shadow-[0_10px_32px_-8px_rgba(0,0,0,0.55)] dark:hover:bg-slate-800 sm:bottom-6 sm:right-6"
-        aria-label="Give feedback"
-        title="Give feedback"
+        aria-label="Got feedback?"
+        title="Got feedback?"
       >
         <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
           <path
@@ -77,12 +77,15 @@ export default function FeedbackFloatingButton() {
           className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Give feedback"
+          aria-label="Got feedback?"
         >
           <div className="w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xl dark:border-slate-700/80 dark:bg-slate-900">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-50">
-                Have feedback? Send feedback directly to our team
+                Got feedback?
+                <span className="mt-1 block text-xs font-normal text-slate-600 dark:text-slate-400">
+                  Send a note straight to our team.
+                </span>
               </h2>
               <button
                 type="button"
