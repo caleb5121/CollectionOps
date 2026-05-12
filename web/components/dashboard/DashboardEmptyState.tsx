@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CollectionOpsIllustration } from "../illustrations/CollectionOpsIllustration";
 import { IconCost, IconOrders, IconRevenue } from "../MetricIcons";
 
 export function DashboardEmptyState() {
@@ -20,12 +21,20 @@ export function DashboardEmptyState() {
         }}
         aria-hidden
       />
-      <div className="relative z-[1]">
-        <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-[color:var(--foreground)] sm:text-2xl">
+      <div className="relative z-[1] flex flex-col items-center text-center">
+        <CollectionOpsIllustration
+          src="/illustrations/empty-dashboard.svg"
+          alt="Illustration of people reviewing charts and statistics"
+          width={792}
+          height={399}
+          size="empty"
+          priority
+        />
+        <h2 className="font-display mt-2 max-w-xl text-xl font-semibold tracking-[-0.02em] text-[color:var(--foreground)] sm:mt-3 sm:text-2xl">
           Your store snapshot starts here
         </h2>
         <p className="mt-4 max-w-lg text-[0.9375rem] font-normal leading-[1.65] text-[color:var(--foreground-muted)]">
-          Import your Order List and Sales Summary to unlock profit, fees, shipping, and store trends.
+          Import your first CSV to unlock profit, fees, and trends.
         </p>
         <Link
           href="/data"
@@ -36,7 +45,7 @@ export function DashboardEmptyState() {
         <p className="mt-2 text-[0.8125rem] font-medium text-[color:var(--foreground-muted)]">Takes about a minute</p>
 
         <div
-          className="mt-10 grid grid-cols-3 gap-4 border-t border-[color:color-mix(in_oklab,var(--border-warm)_75%,transparent)] pt-8 dark:border-stone-800/80 sm:gap-6"
+          className="mt-10 grid w-full max-w-md grid-cols-3 gap-4 border-t border-[color:color-mix(in_oklab,var(--border-warm)_75%,transparent)] pt-8 dark:border-stone-800/80 sm:gap-6"
           aria-hidden
         >
           {[
@@ -45,13 +54,13 @@ export function DashboardEmptyState() {
             { Icon: IconCost, label: "Costs" },
           ].map(({ Icon, label }) => (
             <div key={label} className="min-w-0">
-              <p className="flex items-center gap-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground-muted)]">
+              <p className="flex items-center justify-center gap-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[color:var(--foreground-muted)] sm:justify-start">
                 <Icon className="h-3 w-3 shrink-0 opacity-80" />
                 {label}
               </p>
-                <div className="mt-3 space-y-2">
-                <div className="h-2.5 w-[70%] max-w-[5.5rem] animate-pulse rounded-full bg-[color:color-mix(in_oklab,var(--border-warm)_55%,transparent)] motion-reduce:animate-none dark:bg-stone-700/80" />
-                <div className="h-2.5 w-[45%] max-w-[3.5rem] animate-pulse rounded-full bg-[color:color-mix(in_oklab,var(--border-warm)_40%,transparent)] motion-reduce:animate-none dark:bg-stone-800/90" />
+              <div className="mt-3 space-y-2">
+                <div className="mx-auto h-2.5 w-[70%] max-w-[5.5rem] animate-pulse rounded-full bg-[color:color-mix(in_oklab,var(--border-warm)_55%,transparent)] motion-reduce:animate-none dark:bg-stone-700/80 sm:mx-0" />
+                <div className="mx-auto h-2.5 w-[45%] max-w-[3.5rem] animate-pulse rounded-full bg-[color:color-mix(in_oklab,var(--border-warm)_40%,transparent)] motion-reduce:animate-none dark:bg-stone-800/90 sm:mx-0" />
               </div>
             </div>
           ))}

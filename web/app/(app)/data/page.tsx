@@ -28,6 +28,7 @@ import { resolveOrderListColumnMap } from "../../../lib/orderListColumnMap";
 import { resolveSalesSummaryColumnMap } from "../../../lib/salesSummaryColumnMap";
 import { ImportCheckBlock } from "../../../components/imports/ImportCheckBlock";
 import FirstImportHelpCard from "../../../components/imports/FirstImportHelpCard";
+import { CollectionOpsIllustration } from "../../../components/illustrations/CollectionOpsIllustration";
 import { ImportsSnapshotStrip } from "../../../components/imports/ImportsSnapshotStrip";
 import { UNMAPPED_COLUMN_WARNING_LINES, formatImportFileRejectionMessage } from "../../../lib/importFormatCopy";
 import type { ImportBatchStatus } from "../../../lib/importSessionBatch";
@@ -2009,7 +2010,15 @@ export default function DataPage() {
                 {workspaceReady ? (
                   <>
                     {importComplete ? (
-                      <div className="mx-auto w-full max-w-md rounded-lg border border-emerald-200/90 bg-emerald-50/90 px-4 py-3.5 dark:border-emerald-800/45 dark:bg-emerald-950/25">
+                      <div className="mx-auto w-full max-w-md rounded-lg border border-emerald-200/90 bg-emerald-50/90 px-4 py-3.5 text-center dark:border-emerald-800/45 dark:bg-emerald-950/25">
+                        <CollectionOpsIllustration
+                          src="/illustrations/import-success.svg"
+                          alt="Illustration of a completed checklist"
+                          width={444}
+                          height={607}
+                          size="tall"
+                          className="!max-w-[min(100%,9rem)] sm:!max-w-[min(100%,10.5rem)]"
+                        />
                         <h3 className="text-[0.9375rem] font-semibold text-emerald-950 dark:text-emerald-100">Import complete</h3>
                         <p className="mt-1 text-[0.8125rem] text-emerald-900/95 dark:text-emerald-200/95">
                           Your dashboard has been updated with this batch.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 
 import Card from "../../../components/Card";
+import { CollectionOpsIllustration } from "../../../components/illustrations/CollectionOpsIllustration";
 import PageShell from "../../../components/PageShell";
 
 const SUPPORT_EMAIL = "support@collectionops.com";
@@ -24,10 +25,24 @@ export default function HelpPage() {
 
   return (
     <PageShell maxWidth="wide">
-      <h2 className="text-2xl font-bold tracking-tight text-[color:var(--foreground)] sm:text-3xl">Help Center</h2>
-      <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600 dark:text-stone-400">
-        Find guides, FAQs, and support for CollectionOps.
-      </p>
+      <div className="relative flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-2xl font-bold tracking-tight text-[color:var(--foreground)] sm:text-3xl">Help Center</h2>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600 dark:text-stone-400">
+            Find guides, FAQs, and support for CollectionOps.
+          </p>
+        </div>
+        <div className="pointer-events-none flex shrink-0 justify-center md:mt-0 md:justify-end md:pl-4">
+          <CollectionOpsIllustration
+            src="/illustrations/help-hero.svg"
+            alt="Illustration of online support and messaging"
+            width={652}
+            height={551}
+            size="hero"
+            className="opacity-90"
+          />
+        </div>
+      </div>
 
       <div className="mt-8 grid gap-4 sm:gap-6 md:grid-cols-2">
         <Link

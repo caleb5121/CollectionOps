@@ -18,6 +18,7 @@ import {
 import { groupTrendPointsForChart, inferTrendChartGranularity, type TrendChartGranularity } from "../../../lib/trendChartAggregation";
 import { buildTrendInsightsStructuredPanel } from "../../../lib/trendInsights";
 import MiniSparkline from "../../../components/MiniSparkline";
+import { CollectionOpsIllustration } from "../../../components/illustrations/CollectionOpsIllustration";
 
 function formatCurrency(n: number | null | undefined) {
   if (n === null || n === undefined || Number.isNaN(n)) return "-";
@@ -291,15 +292,21 @@ export default function TrendsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={fadeTransition}
-            className="mx-auto max-w-lg py-6 text-center sm:py-7"
+            className="mx-auto flex max-w-lg flex-col items-center py-6 text-center sm:py-7"
           >
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+            <CollectionOpsIllustration
+              src="/illustrations/empty-trends.svg"
+              alt="Illustration of a growth chart and upward progress"
+              width={866}
+              height={454}
+              size="empty"
+            />
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:mt-3 sm:text-3xl">
               See performance over time
             </h2>
             {trendsValidBatchCount === 0 ? (
               <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                Once you upload order data, Trends will show revenue, orders, fees, and momentum across your selected date
-                range.
+                Trends appear after you import data. Come back after your first import.
               </p>
             ) : (
               <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
