@@ -5,6 +5,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "../AuthProvider";
 import DevAccessPanel from "./DevAccessPanel";
+import {
+  AUTH_LAST_EMAIL_STORAGE_KEY,
+  readRememberDeviceFromBrowserDocument,
+  writeRememberDevicePreference,
+} from "../../lib/supabase/sessionPolicy";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -24,12 +29,25 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
+  const [rememberDevice, setRememberDevice] = useState(true);
   const [error, setError] = useState("");
   const [authNotice, setAuthNotice] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendNotice, setResendNotice] = useState("");
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      try {
+        const last = localStorage.getItem(AUTH_LAST_EMAIL_STORAGE_KEY);
+        if (last?.trim()) setEmail(last.trim());
+      } catch {
+        /* ignore */
+      }
+      setRememberDevice(readRememberDeviceFromBrowserDocument());
+    });
+  }, []);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -54,14 +72,16 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
         errorDescription.includes("expired") ||
         errorDescription.includes("already"));
     if (!isExpiredOrUsedLink) return;
-    setAuthNotice(
-      otpKind === "signup"
-        ? "That signup link expired or was already used. Enter your email again and we’ll send a fresh one."
-        : "Your login link expired or was already used. Enter your email again and we’ll send a fresh one.",
-    );
-    if (searchParams.toString()) {
-      router.replace(pathname || (otpKind === "signup" ? "/signup" : "/login"));
-    }
+    queueMicrotask(() => {
+      setAuthNotice(
+        otpKind === "signup"
+          ? "That signup link expired or was already used. Enter your email again and we’ll send a fresh one."
+          : "Your login link expired or was already used. Enter your email again and we’ll send a fresh one.",
+      );
+      if (searchParams.toString()) {
+        router.replace(pathname || (otpKind === "signup" ? "/signup" : "/login"));
+      }
+    });
   }, [otpKind, pathname, router, searchParams]);
 
   if (user) {
@@ -79,7 +99,7 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
       return false;
     }
     setSending(true);
-    const { error: linkError } = await sendMagicLink(v, otpKind);
+    const { error: linkError } = await sendMagicLink(v, otpKind, { rememberDevice });
     setSending(false);
     if (linkError) {
       setError(linkError);
@@ -168,6 +188,24 @@ export default function LocalEmailAuthCard({ title, description, submitLabel, ot
               </p>
             ) : null}
           </div>
+          <label className="flex cursor-pointer items-start gap-2.5 text-sm text-slate-700 dark:text-slate-300">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-teal-600 focus:ring-teal-500/30 dark:border-slate-600 dark:bg-slate-950"
+              checked={rememberDevice}
+              onChange={(ev) => {
+                const next = ev.target.checked;
+                setRememberDevice(next);
+                writeRememberDevicePreference(next);
+              }}
+            />
+            <span>
+              <span className="font-medium">Remember this device</span>
+              <span className="mt-0.5 block text-xs font-normal text-slate-500 dark:text-slate-400">
+                When off, you stay signed in until you close the browser; you will need a new link next visit.
+              </span>
+            </span>
+          </label>
           <button
             type="submit"
             disabled={sending}

@@ -7,6 +7,10 @@ import { ACCOUNT_PREFS_STORAGE_KEY } from "../lib/accountPreferences";
 import { CARDOPS_IMPORT_STORAGE_KEY } from "./DataProvider";
 import { DEV_ACCESS_STORAGE_KEY, type DevAccessKind, isLocalDevelopmentClient } from "../lib/devAccess";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "../lib/supabase/client";
+import {
+  AUTH_LAST_EMAIL_STORAGE_KEY,
+  writeRememberDevicePreference,
+} from "../lib/supabase/sessionPolicy";
 
 /** Single identity: header, Account, and exports all read from this shape. */
 export type AppUser = {
@@ -163,7 +167,11 @@ type AuthCtx = {
   user: AppUser | null;
   setUser: (next: AppUser | null) => void | Promise<void>;
   /** Sends a Supabase magic link / OTP email. `login` does not create new users; `signup` allows new users. */
-  sendMagicLink: (email: string, kind: "login" | "signup") => Promise<{ error: string | null }>;
+  sendMagicLink: (
+    email: string,
+    kind: "login" | "signup",
+    opts?: { rememberDevice?: boolean },
+  ) => Promise<{ error: string | null }>;
   /** Localhost-only developer shortcut auth (development only). */
   devLogin: (kind: DevAccessKind) => Promise<{ error: string | null }>;
   updateProfile: (patch: Partial<Pick<AppUser, "storeName" | "email" | "avatarDataUrl">>) => void;
@@ -225,7 +233,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const sb = getSupabaseBrowserClient();
     if (!sb) {
-      setUserState(loadDevAccessUser());
+      queueMicrotask(() => setUserState(loadDevAccessUser()));
       return;
     }
 
@@ -304,7 +312,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     persistUserProfile(next);
   }, []);
 
-  const sendMagicLink = useCallback(async (emailRaw: string, kind: "login" | "signup") => {
+  const sendMagicLink = useCallback(
+    async (emailRaw: string, kind: "login" | "signup", opts?: { rememberDevice?: boolean }) => {
     const sb = getSupabaseBrowserClient();
     if (!sb) {
       return {
@@ -313,6 +322,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
     const email = emailRaw.trim();
+    const rememberDevice = opts?.rememberDevice ?? true;
+    writeRememberDevicePreference(rememberDevice);
     const { error } = await sb.auth.signInWithOtp({
       email,
       options: {
@@ -320,9 +331,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         shouldCreateUser: kind === "signup",
       },
     });
-    if (!error) return { error: null };
+    if (!error) {
+      try {
+        localStorage.setItem(AUTH_LAST_EMAIL_STORAGE_KEY, email.toLowerCase());
+      } catch {
+        /* ignore */
+      }
+      return { error: null };
+    }
     return { error: mapMagicLinkError(error.message ?? "Could not send magic link.", kind) };
-  }, []);
+  },
+  [],
+);
 
   const devLogin = useCallback(async (kind: DevAccessKind) => {
     if (!isLocalDevelopmentClient()) {

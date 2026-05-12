@@ -3,6 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { DEV_ACCESS_COOKIE, isLocalDevelopmentRequestHost } from "../devAccess";
 import { isSupabaseConfigured } from "./client";
+import {
+  applyRememberToSetCookieOptions,
+  AUTH_REMEMBER_COOKIE_NAME,
+  rememberDevicePreferred,
+} from "./sessionPolicy";
 
 const PUBLIC_EXACT_PATHS = new Set(["/", "/login", "/signup", "/privacy", "/terms", "/contact"]);
 const PUBLIC_PREFIX_PATHS = ["/auth/callback"];
@@ -102,6 +107,8 @@ export async function updateSession(request: NextRequest) {
 
   let supabaseResponse = withRequestHeaders(shouldAllowDemo);
 
+  const rememberDevice = rememberDevicePreferred(request.cookies.get(AUTH_REMEMBER_COOKIE_NAME)?.value);
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -110,13 +117,17 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, headers) {
           cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
           supabaseResponse = withRequestHeaders(shouldAllowDemo);
           cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options);
+            const opts = applyRememberToSetCookieOptions(rememberDevice, name, value, { ...options });
+            supabaseResponse.cookies.set(name, value, opts);
+          });
+          Object.entries(headers ?? {}).forEach(([key, val]) => {
+            if (typeof val === "string") supabaseResponse.headers.set(key, val);
           });
         },
       },
