@@ -27,6 +27,7 @@ import { getWorkspaceStoreLabel } from "../../../lib/sessionLabel";
 import { resolveOrderListColumnMap } from "../../../lib/orderListColumnMap";
 import { resolveSalesSummaryColumnMap } from "../../../lib/salesSummaryColumnMap";
 import { ImportCheckBlock } from "../../../components/imports/ImportCheckBlock";
+import FirstImportHelpCard from "../../../components/imports/FirstImportHelpCard";
 import { ImportsSnapshotStrip } from "../../../components/imports/ImportsSnapshotStrip";
 import { UNMAPPED_COLUMN_WARNING_LINES, formatImportFileRejectionMessage } from "../../../lib/importFormatCopy";
 import type { ImportBatchStatus } from "../../../lib/importSessionBatch";
@@ -400,7 +401,7 @@ function ImportsWorkspaceTrustLine({ techCap }: { techCap: number }) {
         ·
       </span>
       <Link
-        href="/help"
+        href="/help/faq"
         className="font-medium text-zinc-600 underline underline-offset-2 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
       >
         Help
@@ -439,6 +440,7 @@ function chunkShowUnmappedHelp(chunk: ImportChunk, kind: "order" | "summary"): b
 
 function UploadZone({
   title,
+  titleTooltip,
   titleDescription,
   helperEmpty,
   imports,
@@ -456,6 +458,8 @@ function UploadZone({
   duplicateFilenameNotice,
 }: {
   title: string;
+  /** Optional (?) tooltip next to the slot title. */
+  titleTooltip?: string;
   /** Short line under the section title (what belongs in this slot). */
   titleDescription: string;
   helperEmpty: string;
@@ -540,10 +544,15 @@ function UploadZone({
                 <SlotIcon className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-              <h3 className="text-[0.9375rem] font-semibold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-zinc-50 sm:text-base">
-                {title}
-              </h3>
-              <p className="mt-1.5 text-[0.8125rem] leading-snug text-zinc-600 dark:text-zinc-400">{titleDescription}</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <h3 className="text-[0.9375rem] font-semibold leading-tight tracking-[-0.02em] text-zinc-900 dark:text-zinc-50 sm:text-base">
+                    {title}
+                  </h3>
+                  {titleTooltip ? (
+                    <InfoTooltip text={titleTooltip} aria-label={`Help: ${title}`} />
+                  ) : null}
+                </div>
+                <p className="mt-1.5 text-[0.8125rem] leading-snug text-zinc-600 dark:text-zinc-400">{titleDescription}</p>
               </div>
             </div>
             <div className="shrink-0 rounded-md border border-stone-200/85 bg-white p-0.5 dark:border-zinc-600 dark:bg-zinc-800">
@@ -1510,6 +1519,7 @@ export default function DataPage() {
 
           {!currentUploadCollapsed ? (
             <div className="mt-2.5 space-y-2.5 sm:mt-3 sm:space-y-3">
+        {!isDemoMode ? <FirstImportHelpCard hasImports={hasFiles} /> : null}
         {importProgress ? (
           <motion.div
             role="status"
@@ -1582,9 +1592,15 @@ export default function DataPage() {
             </div>
           ) : null}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <label htmlFor="import-game" className="shrink-0 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-              Label
-            </label>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <label htmlFor="import-game" className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
+                Label
+              </label>
+              <InfoTooltip
+                aria-label="Help: import label"
+                text="Pick a name for this batch so you remember it later (example: 'June 2026' or 'Pokemon TCG'). It helps organize multiple imports."
+              />
+            </div>
             <div className="min-w-0 max-w-64 flex-1 sm:flex-initial">
               <select
                 id="import-game"
@@ -1684,6 +1700,7 @@ export default function DataPage() {
           <div className="grid gap-3 md:grid-cols-2 md:items-stretch md:gap-4">
             <UploadZone
               title="Order list"
+              titleTooltip="This is your line-item export from TCGplayer. Go to Orders > Filters > set date range > See Results > Export Orders."
               titleDescription="This is your order history from TCGplayer - the line-item export from Orders (CSV)."
               helperEmpty="Add your Order List CSV to begin"
               imports={orderImports}
@@ -1709,6 +1726,7 @@ export default function DataPage() {
             />
             <UploadZone
               title="Sales summary"
+              titleTooltip="This is your summary report from TCGplayer. Go to Reports > Sales Summary Report > set the SAME date range > Download Report."
               titleDescription="This is your sales summary from TCGplayer - totals for the same date range as your orders (CSV)."
               helperEmpty="Add your Sales Summary CSV to continue"
               imports={summaryImports}
@@ -2008,10 +2026,27 @@ export default function DataPage() {
                         className="text-center text-[0.9375rem] font-medium text-emerald-800 dark:text-emerald-200"
                         role="status"
                       >
-                        Data loaded successfully
+                        Your files are loaded! Scroll down to review what we found and then click View Dashboard.
                       </p>
                     ) : null}
                     <div className="mx-auto flex w-full max-w-md flex-col gap-4">
+                      {isDemoMode ? (
+                        <div className="rounded-xl border border-emerald-200/85 bg-[color:color-mix(in_oklab,var(--accent-soft)_55%,white)] px-4 py-3 text-center dark:border-emerald-800/45 dark:bg-[color:color-mix(in_oklab,var(--accent-soft)_16%,var(--surface-muted))]">
+                          <p className="text-sm leading-relaxed text-emerald-950 dark:text-emerald-100">
+                            Now you know how it works! Ready to try with your real data? See our guide:{" "}
+                            <span className="font-semibold">How to Get Your CSVs from TCGplayer.com</span>
+                          </p>
+                          <Link
+                            href="/help/getting-your-csvs"
+                            className={
+                              primaryCtaClass +
+                              " mt-3 inline-flex w-full justify-center px-6 py-2.5 text-sm no-underline"
+                            }
+                          >
+                            View Full Guide
+                          </Link>
+                        </div>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => void handleContinueToDashboard()}

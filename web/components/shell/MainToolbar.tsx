@@ -149,7 +149,12 @@ export default function MainToolbar() {
         >
           <IconDiscord className="h-[1.125rem] w-[1.125rem] shrink-0" />
         </a>
-        <Link href="/help" className={toolbarIconLinkClass} aria-label="Help and FAQs" title="Help & FAQs">
+        <Link
+          href="/help/getting-your-csvs"
+          className={toolbarIconLinkClass}
+          aria-label="Help: how to get your TCGplayer CSVs"
+          title="Help — getting your CSVs"
+        >
           <IconHelp className="h-[1.125rem] w-[1.125rem] shrink-0" strokeWidth={2} aria-hidden />
         </Link>
         {!user ? (
@@ -215,7 +220,7 @@ export default function MainToolbar() {
                 </Link>
                 <Link href="/help" className={menuRowClass()} onClick={() => setDropdownOpen(false)}>
                   <IconHelp className="h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" strokeWidth={2} aria-hidden />
-                  Help &amp; FAQs
+                  Help Center
                 </Link>
                 <Link href="/account" className={menuRowClass()} onClick={() => setDropdownOpen(false)}>
                   <span className="w-4 shrink-0" aria-hidden />

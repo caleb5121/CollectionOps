@@ -8,7 +8,15 @@ const PUBLIC_EXACT_PATHS = new Set(["/", "/login", "/signup", "/privacy", "/term
 const PUBLIC_PREFIX_PATHS = ["/auth/callback"];
 const DEMO_COOKIE = "cardops_public_demo";
 /** Routes reachable in public demo mode (cookie from /data?demo=1). */
-const DEMO_ALLOWED_PATHS = new Set(["/data", "/dashboard", "/help", "/settings", "/settings/shipping"]);
+const DEMO_ALLOWED_PATHS = new Set([
+  "/data",
+  "/dashboard",
+  "/help",
+  "/help/getting-your-csvs",
+  "/help/faq",
+  "/settings",
+  "/settings/shipping",
+]);
 
 function isMissingSessionError(error: unknown): boolean {
   const maybe = error as { name?: string; message?: string; code?: string } | null;

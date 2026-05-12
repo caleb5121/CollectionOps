@@ -36,7 +36,9 @@ test.describe("Navigation", () => {
     { path: "/trends", title: "Trends" },
     { path: "/settings/shipping", title: "Shipping Settings" },
     { path: "/account", title: "Account" },
-    { path: "/help", title: "Help & FAQs" },
+    { path: "/help", title: "Help Center" },
+    { path: "/help/faq", title: "FAQ" },
+    { path: "/help/getting-your-csvs", title: "Getting your CSVs" },
   ];
 
   for (const { path, title } of routes) {
@@ -65,8 +67,9 @@ test.describe("Navigation", () => {
   test("toolbar help and settings", async ({ page }) => {
     await page.goto("/data?demo=1");
     await page.goto("/dashboard");
-    await page.getByRole("banner").getByRole("link", { name: "Help and FAQs" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Help & FAQs" })).toBeVisible();
+    await page.getByRole("banner").getByRole("link", { name: "Help: how to get your TCGplayer CSVs" }).click();
+    await expect(page.getByRole("heading", { level: 1, name: "Getting your CSVs" })).toBeVisible();
+    await expect(page.getByText(/How to get your CSVs from TCGplayer/i).first()).toBeVisible();
     await page.goto("/dashboard");
     await page.getByRole("banner").getByRole("link", { name: "Shipping Settings" }).click();
     await expect(page.getByRole("banner").getByRole("heading", { name: "Shipping Settings" })).toBeVisible();
